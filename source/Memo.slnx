@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Memo.Service/Memo.Service.csproj" />
+  <Project Path="Memo/Memo.csproj" />
+</Solution>

@@ -1,0 +1,144 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Paleta -->
+    <Color x:Key="CorFundoBase">#FF181926</Color>
+    <Color x:Key="CorPainelBase">#FF1E1F30</Color>
+    <Color x:Key="CorCampoBase">#FF26283C</Color>
+    <Color x:Key="CorBordaBase">#FF363954</Color>
+    <Color x:Key="CorDestaqueBase">#FF7A89FF</Color>
+
+    <SolidColorBrush x:Key="CorFundo" Color="{StaticResource CorFundoBase}" />
+    <SolidColorBrush x:Key="CorPainel" Color="{StaticResource CorPainelBase}" />
+    <SolidColorBrush x:Key="CorCampo" Color="{StaticResource CorCampoBase}" />
+    <SolidColorBrush x:Key="CorBorda" Color="{StaticResource CorBordaBase}" />
+    <SolidColorBrush x:Key="CorDestaque" Color="{StaticResource CorDestaqueBase}" />
+    <SolidColorBrush x:Key="CorTexto" Color="#FFDCDFEB" />
+    <SolidColorBrush x:Key="CorTextoFraco" Color="#FF8C91AA" />
+    <SolidColorBrush x:Key="CorPerigo" Color="#FFE85A64" />
+
+    <!-- TextBox -->
+    <Style TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource CorCampo}" />
+        <Setter Property="Foreground" Value="{StaticResource CorTexto}" />
+        <Setter Property="CaretBrush" Value="{StaticResource CorTexto}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CorBorda}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="b" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="b" Property="BorderBrush" Value="{StaticResource CorDestaque}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- PasswordBox -->
+    <Style TargetType="PasswordBox">
+        <Setter Property="Background" Value="{StaticResource CorCampo}" />
+        <Setter Property="Foreground" Value="{StaticResource CorTexto}" />
+        <Setter Property="CaretBrush" Value="{StaticResource CorTexto}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CorBorda}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Border x:Name="b" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="b" Property="BorderBrush" Value="{StaticResource CorDestaque}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Botão padrão -->
+    <Style TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource CorCampo}" />
+        <Setter Property="Foreground" Value="{StaticResource CorTexto}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="16,8" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="b" Property="Opacity" Value="0.85" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="b" Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Botão de destaque (primário) -->
+    <Style x:Key="BotaoPrimario" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="{StaticResource CorDestaque}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- Botão de perigo -->
+    <Style x:Key="BotaoPerigo" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Foreground" Value="{StaticResource CorPerigo}" />
+    </Style>
+
+    <!-- Itens da lista de documentos -->
+    <Style x:Key="ItemDocumento" TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="{StaticResource CorTexto}" />
+        <Setter Property="Padding" Value="14,11" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="b" Background="Transparent" CornerRadius="8"
+                            Padding="{TemplateBinding Padding}" Margin="0,1">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="b" Property="Background" Value="{StaticResource CorCampo}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="b" Property="Background" Value="{StaticResource CorCampo}" />
+                            <Setter Property="Foreground" Value="{StaticResource CorDestaque}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

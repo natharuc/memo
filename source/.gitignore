@@ -1,0 +1,28 @@
+# Build
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+.vs/
+
+# User-specific
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+
+# Resultados de teste
+[Tt]est[Rr]esult*/
+
+# Segredos / artefatos locais (NUNCA versionar)
+*.pfx
+documents/
+vault.json
+session*.bin

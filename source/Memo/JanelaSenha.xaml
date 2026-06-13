@@ -1,0 +1,41 @@
+<Window x:Class="Memo.JanelaSenha"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Memo" Width="380"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        FontFamily="Segoe UI"
+        Background="{StaticResource CorFundo}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="textoTitulo" Grid.Row="0" Text="Destrancar cofre"
+                   Foreground="{StaticResource CorTexto}" FontSize="20" FontWeight="SemiBold" />
+
+        <TextBlock x:Name="textoSubtitulo" Grid.Row="1" Margin="0,4,0,16"
+                   Foreground="{StaticResource CorTextoFraco}" FontSize="13" TextWrapping="Wrap"
+                   Text="Digite sua senha-mestra para acessar os documentos." />
+
+        <PasswordBox x:Name="campoSenha" Grid.Row="2" />
+
+        <PasswordBox x:Name="campoConfirmar" Grid.Row="3" Margin="0,10,0,0" Visibility="Collapsed" />
+
+        <TextBlock x:Name="textoErro" Grid.Row="4" Margin="0,10,0,0"
+                   Foreground="{StaticResource CorPerigo}" FontSize="12"
+                   TextWrapping="Wrap" Visibility="Collapsed" />
+
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+            <Button x:Name="botaoCancelar" Content="Cancelar" Click="Cancelar_Click" Margin="0,0,8,0" />
+            <Button x:Name="botaoConfirmar" Content="Destrancar" Style="{StaticResource BotaoPrimario}"
+                    Click="Confirmar_Click" IsDefault="True" />
+        </StackPanel>
+    </Grid>
+</Window>

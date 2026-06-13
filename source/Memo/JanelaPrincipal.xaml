@@ -1,0 +1,87 @@
+<Window x:Class="Memo.JanelaPrincipal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Memo" Height="560" Width="880" MinHeight="420" MinWidth="640"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI"
+        Background="{StaticResource CorFundo}">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Barra superior: busca + novo -->
+        <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="campoBusca" Grid.Column="0"
+                     TextChanged="Busca_TextChanged" KeyDown="Busca_KeyDown" />
+            <Button x:Name="botaoNovo" Grid.Column="1" Content="+ Novo" Margin="8,0,0,0"
+                    Style="{StaticResource BotaoPrimario}" Click="Novo_Click" />
+        </Grid>
+
+        <!-- Lista | detalhes -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" MinWidth="220" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="3*" MinWidth="240" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{StaticResource CorPainel}" CornerRadius="10" Padding="6">
+                <ListBox x:Name="listaDocumentos" Background="Transparent" BorderThickness="0"
+                         DisplayMemberPath="Key"
+                         ItemContainerStyle="{StaticResource ItemDocumento}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         SelectionChanged="Lista_SelectionChanged"
+                         MouseDoubleClick="Lista_MouseDoubleClick"
+                         KeyDown="Lista_KeyDown" />
+            </Border>
+
+            <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Center"
+                          Background="Transparent" />
+
+            <Border Grid.Column="2" Background="{StaticResource CorPainel}" CornerRadius="10" Padding="20">
+                <Grid x:Name="painelDetalhes" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="CHAVE" Foreground="{StaticResource CorTextoFraco}"
+                               FontSize="11" FontWeight="SemiBold" />
+                    <TextBlock x:Name="textoChave" Grid.Row="1" Margin="0,2,0,16"
+                               Foreground="{StaticResource CorTexto}" FontSize="18" FontWeight="SemiBold"
+                               TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Row="2" Text="VALOR" Foreground="{StaticResource CorTextoFraco}"
+                               FontSize="11" FontWeight="SemiBold" />
+                    <TextBox x:Name="campoValor" Grid.Row="3" Margin="0,4,0,0"
+                             IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             FontFamily="Consolas" FontSize="14"
+                             VerticalContentAlignment="Top" />
+
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0,14,0,0">
+                        <Button x:Name="botaoCopiar" Content="Copiar" Style="{StaticResource BotaoPrimario}"
+                                Click="Copiar_Click" Margin="0,0,8,0" />
+                        <Button x:Name="botaoMostrar" Content="Mostrar" Click="Mostrar_Click" Margin="0,0,8,0" />
+                        <Button x:Name="botaoEditar" Content="Editar" Click="Editar_Click" Margin="0,0,8,0" />
+                        <Button x:Name="botaoExcluir" Content="Excluir" Style="{StaticResource BotaoPerigo}"
+                                Click="Excluir_Click" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <TextBlock x:Name="textoStatus" Grid.Row="2" Margin="2,10,0,0"
+                   Foreground="{StaticResource CorTextoFraco}" FontSize="12" />
+    </Grid>
+</Window>
