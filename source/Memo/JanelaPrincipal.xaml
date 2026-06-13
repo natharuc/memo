@@ -4,7 +4,8 @@
         Title="Memo" Height="560" Width="880" MinHeight="420" MinWidth="640"
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI"
-        Background="{StaticResource CorFundo}">
+        Background="{StaticResource CorFundo}"
+        KeyDown="Window_KeyDown">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
+using Memo.Service.Atualizacao;
 using Memo.Service.Repositorio;
 using Memo.Services;
 
@@ -28,6 +30,9 @@ namespace Memo
 
             if (e.Args.Length == 0)
             {
+                // Remove o executável antigo deixado por uma atualização anterior.
+                AtualizadorService.LimparResiduos();
+
                 // Passada de auto-reparo: recifra o que for antigo e isola o que não abrir.
                 var resultado = service.Migrar();
                 if (resultado.HouveMudanca)
@@ -35,11 +40,31 @@ namespace Memo
                         MessageBoxButton.OK,
                         resultado.Falhas.Any() ? MessageBoxImage.Warning : MessageBoxImage.Information);
 
-                new JanelaPrincipal(service).Show();
+                var janela = new JanelaPrincipal(service);
+                janela.Show();
+
+                VerificarAtualizacaoEmBackground(janela);
                 return;
             }
 
             ExecutarLinhaDeComando(service, e.Args);
+        }
+
+        private static async void VerificarAtualizacaoEmBackground(Window dono)
+        {
+            try
+            {
+                var versao = Assembly.GetEntryAssembly()?.GetName().Version ?? new Version(0, 0, 0);
+                var atualizador = new AtualizadorService(versao);
+
+                var info = await atualizador.VerificarAsync();
+                if (info != null)
+                    JanelaAtualizacao.Mostrar(dono, atualizador, info);
+            }
+            catch
+            {
+                // A verificação de atualização nunca deve atrapalhar o uso do app.
+            }
         }
 
         private void ExecutarLinhaDeComando(MemoService service, string[] args)

@@ -80,6 +80,11 @@ namespace Memo
 
         // ---------------- eventos ----------------
 
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape) Close();
+        }
+
         private void Busca_TextChanged(object sender, TextChangedEventArgs e) => Filtrar();
 
         private void Busca_KeyDown(object sender, KeyEventArgs e)

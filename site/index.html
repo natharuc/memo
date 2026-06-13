@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memo — seu cofre de segredos</title>
+  <meta name="description" content="Memo é um cofre de segredos para Windows: criptografia AES-256-GCM, busca instantânea, GUI e linha de comando. Seus dados nunca saem da sua máquina." />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topo">
+    <div class="container topo-conteudo">
+      <a class="marca" href="#">
+        <span class="marca-icone" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+        </span>
+        Memo
+      </a>
+      <nav class="nav">
+        <a href="#recursos">Recursos</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#seguranca">Segurança</a>
+        <a class="nav-gh" href="https://github.com/natharuc/memo" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-texto">
+          <span class="selo">Windows · .NET 8 · Open source</span>
+          <h1>Seus segredos, trancados de verdade.</h1>
+          <p class="subtitulo">
+            O <strong>Memo</strong> é um cofre local para senhas, tokens e anotações sensíveis.
+            Tudo criptografado com AES-256-GCM e protegido por uma senha-mestra que só você conhece —
+            nada vai para a nuvem.
+          </p>
+          <div class="acoes">
+            <a class="botao botao-primario" href="https://github.com/natharuc/memo/releases/latest" target="_blank" rel="noopener">
+              Baixar para Windows
+            </a>
+            <a class="botao botao-secundario" href="#como-funciona">Ver como funciona</a>
+          </div>
+          <p class="nota-download">Download único, sem instalador. Atualizações automáticas dentro do app.</p>
+        </div>
+
+        <!-- Mockup da janela -->
+        <div class="mockup" aria-hidden="true">
+          <div class="mockup-barra">
+            <span class="ponto"></span><span class="ponto"></span><span class="ponto"></span>
+            <span class="mockup-titulo">Memo — 12</span>
+          </div>
+          <div class="mockup-corpo">
+            <div class="mockup-busca">Buscar…</div>
+            <div class="mockup-conteudo">
+              <ul class="mockup-lista">
+                <li class="ativo">github token</li>
+                <li>aws · produção</li>
+                <li>e-mail recuperação</li>
+                <li>chave pix</li>
+                <li>vpn escritório</li>
+              </ul>
+              <div class="mockup-detalhe">
+                <span class="rotulo">CHAVE</span>
+                <div class="valor-chave">github token</div>
+                <span class="rotulo">VALOR</span>
+                <div class="valor-secreto">••••••••••••••••</div>
+                <div class="mockup-botoes">
+                  <span class="mini-botao primario">Copiar</span>
+                  <span class="mini-botao">Mostrar</span>
+                  <span class="mini-botao">Editar</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECURSOS -->
+    <section id="recursos" class="secao">
+      <div class="container">
+        <h2>Por que usar o Memo</h2>
+        <div class="cards">
+          <article class="card">
+            <div class="card-icone">🔒</div>
+            <h3>Criptografia forte</h3>
+            <p>AES-256-GCM com chave derivada via PBKDF2-SHA256 (200.000 iterações). Cada segredo é um arquivo cifrado.</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">💻</div>
+            <h3>GUI + linha de comando</h3>
+            <p>Interface gráfica para o dia a dia e comandos <code>memo get</code> / <code>memo set</code> para automação.</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">⚡</div>
+            <h3>Busca instantânea</h3>
+            <p>Encontre qualquer segredo digitando. Enter copia o valor direto para a área de transferência.</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">🔁</div>
+            <h3>Atualização automática</h3>
+            <p>O app verifica novas versões no GitHub e avisa você. Um clique para atualizar e reiniciar.</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">🏠</div>
+            <h3>100% local</h3>
+            <p>Sem servidores, sem telemetria, sem cadastro. Seus dados ficam só na sua máquina (e no seu backup).</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">⏱️</div>
+            <h3>Sessão temporária</h3>
+            <p>Depois de destrancado, o cofre fica acessível por uma janela curta — sem redigitar a senha toda hora.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section id="como-funciona" class="secao secao-alt">
+      <div class="container">
+        <h2>Como funciona</h2>
+        <div class="passos">
+          <div class="passo">
+            <span class="passo-num">1</span>
+            <h3>Crie seu cofre</h3>
+            <p>No primeiro uso, defina uma senha-mestra. Ela protege todos os documentos e não pode ser recuperada se esquecida.</p>
+          </div>
+          <div class="passo">
+            <span class="passo-num">2</span>
+            <h3>Guarde seus segredos</h3>
+            <p>Adicione chaves e valores pela interface ou pela linha de comando. Cada item vira um arquivo criptografado.</p>
+          </div>
+          <div class="passo">
+            <span class="passo-num">3</span>
+            <h3>Acesse quando precisar</h3>
+            <p>Busque, copie e edite com um clique. Pela CLI: <code>memo get "github token"</code> já copia o valor.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEGURANÇA -->
+    <section id="seguranca" class="secao">
+      <div class="container seguranca-grid">
+        <div>
+          <h2>Segurança em primeiro lugar</h2>
+          <p>
+            O Memo foi desenhado para que seus dados sejam inúteis para qualquer um sem a senha-mestra.
+            A senha nunca é gravada em disco — apenas a chave de sessão temporária, protegida pela
+            DPAPI do Windows (vinculada à sua conta de usuário).
+          </p>
+          <ul class="lista-seg">
+            <li>Cifragem autenticada AES-256-GCM (detecta adulteração).</li>
+            <li>Derivação de chave PBKDF2-SHA256 com 200.000 iterações.</li>
+            <li>Sessão isolada por cofre e validada contra o arquivo de configuração.</li>
+            <li>Executável assinado e verificado por SHA256 antes de cada atualização.</li>
+          </ul>
+        </div>
+        <div class="codigo">
+          <div class="codigo-barra">PowerShell</div>
+          <pre><code><span class="c-com"># copia um segredo para a área de transferência</span>
+memo get "github token"
+
+<span class="c-com"># cria ou atualiza um segredo</span>
+memo set "chave pix" = a1b2c3d4
+
+<span class="c-com"># abre a interface gráfica</span>
+memo</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta">
+      <div class="container cta-conteudo">
+        <h2>Pronto para trancar seus segredos?</h2>
+        <p>Baixe a última versão e crie seu cofre em menos de um minuto.</p>
+        <a class="botao botao-primario botao-grande" href="https://github.com/natharuc/memo/releases/latest" target="_blank" rel="noopener">
+          Baixar para Windows
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="container rodape-conteudo">
+      <span>Memo · cofre de segredos para Windows</span>
+      <a href="https://github.com/natharuc/memo" target="_blank" rel="noopener">github.com/natharuc/memo</a>
+    </div>
+  </footer>
+</body>
+</html>

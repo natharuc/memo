@@ -11,6 +11,9 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <ApplicationIcon>6373087.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- Versão base; o CI sobrescreve via -p:Version=<tag> ao gerar a release. -->
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

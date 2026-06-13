@@ -10,6 +10,12 @@ memo set senha pollaris = 1234   # cria/atualiza um documento cifrado
 memo                             # abre a interface gráfica
 ```
 
+## Download
+
+Baixe a última versão (executável único para Windows, sem instalador) em
+**[Releases](https://github.com/natharuc/memo/releases/latest)**. O próprio app
+avisa e instala novas versões automaticamente.
+
 ## Por que existe
 
 Um gerenciador de segredos mínimo, sob controle do próprio usuário: cada segredo
@@ -28,6 +34,8 @@ Esse modelo file-based é proposital — é o diferencial do Memo, não um acide
   nativos.
 - **Resiliência**: leitura tolerante a falhas e migração transparente de
   documentos em formato antigo.
+- **Atualização automática**: verifica novas releases no GitHub, valida o
+  download por SHA256 e troca o executável com um clique.
 
 ## Estrutura do repositório
 
