@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Atualização" Width="420" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        FontFamily="Segoe UI" Background="{StaticResource CorFundo}">
+        FontFamily="Segoe UI" Background="{DynamicResource CorFundo}">
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -15,26 +15,26 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Nova versão disponível"
-                   Foreground="{StaticResource CorTexto}" FontSize="20" FontWeight="SemiBold" />
+                   Foreground="{DynamicResource CorTexto}" FontSize="20" FontWeight="SemiBold" />
 
         <TextBlock x:Name="textoVersao" Grid.Row="1" Margin="0,4,0,12"
-                   Foreground="{StaticResource CorTextoFraco}" FontSize="13" TextWrapping="Wrap" />
+                   Foreground="{DynamicResource CorTextoFraco}" FontSize="13" TextWrapping="Wrap" />
 
-        <Border Grid.Row="2" Background="{StaticResource CorCampo}" CornerRadius="8" Padding="12"
+        <Border Grid.Row="2" Background="{DynamicResource CorCampo}" CornerRadius="8" Padding="12"
                 MaxHeight="180">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <TextBlock x:Name="textoNotas" Foreground="{StaticResource CorTexto}" FontSize="13"
+                <TextBlock x:Name="textoNotas" Foreground="{DynamicResource CorTexto}" FontSize="13"
                            TextWrapping="Wrap" />
             </ScrollViewer>
         </Border>
 
         <ProgressBar x:Name="barraProgresso" Grid.Row="3" Height="6" Margin="0,14,0,0"
                      Minimum="0" Maximum="1" Visibility="Collapsed"
-                     Background="{StaticResource CorCampo}" Foreground="{StaticResource CorDestaque}"
+                     Background="{DynamicResource CorCampo}" Foreground="{DynamicResource CorDestaque}"
                      BorderThickness="0" />
 
         <TextBlock x:Name="textoErro" Grid.Row="4" Margin="0,10,0,0"
-                   Foreground="{StaticResource CorPerigo}" FontSize="12"
+                   Foreground="{DynamicResource CorPerigo}" FontSize="12"
                    TextWrapping="Wrap" Visibility="Collapsed" />
 
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">

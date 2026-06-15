@@ -5,15 +5,15 @@
         ShowInTaskbar="False" Topmost="True" ResizeMode="NoResize"
         SizeToContent="WidthAndHeight" WindowStartupLocation="Manual"
         FontFamily="Segoe UI">
-    <Border CornerRadius="10" Background="{StaticResource CorPainel}" BorderThickness="1"
-            BorderBrush="{StaticResource CorBorda}" Padding="16,12">
+    <Border CornerRadius="10" Background="{DynamicResource CorPainel}" BorderThickness="1"
+            BorderBrush="{DynamicResource CorBorda}" Padding="16,12">
         <Border.Effect>
             <DropShadowEffect Color="Black" BlurRadius="18" ShadowDepth="0" Opacity="0.5" />
         </Border.Effect>
         <StackPanel Orientation="Horizontal">
             <Border x:Name="marcador" Width="4" Height="20" CornerRadius="2" Margin="0,0,12,0"
-                    Background="{StaticResource CorDestaque}" />
-            <TextBlock x:Name="textoMensagem" Foreground="{StaticResource CorTexto}"
+                    Background="{DynamicResource CorDestaque}" />
+            <TextBlock x:Name="textoMensagem" Foreground="{DynamicResource CorTexto}"
                        FontSize="13" VerticalAlignment="Center" MaxWidth="360" TextWrapping="Wrap" />
         </StackPanel>
     </Border>

@@ -11,7 +11,7 @@ namespace Memo
         private JanelaSenha(Cofre cofre)
         {
             InitializeComponent();
-            Nativo.AplicarBarraTituloEscura(this);
+            Nativo.AplicarBarraTitulo(this);
 
             _cofre = cofre;
             _modoCriacao = !cofre.Inicializado;

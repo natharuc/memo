@@ -1,8 +1,14 @@
 # Interface (WPF)
 
-App WPF em `source/Memo`. Tema escuro definido em `Tema.xaml` (um
-`ResourceDictionary` mesclado em `App.xaml`). Barra de título escura via
-`Nativo.AplicarBarraTituloEscura` (`DwmSetWindowAttribute`).
+App WPF em `source/Memo`. Os **estilos** ficam em `Tema.xaml` e as **cores** em
+`PaletaEscura.xaml` / `PaletaClara.xaml` (ambas mescladas em `App.xaml`, paleta no
+índice 0). Os estilos referenciam as cores via **`DynamicResource`**, então
+`Tema.Aplicar(...)` troca a paleta em runtime e todas as janelas abertas atualizam.
+A barra de título acompanha o tema via `Nativo.AplicarBarraTitulo`
+(`DwmSetWindowAttribute`).
+
+Preferências (tema e duração da sessão) ficam em `Configuracoes` (Memo.Service),
+gravadas em `%LOCALAPPDATA%\Memo\config.json`.
 
 ## Janelas
 
@@ -32,6 +38,13 @@ Criar/editar um documento.
 - Ao **editar**, a chave fica travada (renomear trocaria o arquivo; não suportado
   hoje). Ao **criar**, a chave é validada por `DocumentoRepository.SanitizarChave`.
 
+### `JanelaConfiguracoes` (`JanelaConfiguracoes.xaml[.cs]`)
+Preferências do usuário, aberta pelo botão **⚙** na `JanelaPrincipal`.
+- **Tema**: Escuro/Claro, com pré-visualização ao vivo (revertida se cancelar).
+- **Tempo para guardar a senha**: presets (15 min … 1 dia) que definem
+  `Configuracoes.DuracaoSessaoMinutos`, usado pelo `Cofre` na expiração da sessão.
+- `static void JanelaConfiguracoes.Mostrar(owner)`.
+
 ### `Toast` (`Toast.xaml[.cs]`)
 Aviso flutuante no canto inferior direito, com fade-in/out e auto-fechamento
 (~2,2 s). Usado no **modo CLI** para mostrar o resultado. `static void
@@ -51,5 +64,6 @@ Toast.Mostrar(mensagem, sucesso)`.
 
 1. Crie `MinhaJanela.xaml` + `.cs` em `source/Memo` (o SDK inclui `.xaml`
    automaticamente com `UseWPF`).
-2. Use `Background="{StaticResource CorFundo}"` e os estilos do `Tema.xaml`.
-3. Chame `Nativo.AplicarBarraTituloEscura(this)` no construtor para a barra escura.
+2. Use `Background="{DynamicResource CorFundo}"` e os estilos do `Tema.xaml`
+   (sempre **`DynamicResource`** para cores, senão a tela não troca de tema).
+3. Chame `Nativo.AplicarBarraTitulo(this)` no construtor.

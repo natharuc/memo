@@ -13,8 +13,11 @@ namespace Memo
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
-        /// <summary>Deixa a barra de título da janela no tema escuro (Windows 10 1809+ / 11).</summary>
-        public static void AplicarBarraTituloEscura(Window janela)
+        /// <summary>
+        /// Ajusta a barra de título da janela conforme o tema atual (escuro/claro),
+        /// no Windows 10 1809+ / 11. Sem suporte em Windows mais antigo, é ignorado.
+        /// </summary>
+        public static void AplicarBarraTitulo(Window janela)
         {
             void Aplicar()
             {
@@ -22,7 +25,7 @@ namespace Memo
                 {
                     var hwnd = new WindowInteropHelper(janela).Handle;
                     if (hwnd == IntPtr.Zero) return;
-                    int usar = 1;
+                    int usar = Tema.EhEscuro ? 1 : 0;
                     DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref usar, sizeof(int));
                 }
                 catch

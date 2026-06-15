@@ -22,7 +22,7 @@ namespace Memo
         public JanelaPrincipal(MemoService service)
         {
             InitializeComponent();
-            Nativo.AplicarBarraTituloEscura(this);
+            Nativo.AplicarBarraTitulo(this);
 
             _service = service;
             Title = $"Memo — {_visiveis.Count}";
@@ -139,6 +139,8 @@ namespace Memo
             Status($"\"{editado.Key}\" salvo");
         }
 
+        private void Config_Click(object sender, RoutedEventArgs e) => JanelaConfiguracoes.Mostrar(this);
+
         private void Novo_Click(object sender, RoutedEventArgs e)
         {
             var novo = JanelaEditar.Criar(this);
@@ -165,11 +167,9 @@ namespace Memo
             var doc = Selecionado;
             if (doc == null) return;
 
-            var resposta = MessageBox.Show(this,
-                $"Excluir \"{doc.Key}\"?", "Confirmar exclusão",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
-
-            if (resposta != MessageBoxResult.Yes) return;
+            if (!JanelaDialogo.Confirmar(this, "Confirmar exclusão",
+                    $"Excluir \"{doc.Key}\"?", perigo: true))
+                return;
 
             _service.Deletar(doc);
             Recarregar();

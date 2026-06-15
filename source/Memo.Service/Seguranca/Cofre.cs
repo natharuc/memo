@@ -15,7 +15,6 @@ namespace Memo.Service.Seguranca
     {
         private const string MarcadorVerificacao = "memo-cofre-ok";
         private const int IteracoesPadrao = 200_000;
-        private static readonly TimeSpan DuracaoSessao = TimeSpan.FromMinutes(15);
 
         private readonly string _arquivoConfig;  // vault.json (junto dos documentos, viaja no OneDrive)
         private readonly string _arquivoSessao;   // session.bin (local, protegido por DPAPI)
@@ -205,7 +204,7 @@ namespace Memo.Service.Seguranca
             if (_chave == null) return;
 
             var dados = new byte[8 + CryptoCofre.TamanhoChave];
-            var expira = DateTime.UtcNow.Add(DuracaoSessao).Ticks;
+            var expira = DateTime.UtcNow.Add(Configuracoes.Atual.DuracaoSessao).Ticks;
             Buffer.BlockCopy(BitConverter.GetBytes(expira), 0, dados, 0, 8);
             Buffer.BlockCopy(_chave, 0, dados, 8, CryptoCofre.TamanhoChave);
 

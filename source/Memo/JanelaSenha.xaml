@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         FontFamily="Segoe UI"
-        Background="{StaticResource CorFundo}">
+        Background="{DynamicResource CorFundo}">
     <Grid Margin="24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -18,10 +18,10 @@
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="textoTitulo" Grid.Row="0" Text="Destrancar cofre"
-                   Foreground="{StaticResource CorTexto}" FontSize="20" FontWeight="SemiBold" />
+                   Foreground="{DynamicResource CorTexto}" FontSize="20" FontWeight="SemiBold" />
 
         <TextBlock x:Name="textoSubtitulo" Grid.Row="1" Margin="0,4,0,16"
-                   Foreground="{StaticResource CorTextoFraco}" FontSize="13" TextWrapping="Wrap"
+                   Foreground="{DynamicResource CorTextoFraco}" FontSize="13" TextWrapping="Wrap"
                    Text="Digite sua senha-mestra para acessar os documentos." />
 
         <PasswordBox x:Name="campoSenha" Grid.Row="2" />
@@ -29,7 +29,7 @@
         <PasswordBox x:Name="campoConfirmar" Grid.Row="3" Margin="0,10,0,0" Visibility="Collapsed" />
 
         <TextBlock x:Name="textoErro" Grid.Row="4" Margin="0,10,0,0"
-                   Foreground="{StaticResource CorPerigo}" FontSize="12"
+                   Foreground="{DynamicResource CorPerigo}" FontSize="12"
                    TextWrapping="Wrap" Visibility="Collapsed" />
 
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">

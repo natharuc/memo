@@ -5,6 +5,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Índice 0: paleta de cores (trocada em runtime por Tema.cs). -->
+                <ResourceDictionary Source="PaletaEscura.xaml" />
                 <ResourceDictionary Source="Tema.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

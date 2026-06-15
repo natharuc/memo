@@ -12,7 +12,7 @@ namespace Memo
         private JanelaAtualizacao(AtualizadorService atualizador, InfoAtualizacao info)
         {
             InitializeComponent();
-            Nativo.AplicarBarraTituloEscura(this);
+            Nativo.AplicarBarraTitulo(this);
 
             _atualizador = atualizador;
             _info = info;

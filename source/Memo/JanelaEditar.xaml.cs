@@ -12,7 +12,7 @@ namespace Memo
         private JanelaEditar(Documento documento, bool novo)
         {
             InitializeComponent();
-            Nativo.AplicarBarraTituloEscura(this);
+            Nativo.AplicarBarraTitulo(this);
 
             Title = novo ? "Novo documento" : "Editar documento";
             campoChave.Text = documento?.Key ?? string.Empty;

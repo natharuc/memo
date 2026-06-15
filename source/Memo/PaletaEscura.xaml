@@ -1,0 +1,14 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Paleta escura (padrão) -->
+    <SolidColorBrush x:Key="CorFundo" Color="#FF181926" />
+    <SolidColorBrush x:Key="CorPainel" Color="#FF1E1F30" />
+    <SolidColorBrush x:Key="CorCampo" Color="#FF26283C" />
+    <SolidColorBrush x:Key="CorBorda" Color="#FF363954" />
+    <SolidColorBrush x:Key="CorDestaque" Color="#FF7A89FF" />
+    <SolidColorBrush x:Key="CorTexto" Color="#FFDCDFEB" />
+    <SolidColorBrush x:Key="CorTextoFraco" Color="#FF8C91AA" />
+    <SolidColorBrush x:Key="CorPerigo" Color="#FFE85A64" />
+
+</ResourceDictionary>

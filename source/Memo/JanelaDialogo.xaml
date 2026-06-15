@@ -1,0 +1,32 @@
+<Window x:Class="Memo.JanelaDialogo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Memo" Width="400" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        FontFamily="Segoe UI" Background="{DynamicResource CorFundo}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,12">
+            <Border x:Name="marcador" Width="4" Height="22" CornerRadius="2" Margin="0,0,12,0"
+                    Background="{DynamicResource CorDestaque}" />
+            <TextBlock x:Name="textoTitulo" Foreground="{DynamicResource CorTexto}"
+                       FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <TextBlock x:Name="textoMensagem" Grid.Row="1"
+                   Foreground="{DynamicResource CorTexto}" FontSize="14"
+                   TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+            <Button x:Name="botaoCancelar" Content="Não" Click="Cancelar_Click"
+                    IsCancel="True" Margin="0,0,8,0" />
+            <Button x:Name="botaoOk" Content="Sim" Style="{StaticResource BotaoPrimario}"
+                    Click="Ok_Click" IsDefault="True" />
+        </StackPanel>
+    </Grid>
+</Window>

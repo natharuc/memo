@@ -4,7 +4,7 @@
         Title="Memo" Height="560" Width="880" MinHeight="420" MinWidth="640"
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI"
-        Background="{StaticResource CorFundo}"
+        Background="{DynamicResource CorFundo}"
         KeyDown="Window_KeyDown">
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -18,10 +18,13 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBox x:Name="campoBusca" Grid.Column="0"
                      TextChanged="Busca_TextChanged" KeyDown="Busca_KeyDown" />
-            <Button x:Name="botaoNovo" Grid.Column="1" Content="+ Novo" Margin="8,0,0,0"
+            <Button x:Name="botaoConfig" Grid.Column="1" Content="⚙" Margin="8,0,0,0"
+                    FontSize="16" ToolTip="Configurações" Click="Config_Click" />
+            <Button x:Name="botaoNovo" Grid.Column="2" Content="+ Novo" Margin="8,0,0,0"
                     Style="{StaticResource BotaoPrimario}" Click="Novo_Click" />
         </Grid>
 
@@ -33,7 +36,7 @@
                 <ColumnDefinition Width="3*" MinWidth="240" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="{StaticResource CorPainel}" CornerRadius="10" Padding="6">
+            <Border Grid.Column="0" Background="{DynamicResource CorPainel}" CornerRadius="10" Padding="6">
                 <ListBox x:Name="listaDocumentos" Background="Transparent" BorderThickness="0"
                          DisplayMemberPath="Key"
                          ItemContainerStyle="{StaticResource ItemDocumento}"
@@ -46,7 +49,7 @@
             <GridSplitter Grid.Column="1" Width="10" HorizontalAlignment="Center"
                           Background="Transparent" />
 
-            <Border Grid.Column="2" Background="{StaticResource CorPainel}" CornerRadius="10" Padding="20">
+            <Border Grid.Column="2" Background="{DynamicResource CorPainel}" CornerRadius="10" Padding="20">
                 <Grid x:Name="painelDetalhes" Visibility="Collapsed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -56,13 +59,13 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="CHAVE" Foreground="{StaticResource CorTextoFraco}"
+                    <TextBlock Grid.Row="0" Text="CHAVE" Foreground="{DynamicResource CorTextoFraco}"
                                FontSize="11" FontWeight="SemiBold" />
                     <TextBlock x:Name="textoChave" Grid.Row="1" Margin="0,2,0,16"
-                               Foreground="{StaticResource CorTexto}" FontSize="18" FontWeight="SemiBold"
+                               Foreground="{DynamicResource CorTexto}" FontSize="18" FontWeight="SemiBold"
                                TextWrapping="Wrap" />
 
-                    <TextBlock Grid.Row="2" Text="VALOR" Foreground="{StaticResource CorTextoFraco}"
+                    <TextBlock Grid.Row="2" Text="VALOR" Foreground="{DynamicResource CorTextoFraco}"
                                FontSize="11" FontWeight="SemiBold" />
                     <TextBox x:Name="campoValor" Grid.Row="3" Margin="0,4,0,0"
                              IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"
@@ -83,6 +86,6 @@
         </Grid>
 
         <TextBlock x:Name="textoStatus" Grid.Row="2" Margin="2,10,0,0"
-                   Foreground="{StaticResource CorTextoFraco}" FontSize="12" />
+                   Foreground="{DynamicResource CorTextoFraco}" FontSize="12" />
     </Grid>
 </Window>

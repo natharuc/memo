@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using Memo.Service;
 using Memo.Service.Atualizacao;
 using Memo.Service.Repositorio;
 using Memo.Services;
@@ -13,6 +14,9 @@ namespace Memo
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // Aplica o tema salvo antes de qualquer janela aparecer.
+            Tema.Aplicar(Configuracoes.Atual.Tema);
 
             var service = new MemoService();
             var cofre = service.Cofre;
@@ -36,9 +40,7 @@ namespace Memo
                 // Passada de auto-reparo: recifra o que for antigo e isola o que não abrir.
                 var resultado = service.Migrar();
                 if (resultado.HouveMudanca)
-                    MessageBox.Show(TextoRelatorio(resultado), "Memo — manutenção",
-                        MessageBoxButton.OK,
-                        resultado.Falhas.Any() ? MessageBoxImage.Warning : MessageBoxImage.Information);
+                    JanelaDialogo.Informar(null, "Memo — manutenção", TextoRelatorio(resultado));
 
                 var janela = new JanelaPrincipal(service);
                 janela.Show();
