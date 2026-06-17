@@ -18,8 +18,16 @@
                    FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
         <TextBox x:Name="campoChave" Grid.Row="1" />
 
-        <TextBlock Grid.Row="2" Text="VALOR" Foreground="{DynamicResource CorTextoFraco}"
-                   FontSize="11" FontWeight="SemiBold" Margin="0,14,0,4" />
+        <Grid Grid.Row="2" Margin="0,14,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="VALOR" Foreground="{DynamicResource CorTextoFraco}"
+                       FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Content="Gerar senha" Padding="10,4" FontSize="12"
+                    Click="GerarSenha_Click" />
+        </Grid>
         <TextBox x:Name="campoValor" Grid.Row="3" MinHeight="90" MaxHeight="220"
                  TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
                  FontFamily="Consolas" />

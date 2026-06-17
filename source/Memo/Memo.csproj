@@ -4,13 +4,16 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <UseWindowsForms>false</UseWindowsForms>
+    <!-- WinForms habilitado apenas para o ícone de bandeja (NotifyIcon). A UI é WPF. -->
+    <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>Memo</AssemblyName>
     <RootNamespace>Memo</RootNamespace>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <ApplicationIcon>6373087.ico</ApplicationIcon>
+    <ApplicationIcon>memo.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- DPI fica no app.manifest (necessário para o WPF); o WinForms só entra pelo NotifyIcon. -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
 
     <!-- Versão base; o CI sobrescreve via -p:Version=<tag> ao gerar a release. -->
     <Version>1.1.0</Version>
@@ -18,6 +21,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Memo.Service\Memo.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Recursos\logo.png" />
+    <Resource Include="memo.ico" />
   </ItemGroup>
 
 </Project>

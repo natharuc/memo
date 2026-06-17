@@ -29,6 +29,9 @@ namespace Memo.Service
 
         public int DuracaoSessaoMinutos { get; set; } = 15;
 
+        /// <summary>Preferências do gerador de senha (reusadas na UI e na CLI).</summary>
+        public OpcoesSenha Senha { get; set; } = new OpcoesSenha();
+
         [JsonIgnore]
         public TimeSpan DuracaoSessao =>
             TimeSpan.FromMinutes(Math.Min(MinutosMaximo, Math.Max(MinutosMinimo, DuracaoSessaoMinutos)));

@@ -19,6 +19,7 @@ namespace Memo.Service.Seguranca
         private readonly string _arquivoConfig;  // vault.json (junto dos documentos, viaja no OneDrive)
         private readonly string _arquivoSessao;   // session.bin (local, protegido por DPAPI)
         private byte[] _chave;
+        private DateTime _expiraEm;                // quando a sessão expira (UTC)
 
         public Cofre(string diretorioDocumentos)
         {
@@ -45,6 +46,12 @@ namespace Memo.Service.Seguranca
 
         public bool Inicializado => File.Exists(_arquivoConfig);
         public bool Destrancado => _chave != null;
+
+        /// <summary>Momento (UTC) em que a sessão expira, ou null se trancado.</summary>
+        public DateTime? ExpiraEmUtc => _chave != null ? _expiraEm : (DateTime?)null;
+
+        /// <summary>Tempo até pedir a senha de novo, ou null se trancado (pode ser negativo).</summary>
+        public TimeSpan? TempoRestante => _chave != null ? (TimeSpan?)(_expiraEm - DateTime.UtcNow) : null;
 
         private class Config
         {
@@ -118,8 +125,11 @@ namespace Memo.Service.Seguranca
                     return false;
                 }
 
+                // Expiração ABSOLUTA: a sessão conta a partir da última vez que a
+                // senha foi digitada e NÃO é renovada a cada uso. Assim o prazo
+                // configurado realmente vence (antes, o uso renovava sem parar).
                 _chave = chave;
-                SalvarSessao(); // expiração deslizante
+                _expiraEm = expira;
                 return true;
             }
             catch
@@ -149,6 +159,12 @@ namespace Memo.Service.Seguranca
             _chave = null;
             try { if (File.Exists(_arquivoSessao)) File.Delete(_arquivoSessao); }
             catch { /* ignora */ }
+        }
+
+        /// <summary>Re-ancora o prazo da sessão em "agora + duração atual" (se destrancado).</summary>
+        public void RenovarSessao()
+        {
+            if (_chave != null) SalvarSessao();
         }
 
         public string Cifrar(string texto) => CryptoCofre.Cifrar(texto, ChaveObrigatoria());
@@ -203,9 +219,10 @@ namespace Memo.Service.Seguranca
         {
             if (_chave == null) return;
 
+            _expiraEm = DateTime.UtcNow.Add(Configuracoes.Atual.DuracaoSessao);
+
             var dados = new byte[8 + CryptoCofre.TamanhoChave];
-            var expira = DateTime.UtcNow.Add(Configuracoes.Atual.DuracaoSessao).Ticks;
-            Buffer.BlockCopy(BitConverter.GetBytes(expira), 0, dados, 0, 8);
+            Buffer.BlockCopy(BitConverter.GetBytes(_expiraEm.Ticks), 0, dados, 0, 8);
             Buffer.BlockCopy(_chave, 0, dados, 8, CryptoCofre.TamanhoChave);
 
             var protegido = ProtectedData.Protect(dados, null, DataProtectionScope.CurrentUser);

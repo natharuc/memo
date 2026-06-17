@@ -5,31 +5,49 @@
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI"
         Background="{DynamicResource CorFundo}"
+        Icon="memo.ico"
+        UseLayoutRounding="True"
         KeyDown="Window_KeyDown">
     <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="43*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Barra superior: busca + novo -->
-        <Grid Grid.Row="0" Margin="0,0,0,12">
+        <!-- Barra superior: busca + sessão + config + novo -->
+        <Grid Grid.Row="0" Margin="0,0,0,12" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="campoBusca" Grid.Column="0"
-                     TextChanged="Busca_TextChanged" KeyDown="Busca_KeyDown" />
-            <Button x:Name="botaoConfig" Grid.Column="1" Content="⚙" Margin="8,0,0,0"
+            <Image Grid.Column="0" Source="Recursos/logo.png" Height="28" Stretch="Uniform"
+                   VerticalAlignment="Center" Margin="2,0,16,0"
+                   RenderOptions.BitmapScalingMode="HighQuality" UseLayoutRounding="True" />
+            <TextBox x:Name="campoBusca" Grid.Column="1"
+                     TextChanged="Busca_TextChanged" PreviewKeyDown="Busca_PreviewKeyDown" />
+            <Button x:Name="botaoSessao" Grid.Column="2" Content="🔒 --:--" Margin="8,0,0,0"
+                    Foreground="{DynamicResource CorTextoFraco}"
+                    ToolTip="Tempo até pedir a senha de novo. Clique para TRANCAR o cofre agora."
+                    Click="Sessao_Click" />
+            <Button x:Name="botaoLembretes" Grid.Column="3" Content="⏰" Margin="8,0,0,0"
+                    FontSize="16" ToolTip="Lembretes" Click="Lembretes_Click" />
+            <Button x:Name="botaoConfig" Grid.Column="4" Content="⚙" Margin="8,0,0,0"
                     FontSize="16" ToolTip="Configurações" Click="Config_Click" />
-            <Button x:Name="botaoNovo" Grid.Column="2" Content="+ Novo" Margin="8,0,0,0"
+            <Button x:Name="botaoNovo" Grid.Column="5" Content="+ Novo" Margin="8,0,0,0"
                     Style="{StaticResource BotaoPrimario}" Click="Novo_Click" />
         </Grid>
 
         <!-- Lista | detalhes -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*" MinWidth="220" />
                 <ColumnDefinition Width="Auto" />
@@ -86,6 +104,19 @@
         </Grid>
 
         <TextBlock x:Name="textoStatus" Grid.Row="2" Margin="2,10,0,0"
-                   Foreground="{DynamicResource CorTextoFraco}" FontSize="12" />
+                   Foreground="{DynamicResource CorTextoFraco}" FontSize="12" Grid.ColumnSpan="2" />
+
+        <!-- Overlay de bloqueio: cobre tudo e esconde os segredos quando trancado. -->
+        <Border x:Name="overlayBloqueio" Grid.Row="0" Grid.RowSpan="3"
+                Background="{DynamicResource CorFundo}" Visibility="Collapsed" Grid.ColumnSpan="2">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="🔒" FontSize="52" HorizontalAlignment="Center"
+                           Foreground="{DynamicResource CorTextoFraco}" />
+                <TextBlock Text="Cofre trancado" FontSize="18" Margin="0,10,0,18"
+                           HorizontalAlignment="Center" Foreground="{DynamicResource CorTexto}" />
+                <Button Content="Destrancar" Style="{StaticResource BotaoPrimario}"
+                        HorizontalAlignment="Center" Click="Destrancar_Click" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

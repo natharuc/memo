@@ -29,6 +29,15 @@ Tela principal.
 - **Ações**: **Copiar** (clipboard), **Mostrar/Ocultar**, **Editar**, **Excluir**
   (com confirmação via `MessageBox` nativo), **+ Novo**.
 - Duplo-clique ou Enter na lista = copiar; Delete = excluir.
+- **Badge de sessão** (`botaoSessao`, topo): contagem regressiva até pedir a senha
+  de novo (`Cofre.TempoRestante`), atualizada por um `DispatcherTimer` de 1s. Fica
+  vermelho no último minuto. **Clicar TRANCA o cofre na hora** (`Sessao_Click` →
+  `Bloquear()`) — útil para entregar o PC já trancado.
+- **Bloqueio** (`Bloquear()`): para o timer, limpa a lista/detalhes/busca, chama
+  `Cofre.Trancar()` e mostra o **overlay `overlayBloqueio`** (opaco, esconde os
+  segredos). Acontece ao clicar no badge **ou** quando a contagem zera. O botão
+  **Destrancar** do overlay (`Destrancar_Click`) pede a senha
+  (`JanelaSenha.Solicitar`) e, se ok, recarrega e religa o timer.
 - A barra de status (rodapé) mostra o último resultado.
 
 ### `JanelaEditar` (`JanelaEditar.xaml[.cs]`)
@@ -39,11 +48,16 @@ Criar/editar um documento.
   hoje). Ao **criar**, a chave é validada por `DocumentoRepository.SanitizarChave`.
 
 ### `JanelaConfiguracoes` (`JanelaConfiguracoes.xaml[.cs]`)
-Preferências do usuário, aberta pelo botão **⚙** na `JanelaPrincipal`.
-- **Tema**: Escuro/Claro, com pré-visualização ao vivo (revertida se cancelar).
-- **Tempo para guardar a senha**: presets (15 min … 1 dia) que definem
-  `Configuracoes.DuracaoSessaoMinutos`, usado pelo `Cofre` na expiração da sessão.
-- `static void JanelaConfiguracoes.Mostrar(owner)`.
+Preferências do usuário, aberta pelo botão **⚙** na `JanelaPrincipal`. Organizada
+em **abas** (`TabControl`, estilizado em `Tema.xaml`):
+- **Preferências**: **Tema** (Escuro/Claro, com pré-visualização ao vivo revertida
+  se cancelar) e **Tempo para guardar a senha** (presets 15 min … 1 dia →
+  `Configuracoes.DuracaoSessaoMinutos`, usado pelo `Cofre` na expiração).
+- **Atalhos**: texto didático explicando cada comando de CLI (`get`, `set`, `new`,
+  `pass`, `guid`, `lock`, `unlock`, `migrar`). É só conteúdo estático — para mudar
+  a explicação, edite o XAML; a referência completa fica em [cli.md](cli.md).
+- `static bool JanelaConfiguracoes.Mostrar(owner)` → `true` se o usuário salvou
+  (a `JanelaPrincipal` usa isso para re-ancorar a sessão com a nova duração).
 
 ### `Toast` (`Toast.xaml[.cs]`)
 Aviso flutuante no canto inferior direito, com fade-in/out e auto-fechamento

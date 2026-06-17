@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Memo.Service;
 using Memo.Service.Classes;
 using Memo.Service.Repositorio;
 using Memo.Service.Seguranca;
@@ -82,6 +83,39 @@ namespace Memo.Services
 
             _repositorio.Salvar(new Documento(key, value));
             return ResultadoCli.Ok($"\"{key}\" salvo");
+        }
+
+        public void CopiarTexto(string texto) => _clipboard.SetText(texto ?? string.Empty);
+
+        /// <summary>Gera um GUID novo e copia para a área de transferência.</summary>
+        public ResultadoCli ProcessarGuid()
+        {
+            var guid = Guid.NewGuid().ToString();
+            CopiarTexto(guid);
+            return ResultadoCli.Ok($"GUID copiado: {guid}");
+        }
+
+        /// <summary>
+        /// Gera uma senha com as preferências salvas e copia. Se uma chave for
+        /// informada (ex.: <c>memo pass foo bar</c>), também salva o documento.
+        /// </summary>
+        public ResultadoCli ProcessarPass(string[] args)
+        {
+            var senha = GeradorSenha.Gerar(Configuracoes.Atual.Senha);
+            if (string.IsNullOrEmpty(senha))
+                return ResultadoCli.Falha("Nenhum tipo de caractere habilitado nas preferências");
+
+            var key = string.Join(" ", args.Skip(1)).Trim().Trim('{', '}').Trim();
+
+            if (!string.IsNullOrWhiteSpace(key))
+            {
+                _repositorio.Salvar(new Documento(key, senha));
+                CopiarTexto(senha);
+                return ResultadoCli.Ok($"\"{key}\" criado e senha copiada");
+            }
+
+            CopiarTexto(senha);
+            return ResultadoCli.Ok("Senha copiada para a área de transferência");
         }
     }
 

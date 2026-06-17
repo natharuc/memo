@@ -1,7 +1,7 @@
 <Window x:Class="Memo.JanelaConfiguracoes"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Configurações" Width="460" SizeToContent="Height"
+        Title="Configurações" Width="480" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         FontFamily="Segoe UI" Background="{DynamicResource CorFundo}">
     <Grid Margin="24">
@@ -9,42 +9,124 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Configurações"
                    Foreground="{DynamicResource CorTexto}" FontSize="20" FontWeight="SemiBold"
-                   Margin="0,0,0,18" />
+                   Margin="0,0,0,16" />
 
-        <!-- Tema -->
-        <TextBlock Grid.Row="1" Text="TEMA" Foreground="{DynamicResource CorTextoFraco}"
-                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
-        <StackPanel x:Name="painelTema" Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,20">
-            <Button Content="Escuro" Tag="Escuro" Click="Tema_Click" Margin="0,0,8,0" />
-            <Button Content="Claro" Tag="Claro" Click="Tema_Click" />
-        </StackPanel>
+        <TabControl Grid.Row="1">
 
-        <!-- Duração da sessão -->
-        <TextBlock Grid.Row="3" Text="TEMPO PARA GUARDAR A SENHA"
-                   Foreground="{DynamicResource CorTextoFraco}"
-                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
-        <TextBlock Grid.Row="4"
-                   Text="Depois de destrancar, o cofre fica acessível por esse tempo sem pedir a senha de novo."
-                   Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
-                   TextWrapping="Wrap" Margin="0,0,0,10" />
-        <WrapPanel x:Name="painelDuracao" Grid.Row="5" Margin="0,0,0,4">
-            <Button Content="15 min" Tag="15" Click="Duracao_Click" Margin="0,0,8,8" />
-            <Button Content="30 min" Tag="30" Click="Duracao_Click" Margin="0,0,8,8" />
-            <Button Content="1 hora" Tag="60" Click="Duracao_Click" Margin="0,0,8,8" />
-            <Button Content="4 horas" Tag="240" Click="Duracao_Click" Margin="0,0,8,8" />
-            <Button Content="8 horas" Tag="480" Click="Duracao_Click" Margin="0,0,8,8" />
-            <Button Content="1 dia" Tag="1440" Click="Duracao_Click" Margin="0,0,8,8" />
-        </WrapPanel>
+            <!-- ===== Preferências ===== -->
+            <TabItem Header="Preferências">
+                <StackPanel>
+                    <!-- Tema -->
+                    <TextBlock Text="TEMA" Foreground="{DynamicResource CorTextoFraco}"
+                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <StackPanel x:Name="painelTema" Orientation="Horizontal" Margin="0,0,0,20">
+                        <Button Content="Escuro" Tag="Escuro" Click="Tema_Click" Margin="0,0,8,0" />
+                        <Button Content="Claro" Tag="Claro" Click="Tema_Click" />
+                    </StackPanel>
 
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                    <!-- Duração da sessão -->
+                    <TextBlock Text="TEMPO PARA GUARDAR A SENHA"
+                               Foreground="{DynamicResource CorTextoFraco}"
+                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                    <TextBlock Text="Depois de destrancar, o cofre fica acessível por esse tempo sem pedir a senha de novo."
+                               Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                               TextWrapping="Wrap" Margin="0,0,0,10" />
+                    <WrapPanel x:Name="painelDuracao">
+                        <Button Content="15 min" Tag="15" Click="Duracao_Click" Margin="0,0,8,8" />
+                        <Button Content="30 min" Tag="30" Click="Duracao_Click" Margin="0,0,8,8" />
+                        <Button Content="1 hora" Tag="60" Click="Duracao_Click" Margin="0,0,8,8" />
+                        <Button Content="4 horas" Tag="240" Click="Duracao_Click" Margin="0,0,8,8" />
+                        <Button Content="8 horas" Tag="480" Click="Duracao_Click" Margin="0,0,8,8" />
+                        <Button Content="1 dia" Tag="1440" Click="Duracao_Click" Margin="0,0,8,8" />
+                    </WrapPanel>
+                </StackPanel>
+            </TabItem>
+
+            <!-- ===== Atalhos ===== -->
+            <TabItem Header="Atalhos">
+                <StackPanel>
+                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                               Margin="0,0,0,12"
+                               Text="Comandos para usar no terminal (Win+R, cmd ou PowerShell). Onde aparece &lt;nome&gt;, troque pelo nome do seu documento." />
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="300">
+                        <StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo get &lt;nome&gt;" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Copia o valor (senha) do documento para a área de transferência." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo set &lt;nome&gt; = &lt;valor&gt;" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Cria um documento novo ou atualiza um existente com o valor informado." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo new" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Abre a janela para criar um documento, sem precisar abrir o app inteiro." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo pass [&lt;nome&gt;]" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Gera uma senha forte e copia. Se você der um nome, também salva como documento." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo guid" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Gera um identificador único (GUID) e copia para a área de transferência." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo lock" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Tranca o cofre na hora. O próximo acesso vai pedir a senha-mestra de novo." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo unlock" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Destranca o cofre pedindo a senha (deixa pronto para usar sem pedir de novo)." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo migrar" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Reorganiza/atualiza os documentos antigos para o formato de criptografia atual." />
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Sem nada depois, abre a interface gráfica (esta janela do app)." />
+                            </StackPanel>
+
+                        </StackPanel>
+                    </ScrollViewer>
+                </StackPanel>
+            </TabItem>
+
+        </TabControl>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
             <Button Content="Cancelar" Click="Cancelar_Click" IsCancel="True" Margin="0,0,8,0" />
             <Button Content="Salvar" Style="{StaticResource BotaoPrimario}"
                     Click="Salvar_Click" IsDefault="True" />

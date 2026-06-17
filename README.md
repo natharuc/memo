@@ -7,6 +7,12 @@ comando ou por uma interface gráfica (WPF/.NET 8).
 ```
 memo get senha pollaris          # copia o valor para a área de transferência
 memo set senha pollaris = 1234   # cria/atualiza um documento cifrado
+memo pass                        # gera uma senha (preferências do usuário) e copia
+memo pass cofre banco            # gera a senha, salva em "cofre banco" e copia
+memo guid                        # gera um GUID e copia
+memo new                         # abre a janela de novo documento
+memo lock                        # tranca o cofre (próximo acesso pede a senha)
+memo unlock                      # destranca pedindo a senha
 memo                             # abre a interface gráfica
 ```
 
@@ -28,8 +34,10 @@ Esse modelo file-based é proposital — é o diferencial do Memo, não um acide
   (200k iterações). Cada documento é cifrado com **AES-256-GCM** (cifra
   autenticada), com salt e nonce aleatórios. A senha nunca é gravada nem fica
   no código.
-- **Sessão em cache (15 min)** protegida por **DPAPI**, isolada por diretório e
-  validada contra o cofre, para o `memo get` não pedir senha a cada uso.
+- **Sessão em cache** (prazo configurável, **absoluto**) protegida por **DPAPI**,
+  isolada por diretório e validada contra o cofre, para o `memo get` não pedir
+  senha a cada uso. A tela principal mostra um badge com a contagem regressiva;
+  clicar nele **tranca na hora**. Também há `memo lock` / `memo unlock`.
 - **Interface WPF** com tema escuro, busca, painel de detalhes, e diálogos
   nativos.
 - **Resiliência**: leitura tolerante a falhas e migração transparente de

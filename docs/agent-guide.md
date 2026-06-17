@@ -41,6 +41,10 @@ Detalhes em [architecture.md](architecture.md), [security.md](security.md),
 4. **A sessão é isolada por diretório.** O arquivo é
    `session-<hash do diretório>.bin`. Nunca volte para um caminho global
    compartilhado.
+4b. **A expiração da sessão é absoluta.** O prazo é fixado quando a senha é
+   digitada e **não** é renovado a cada uso. Não reintroduza renovação na leitura
+   (`TentarDestrancarPelaSessao`) — isso fazia o prazo nunca vencer e quebraria o
+   badge de contagem regressiva da `JanelaPrincipal`.
 5. **Sanitize chaves.** Toda operação por chave passa por
    `DocumentoRepository.SanitizarChave` (anti path-traversal). Mantenha.
 6. **Leitura é resiliente.** `CarregarTodos` nunca pode lançar por causa de um

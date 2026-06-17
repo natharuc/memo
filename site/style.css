@@ -49,11 +49,8 @@ a { color: inherit; text-decoration: none; }
 .marca {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 700;
-  font-size: 18px;
 }
-.marca-icone { color: var(--destaque); display: inline-flex; }
+.marca-logo { height: 30px; width: auto; display: block; }
 .nav { display: flex; align-items: center; gap: 24px; }
 .nav a { color: var(--texto-fraco); font-size: 14px; transition: color .15s; }
 .nav a:hover { color: var(--texto); }
@@ -79,7 +76,24 @@ a { color: inherit; text-decoration: none; }
 .botao-grande { padding: 15px 32px; font-size: 16px; }
 
 /* ---------- Hero ---------- */
-.hero { padding: 72px 0 64px; }
+.hero {
+  padding: 72px 0 64px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  top: -180px;
+  left: 50%;
+  width: 900px;
+  height: 520px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(122, 137, 255, 0.18), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-grid { position: relative; z-index: 1; }
 .hero-grid {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;

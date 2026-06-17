@@ -5,6 +5,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
 using Memo.Service.Classes;
 using Memo.Services;
 
@@ -16,6 +18,7 @@ namespace Memo
 
         private readonly MemoService _service;
         private readonly ObservableCollection<Documento> _visiveis = new ObservableCollection<Documento>();
+        private readonly DispatcherTimer _timerSessao;
         private List<Documento> _todos;
         private bool _valorVisivel;
 
@@ -29,6 +32,12 @@ namespace Memo
             listaDocumentos.ItemsSource = _visiveis;
 
             Recarregar();
+
+            _timerSessao = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _timerSessao.Tick += (_, __) => TickSessao();
+            _timerSessao.Start();
+            AtualizarBadge();
+
             Loaded += (_, __) => campoBusca.Focus();
         }
 
@@ -64,8 +73,6 @@ namespace Memo
         private void AtualizarDetalhes()
         {
             var doc = Selecionado;
-            _valorVisivel = false;
-            botaoMostrar.Content = "Mostrar";
 
             if (doc == null)
             {
@@ -75,7 +82,10 @@ namespace Memo
 
             painelDetalhes.Visibility = Visibility.Visible;
             textoChave.Text = doc.Key;
-            campoValor.Text = Mascara;
+
+            // Mantém a escolha de mostrar/ocultar ao navegar entre documentos.
+            campoValor.Text = _valorVisivel ? doc.Value : Mascara;
+            botaoMostrar.Content = _valorVisivel ? "Ocultar" : "Mostrar";
         }
 
         // ---------------- eventos ----------------
@@ -87,18 +97,36 @@ namespace Memo
 
         private void Busca_TextChanged(object sender, TextChangedEventArgs e) => Filtrar();
 
-        private void Busca_KeyDown(object sender, KeyEventArgs e)
+        private void Busca_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter && _visiveis.Count > 0)
+            if (_visiveis.Count == 0) return;
+
+            if (e.Key == Key.Enter)
             {
                 if (listaDocumentos.SelectedIndex < 0) listaDocumentos.SelectedIndex = 0;
                 Copiar();
+                e.Handled = true;
             }
-            else if (e.Key == Key.Down && _visiveis.Count > 0)
+            else if (e.Key == Key.Down)
             {
-                if (listaDocumentos.SelectedIndex < 0) listaDocumentos.SelectedIndex = 0;
-                listaDocumentos.Focus();
+                // Move o foco do teclado para a lista, selecionando o item atual (ou o primeiro).
+                var indice = listaDocumentos.SelectedIndex < 0 ? 0 : listaDocumentos.SelectedIndex;
+                listaDocumentos.SelectedIndex = indice;
+                FocarItem(indice);
+                e.Handled = true;
             }
+        }
+
+        /// <summary>Dá foco de teclado ao contêiner do item, para as setas navegarem na lista.</summary>
+        private void FocarItem(int indice)
+        {
+            listaDocumentos.ScrollIntoView(listaDocumentos.SelectedItem);
+            listaDocumentos.UpdateLayout();
+
+            if (listaDocumentos.ItemContainerGenerator.ContainerFromIndex(indice) is ListBoxItem item)
+                item.Focus();
+            else
+                listaDocumentos.Focus();
         }
 
         private void Lista_SelectionChanged(object sender, SelectionChangedEventArgs e) => AtualizarDetalhes();
@@ -112,6 +140,12 @@ namespace Memo
         {
             if (e.Key == Key.Enter) Copiar();
             else if (e.Key == Key.Delete) Excluir();
+            else if (e.Key == Key.Up && listaDocumentos.SelectedIndex <= 0)
+            {
+                // Voltar da primeira posição devolve o foco para a busca.
+                campoBusca.Focus();
+                e.Handled = true;
+            }
         }
 
         private void Copiar_Click(object sender, RoutedEventArgs e) => Copiar();
@@ -139,7 +173,19 @@ namespace Memo
             Status($"\"{editado.Key}\" salvo");
         }
 
-        private void Config_Click(object sender, RoutedEventArgs e) => JanelaConfiguracoes.Mostrar(this);
+        private void Config_Click(object sender, RoutedEventArgs e)
+        {
+            if (JanelaConfiguracoes.Mostrar(this))
+            {
+                _service.Cofre.RenovarSessao(); // aplica a nova duração ao prazo atual
+                AtualizarBadge();
+            }
+        }
+
+        private void Lembretes_Click(object sender, RoutedEventArgs e)
+        {
+            new JanelaLembretes(new Memo.Service.Lembretes.LembreteService()) { Owner = this }.ShowDialog();
+        }
 
         private void Novo_Click(object sender, RoutedEventArgs e)
         {
@@ -177,5 +223,77 @@ namespace Memo
         }
 
         private void Status(string mensagem) => textoStatus.Text = mensagem;
+
+        // ---------------- sessão / badge ----------------
+
+        private void TickSessao()
+        {
+            var restante = _service.Cofre.TempoRestante;
+            if (restante == null || restante.Value <= TimeSpan.Zero)
+            {
+                Bloquear();
+                return;
+            }
+            AtualizarBadge();
+        }
+
+        private void AtualizarBadge()
+        {
+            var restante = _service.Cofre.TempoRestante;
+            if (restante == null)
+            {
+                botaoSessao.Content = "🔒 bloqueado";
+                return;
+            }
+
+            var ts = restante.Value;
+            if (ts < TimeSpan.Zero) ts = TimeSpan.Zero;
+
+            string texto;
+            if (ts.TotalDays >= 1) texto = $"{(int)ts.TotalDays}d {ts.Hours:00}h";
+            else if (ts.TotalHours >= 1) texto = $"{(int)ts.TotalHours}h {ts.Minutes:00}m";
+            else texto = $"{ts.Minutes:00}:{ts.Seconds:00}";
+
+            botaoSessao.Content = "🔒 " + texto;
+            botaoSessao.Foreground = ts.TotalSeconds <= 60
+                ? (Brush)FindResource("CorPerigo")
+                : (Brush)FindResource("CorTextoFraco");
+        }
+
+        /// <summary>Clique no badge: tranca o cofre agora (ex.: antes de emprestar o PC).</summary>
+        private void Sessao_Click(object sender, RoutedEventArgs e) => Bloquear();
+
+        /// <summary>
+        /// Tranca: limpa os segredos da tela, esquece a chave e mostra o overlay de
+        /// bloqueio. Usado tanto pelo clique no badge quanto pela expiração da sessão.
+        /// </summary>
+        private void Bloquear()
+        {
+            _timerSessao.Stop();
+
+            _valorVisivel = false;
+            _todos = new List<Documento>();
+            _visiveis.Clear();
+            painelDetalhes.Visibility = Visibility.Collapsed;
+            campoBusca.Clear();
+
+            _service.Cofre.Trancar();
+
+            botaoSessao.Content = "🔒 Trancado";
+            overlayBloqueio.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>Botão "Destrancar" do overlay: pede a senha e recarrega.</summary>
+        private void Destrancar_Click(object sender, RoutedEventArgs e)
+        {
+            if (!JanelaSenha.Solicitar(_service.Cofre))
+                return; // continua trancado se cancelar
+
+            overlayBloqueio.Visibility = Visibility.Collapsed;
+            Recarregar();
+            _timerSessao.Start();
+            AtualizarBadge();
+            campoBusca.Focus();
+        }
     }
 }

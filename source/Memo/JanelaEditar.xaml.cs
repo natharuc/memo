@@ -32,6 +32,7 @@ namespace Memo
         private static Documento Mostrar(Window dono, Documento documento, bool novo)
         {
             var janela = new JanelaEditar(documento, novo) { Owner = dono };
+            if (dono == null) janela.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             return janela.ShowDialog() == true ? janela._resultado : null;
         }
 
@@ -54,6 +55,12 @@ namespace Memo
         }
 
         private void Cancelar_Click(object sender, RoutedEventArgs e) => DialogResult = false;
+
+        private void GerarSenha_Click(object sender, RoutedEventArgs e)
+        {
+            var senha = JanelaGerarSenha.Gerar(this);
+            if (senha != null) campoValor.Text = senha;
+        }
 
         private void MostrarErro(string mensagem)
         {

@@ -27,10 +27,12 @@ namespace Memo
             Destacar(painelDuracao, _minutosSelecionado.ToString(CultureInfo.InvariantCulture));
         }
 
-        public static void Mostrar(Window dono)
+        /// <summary>Mostra as configurações. Retorna true se o usuário salvou.</summary>
+        public static bool Mostrar(Window dono)
         {
             var janela = new JanelaConfiguracoes { Owner = dono };
             janela.ShowDialog();
+            return janela._salvou;
         }
 
         private void Tema_Click(object sender, RoutedEventArgs e)

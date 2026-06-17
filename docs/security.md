@@ -71,13 +71,23 @@ bytes (hex) de `SHA256(caminho-do-diretório normalizado e em minúsculas)`
 (`Cofre.IdDiretorio`). **Isolado por diretório** — cofres/testes diferentes nunca
 compartilham sessão.
 
-- Conteúdo (antes do DPAPI): `[expiraTicks (8 bytes)] [chave (32 bytes)]`.
+- Conteúdo (antes do DPAPI): `[expiraTicks (8 bytes, UTC)] [chave (32 bytes)]`.
 - Protegido com **DPAPI** (`ProtectedData.Protect`, escopo `CurrentUser`) — só o
   mesmo usuário Windows consegue ler.
-- **Validade: 15 min, deslizante** (renova a cada uso).
+- **Validade: absoluta** — o prazo é definido **no momento em que a senha é
+  digitada** (`Inicializar`/`Destrancar`/`RenovarSessao`) como `agora + duração`,
+  e **não é renovado a cada uso** (`TentarDestrancarPelaSessao` apenas lê o prazo;
+  não o estende). A duração vem de `Configuracoes.DuracaoSessao` (configurável).
+  > ⚠️ Histórico: já foi *deslizante* (renovava a cada uso), o que fazia o prazo
+  > nunca vencer se o app fosse usado com frequência. Não volte a renovar na
+  > leitura — o badge da tela principal depende de um prazo fixo.
 - **Validação obrigatória** (`ChaveAbreCofre`): ao carregar a sessão, a chave só
   é aceita se decifrar o verificador do `vault.json` atual. Isso impede que uma
   sessão antiga/estranha re-cifre documentos com a chave errada.
+- **`Cofre.TempoRestante` / `ExpiraEmUtc`** expõem o prazo para a UI. A
+  `JanelaPrincipal` mostra um badge com a contagem regressiva e, ao zerar,
+  **bloqueia** (limpa a tela, `Trancar()`, pede a senha). Clicar no badge pede a
+  senha e renova (`RenovarSessao`).
 
 ## Formato legado (somente leitura)
 

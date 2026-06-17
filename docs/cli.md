@@ -34,6 +34,43 @@ memo set so a chave            (cria com valor vazio)
   (`MemoService.ProcessarSet`).
 - A chave é sanitizada (sem `/`, `\`, `..`).
 
+### `memo new`
+Abre a janela de **novo documento** (modo gráfico). Ao salvar, grava o documento e
+mostra um `Toast`; ao cancelar, encerra sem fazer nada.
+
+### `memo guid`
+Gera um **GUID** novo e copia para a área de transferência.
+
+```
+memo guid        →  GUID copiado: 3f2a... 
+```
+
+### `memo pass [<chave>]`
+Gera uma **senha** usando as preferências salvas do usuário
+(`Configuracoes.Senha`: comprimento e tipos de caractere) e copia para a área de
+transferência. Se uma **chave** for informada, também salva o documento.
+
+```
+memo pass              copia uma senha nova
+memo pass foo bar      cria o documento "foo bar" com a senha e copia
+memo pass {foo bar}    chaves entre { } também funcionam
+```
+
+- As preferências vêm da tela **Gerar senha** (botão na janela de novo/editar);
+  o que o usuário configurar lá é reaproveitado aqui (`MemoService.ProcessarPass`).
+
+### `memo lock`
+**Tranca o cofre**: apaga o cache de sessão (`Cofre.Trancar`). O próximo acesso
+(`get`/`set`/GUI) vai pedir a senha. Não pede senha para trancar.
+
+> Trata uma janela do app **já aberta**? Não — `memo lock` roda em outro processo
+> e só invalida a sessão em disco. Para trancar uma janela aberta, clique no badge
+> de sessão na tela principal.
+
+### `memo unlock`
+**Destranca pedindo a senha**: ignora a sessão atual e abre a janela de senha
+(`JanelaSenha`). Útil para "esquentar" a sessão antes de usar `get` em scripts.
+
 ### `memo migrar`
 Recifra todos os documentos no formato atual e move para `falhas/` os que não
 abrirem. Mostra um resumo `X migrado(s), Y ok, Z em quarentena`.
@@ -42,10 +79,11 @@ abrirem. Mostra um resumo `X migrado(s), Y ok, Z em quarentena`.
 
 ## Cofre trancado na CLI
 
-Se a sessão (15 min) não estiver válida, **mesmo um comando de CLI abre a janela
-de senha** (`JanelaSenha`) para destrancar/criar o cofre, e só então executa.
-Depois de destrancar uma vez, os próximos `get`/`set` dentro de 15 min não pedem
-senha.
+Se a sessão não estiver válida, **mesmo um comando de CLI abre a janela de senha**
+(`JanelaSenha`) para destrancar/criar o cofre, e só então executa. Depois de
+destrancar uma vez, os próximos `get`/`set` dentro do prazo da sessão não pedem
+senha. O prazo é **absoluto** (conta a partir da senha digitada, não renova a
+cada uso) e configurável (`Configuracoes.DuracaoSessao`).
 
 ## Como o usuário chama `memo`
 
