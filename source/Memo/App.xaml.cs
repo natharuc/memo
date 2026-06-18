@@ -1,3 +1,8 @@
+using Memo.Service;
+using Memo.Service.Atualizacao;
+using Memo.Service.Lembretes;
+using Memo.Service.Repositorio;
+using Memo.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5,11 +10,6 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
-using Memo.Service;
-using Memo.Service.Atualizacao;
-using Memo.Service.Lembretes;
-using Memo.Service.Repositorio;
-using Memo.Services;
 
 namespace Memo
 {
@@ -35,6 +35,15 @@ namespace Memo
             _service = new MemoService();
 
             var args = e.Args;
+
+            // Pós-atualização: espera o processo antigo sair (libera o mutex de
+            // instância única) e segue como uma abertura normal de bandeja.
+            if (args.Length >= 2 && args[0] == "--apos-atualizacao" && int.TryParse(args[1], out var pidAntigo))
+            {
+                EsperarProcessoSair(pidAntigo, TimeSpan.FromSeconds(10));
+                args = Array.Empty<string>();
+            }
+
             var modoBandeja = args.Length == 0 || (args.Length == 1 && args[0] == "--tray");
 
             if (!modoBandeja)
@@ -89,6 +98,9 @@ namespace Memo
             _janela.Closing += (s, ev) =>
             {
                 if (_encerrando) return;
+
+                _janela.campoBusca.Clear(); // limpa busca para não mostrar resultados confusos ao reabrir
+
                 ev.Cancel = true;   // X não fecha o app: esconde na bandeja
                 _janela.Hide();
 
@@ -144,6 +156,19 @@ namespace Memo
             if (_bandeja != null) { _bandeja.Visible = false; _bandeja.Dispose(); }
             _instancia?.Dispose();
             Shutdown();
+        }
+
+        private static void EsperarProcessoSair(int pid, TimeSpan timeout)
+        {
+            try
+            {
+                using var p = Process.GetProcessById(pid);
+                p.WaitForExit((int)timeout.TotalMilliseconds);
+            }
+            catch
+            {
+                // Processo já saiu (ou não existe) — segue normalmente.
+            }
         }
 
         private static System.Drawing.Icon ObterIcone()

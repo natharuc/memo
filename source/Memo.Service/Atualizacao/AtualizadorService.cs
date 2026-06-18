@@ -144,7 +144,13 @@ namespace Memo.Service.Atualizacao
             File.Move(atual, antigo);
             File.Move(novoExe, atual);
 
-            Process.Start(new ProcessStartInfo(atual) { UseShellExecute = true });
+            // Passa o PID atual para o novo processo esperar este sair antes de
+            // assumir a instância única (senão ele se acha "2ª instância" e fecha).
+            Process.Start(new ProcessStartInfo(atual)
+            {
+                UseShellExecute = true,
+                Arguments = $"--apos-atualizacao {Environment.ProcessId}"
+            });
         }
 
         /// <summary>Apaga resíduos (*.old) deixados por uma atualização anterior. Nunca lança.</summary>

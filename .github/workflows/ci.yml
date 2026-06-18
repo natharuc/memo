@@ -17,8 +17,10 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      # Build pelo .csproj (o app referencia o Memo.Service). Evita o formato
+      # .slnx, que o SDK 8.0.x não suporta.
       - name: Restore
-        run: dotnet restore source/Memo.slnx
+        run: dotnet restore source/Memo/Memo.csproj
 
       - name: Build
-        run: dotnet build source/Memo.slnx -c Release --no-restore
+        run: dotnet build source/Memo/Memo.csproj -c Release --no-restore

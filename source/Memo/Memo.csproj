@@ -16,7 +16,7 @@
     <NoWarn>$(NoWarn);WFAC010</NoWarn>
 
     <!-- Versão base; o CI sobrescreve via -p:Version=<tag> ao gerar a release. -->
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
