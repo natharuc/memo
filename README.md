@@ -11,6 +11,7 @@ memo pass                        # gera uma senha (preferências do usuário) e 
 memo pass cofre banco            # gera a senha, salva em "cofre banco" e copia
 memo guid                        # gera um GUID e copia
 memo new                         # abre a janela de novo documento
+memo remember pagar boleto 9h tomorrow   # cria um lembrete (linguagem natural)
 memo lock                        # tranca o cofre (próximo acesso pede a senha)
 memo unlock                      # destranca pedindo a senha
 memo                             # abre a interface gráfica

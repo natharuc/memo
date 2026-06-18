@@ -217,6 +217,14 @@ namespace Memo
                 return;
             }
 
+            // Lembretes não são segredo: não exigem o cofre destrancado.
+            if (cmd == "remember" || cmd == "lembrar" || cmd == "lembrete")
+            {
+                var r = _service.ProcessarRemember(args);
+                Toast.Mostrar(r.Mensagem, r.Sucesso);
+                return;
+            }
+
             // Demais comandos precisam do cofre aberto.
             if (!cofre.TentarDestrancarPelaSessao() && !JanelaSenha.Solicitar(cofre))
             {

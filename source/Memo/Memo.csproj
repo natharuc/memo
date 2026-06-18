@@ -10,7 +10,7 @@
     <RootNamespace>Memo</RootNamespace>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-    <ApplicationIcon>memo.ico</ApplicationIcon>
+    <ApplicationIcon>memo-app-icon-transparent-256.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- DPI fica no app.manifest (necessário para o WPF); o WinForms só entra pelo NotifyIcon. -->
     <NoWarn>$(NoWarn);WFAC010</NoWarn>
@@ -18,6 +18,10 @@
     <!-- Versão base; o CI sobrescreve via -p:Version=<tag> ao gerar a release. -->
     <Version>1.1.0</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="memo-app-icon-transparent-256.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Memo.Service\Memo.Service.csproj" />

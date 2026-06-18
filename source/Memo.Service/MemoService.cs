@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Memo.Service;
 using Memo.Service.Classes;
+using Memo.Service.Lembretes;
 using Memo.Service.Repositorio;
 using Memo.Service.Seguranca;
 using TextCopy;
@@ -116,6 +117,26 @@ namespace Memo.Services
 
             CopiarTexto(senha);
             return ResultadoCli.Ok("Senha copiada para a área de transferência");
+        }
+
+        /// <summary>
+        /// Cria um lembrete a partir de linguagem natural, ex.:
+        /// <c>memo remember ver tarefa 477987 10:00 tomorrow</c> ou
+        /// <c>memo remember beber agua every 30 minutes</c>.
+        /// </summary>
+        public ResultadoCli ProcessarRemember(string[] args)
+        {
+            var entrada = string.Join(" ", args.Skip(1));
+            var p = ParserLembrete.Analisar(entrada, DateTime.Now);
+            if (!p.Ok)
+                return ResultadoCli.Falha(p.Erro);
+
+            new LembreteService().Adicionar(p.Texto, p.Proximo, p.RepetirMinutos);
+
+            var quando = p.RepetirMinutos > 0
+                ? $"a cada {p.RepetirMinutos} min"
+                : p.Proximo.ToString("dd/MM 'às' HH:mm");
+            return ResultadoCli.Ok($"Lembrete \"{p.Texto}\" criado — {quando}");
         }
     }
 

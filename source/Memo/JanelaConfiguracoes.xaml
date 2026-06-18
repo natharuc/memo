@@ -107,6 +107,13 @@
 
                             <StackPanel Margin="0,0,0,12">
                                 <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo remember &lt;texto&gt; &lt;quando&gt;" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Cria um lembrete em linguagem natural. Ex.: &quot;ver tarefa 477987 10:00 tomorrow&quot;, &quot;22h&quot;, &quot;beber agua every 30 minutes&quot;." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
                                            Text="memo migrar" />
                                 <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
                                            Text="Reorganiza/atualiza os documentos antigos para o formato de criptografia atual." />

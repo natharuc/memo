@@ -71,6 +71,31 @@ memo pass {foo bar}    chaves entre { } também funcionam
 **Destranca pedindo a senha**: ignora a sessão atual e abre a janela de senha
 (`JanelaSenha`). Útil para "esquentar" a sessão antes de usar `get` em scripts.
 
+### `memo remember <texto> <quando>`
+Cria um lembrete em **linguagem natural** (PT/EN). Não pede a senha-mestra
+(lembrete não é segredo). Aliases: `lembrar`, `lembrete`.
+
+```
+memo remember ver tarefa 477987 10:00 tomorrow   # amanhã 10:00
+memo remember ver tarefa 477987 10:00            # hoje 10:00 (ou amanhã, se já passou)
+memo remember ver tarefa 477987 22h              # hoje 22:00
+memo remember ver tarefa 477987 22h tomorrow     # amanhã 22:00
+memo remember beber agua every 30 minutes        # repete a cada 30 min
+memo remember ligar joão in 15 minutes           # daqui a 15 min
+```
+
+Regras (em [ParserLembrete](../source/Memo.Service/Lembretes/ParserLembrete.cs)):
+- **Recorrência**: `every N minutes|hours` ou `a cada N minutos|horas` → repete; o
+  primeiro disparo é daqui a N. Tem prioridade sobre hora do dia.
+- **Relativo**: `in N minutes|hours`, `daqui [a] N min`, `em N horas`.
+- **Hora do dia**: `HH:mm` (10:00), `HHh` (22h), `HHhMM` (22h30). Com `tomorrow`/
+  `amanhã` vai para o dia seguinte; sem dia e já passou hoje → joga para amanhã.
+- O **texto** é o que sobra depois de tirar os termos de tempo. Números soltos
+  (ex.: `477987`) não são confundidos com hora (exige `:` ou `h`).
+
+> O lembrete é gravado no `lembretes.json`; quem dispara é o app na bandeja. Se
+> não houver instância na bandeja rodando, ele só aparece quando o app abrir.
+
 ### `memo migrar`
 Recifra todos os documentos no formato atual e move para `falhas/` os que não
 abrirem. Mostra um resumo `X migrado(s), Y ok, Z em quarentena`.
