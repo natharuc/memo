@@ -1,11 +1,79 @@
 # Linha de comando
 
-O mesmo executável (`Memo.exe`) é GUI e CLI: **sem argumentos** abre a interface;
-**com argumentos** roda um comando e mostra um `Toast` (aviso flutuante) com o
-resultado.
+Há **dois jeitos** de usar o Memo pelo terminal:
 
-Roteamento em `source/Memo/App.xaml.cs` (`ExecutarLinhaDeComando`); a lógica em
-`MemoService` (`source/Memo.Service/MemoService.cs`).
+1. **`memo-cli.exe`** (projeto `source/Memo.Cli`) — um app **console** de verdade:
+   a saída vai pro **stdout** e é **capturável** por scripts/outros sistemas
+   (`$(memo-cli get x --text)`, pipes, etc.), com **exit codes**. É a interface
+   recomendada para automação. Veja [CLI console](#cli-console-memo-cli).
+2. **`Memo.exe`** (a própria GUI) — sem argumentos abre a interface; **com
+   argumentos** roda o comando e mostra um `Toast`, copiando para a área de
+   transferência. Bom para uso interativo, **não** para capturar saída (é um app
+   GUI; o shell não espera nem captura o stdout).
+
+Roteamento da GUI em `source/Memo/App.xaml.cs`; lógica compartilhada em
+`MemoService` (`source/Memo.Service/MemoService.cs`) — o mesmo núcleo usado pelos dois.
+
+---
+
+## CLI console (`memo-cli`)
+
+App console que "cospe" o resultado no stdout. Implementado em
+`source/Memo.Cli/Program.cs` sobre o `Memo.Service`.
+
+### Formatos de saída
+| Flag | Efeito |
+|------|--------|
+| `--text` | (padrão) valor cru no stdout |
+| `--json` | objeto/array JSON |
+| `--bytes` | bytes crus (binário) no stdout — bom para pipe |
+| `--copy` | copia para a área de transferência em vez de imprimir |
+
+### Comandos
+```
+memo-cli get <chave> [--json|--text|--bytes|--copy]
+memo-cli set <chave> <valor>        # ou <chave>=<valor>, --value <v>, --stdin
+memo-cli list [--json]
+memo-cli del <chave>
+memo-cli remember <texto/quando>    # mesmas regras do "memo remember"
+memo-cli pass [<chave>] [--json]
+memo-cli guid [--json]
+memo-cli unlock | lock
+memo-cli migrar
+memo-cli version | help
+```
+
+### Cofre trancado (automação)
+Comandos que leem/gravam segredos precisam do cofre destrancado. A ordem é:
+1. **sessão** válida (DPAPI, 15 min) — reaproveitada entre processos;
+2. `--password <senha>` ou variável **`MEMO_PASSWORD`**;
+3. **prompt** mascarado, se rodando num terminal interativo.
+
+Fluxo típico em scripts: `memo-cli unlock --password "$PW"` uma vez, depois
+`memo-cli get x --json` durante a janela da sessão.
+
+### Variáveis de ambiente
+- **`MEMO_DIR`** — aponta o cofre para outro diretório (padrão: pasta no OneDrive).
+- **`MEMO_PASSWORD`** — senha-mestra para destravar sem prompt.
+
+### Exit codes
+`0` ok · `1` erro · `2` cofre trancado · `3` não encontrado · `64` uso incorreto.
+
+### Exemplos
+```bash
+memo-cli unlock --password "$MEMO_PW"
+valor=$(memo-cli get "github token" --text)
+memo-cli list --json | jq -r '.[]'
+echo -n "$SEGREDO" | memo-cli set "api key" --stdin
+memo-cli get "chave bin" --bytes > saida.bin
+```
+
+---
+
+## GUI em modo CLI (`Memo.exe <args>`)
+
+> Mantido para uso interativo; copia para a área de transferência e mostra um
+> `Toast`. Não é capturável (app GUI).
 
 ## Comandos
 

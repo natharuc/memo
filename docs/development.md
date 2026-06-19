@@ -10,8 +10,9 @@
 
 | Projeto | Alvo | Tipo |
 |---------|------|------|
-| `source/Memo` | `net8.0-windows`, `UseWPF` | WinExe (GUI + CLI) |
-| `source/Memo.Service` | `net8.0-windows` | biblioteca |
+| `source/Memo` | `net8.0-windows`, `UseWPF` | WinExe (GUI; também aceita args, mas não captura stdout) |
+| `source/Memo.Cli` | `net8.0-windows` | Exe console (`memo-cli.exe`) — CLI scriptável, saída em stdout |
+| `source/Memo.Service` | `net8.0-windows` | biblioteca (núcleo compartilhado por GUI e CLI) |
 
 ### Dependências (`Memo.Service`)
 - `Newtonsoft.Json` — serialização do `Documento` e do `vault.json`.

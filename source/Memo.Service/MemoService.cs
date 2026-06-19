@@ -12,8 +12,12 @@ namespace Memo.Services
 {
     public class MemoService
     {
+        // Diretório do cofre. Pode ser sobrescrito pela variável de ambiente
+        // MEMO_DIR (útil para apontar o memo a outro cofre / automação).
         public static string DiretorioPadrao =>
-            @"C:\Users\natha\OneDrive\Atalhos\memoApplication\documents";
+            Environment.GetEnvironmentVariable("MEMO_DIR") is string d && d.Trim().Length > 0
+                ? d.Trim()
+                : @"C:\Users\natha\OneDrive\Atalhos\memoApplication\documents";
 
         private readonly Cofre _cofre;
         private readonly DocumentoRepository _repositorio;

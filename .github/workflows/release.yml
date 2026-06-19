@@ -27,10 +27,20 @@ jobs:
           "version=$ver" >> $env:GITHUB_OUTPUT
           Write-Host "Versão: $ver"
 
-      - name: Publish (single-file, self-contained, win-x64)
+      - name: Publish GUI (single-file, self-contained, win-x64)
         shell: pwsh
         run: |
           dotnet publish source/Memo/Memo.csproj `
+            -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtraction=true `
+            -p:Version=${{ steps.ver.outputs.version }} `
+            -o publish
+
+      - name: Publish CLI (single-file, self-contained, win-x64)
+        shell: pwsh
+        run: |
+          dotnet publish source/Memo.Cli/Memo.Cli.csproj `
             -c Release -r win-x64 --self-contained true `
             -p:PublishSingleFile=true `
             -p:IncludeNativeLibrariesForSelfExtraction=true `
@@ -53,7 +63,7 @@ jobs:
 
           & $signtool sign /f $pfxPath /p $env:PFX_PASSWORD `
             /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 `
-            "publish/Memo.exe"
+            "publish/Memo.exe" "publish/memo-cli.exe"
 
           Remove-Item $pfxPath -Force
 
@@ -64,11 +74,15 @@ jobs:
           $hash = (Get-FileHash "publish/Memo.exe" -Algorithm SHA256).Hash.ToLower()
           "$hash  Memo.exe" | Out-File -Encoding ascii "publish/Memo.exe.sha256"
 
+          $hashCli = (Get-FileHash "publish/memo-cli.exe" -Algorithm SHA256).Hash.ToLower()
+          "$hashCli  memo-cli.exe" | Out-File -Encoding ascii "publish/memo-cli.exe.sha256"
+
           $url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Memo.exe"
           $manifest = [ordered]@{ version = $ver; url = $url; sha256 = $hash }
           $manifest | ConvertTo-Json | Out-File -Encoding utf8 "publish/latest.json"
 
-          Write-Host "SHA256: $hash"
+          Write-Host "SHA256 GUI: $hash"
+          Write-Host "SHA256 CLI: $hashCli"
 
       - name: Criar GitHub Release
         uses: softprops/action-gh-release@v2
@@ -78,4 +92,6 @@ jobs:
           files: |
             publish/Memo.exe
             publish/Memo.exe.sha256
+            publish/memo-cli.exe
+            publish/memo-cli.exe.sha256
             publish/latest.json
