@@ -86,10 +86,12 @@ Correções já aplicadas (invariantes 3 e 4 acima): sessão validada
 2. Em `App.ExecutarLinhaDeComando`, adicione o `else if (acao == "del")`.
 3. Atualize [cli.md](cli.md).
 
-### Tornar o diretório configurável (dívida conhecida)
-`MemoService.DiretorioPadrao` é hardcoded. `MemoService(string)` e `Cofre(string)`
-já aceitam diretório. Leia de uma config/variável de ambiente em `App.OnStartup`
-e passe para `new MemoService(dir)`.
+### Pasta dos documentos (sem caminho fixo)
+Resolvida por `MemoService.DiretorioConfigurado`: `MEMO_DIR` (env) → senão
+`Configuracoes.DiretorioDocumentos`. Se nenhuma → null: a GUI pergunta na 1ª
+execução (`App.EscolherPastaDocumentos`, `FolderBrowserDialog`) e salva; o CLI
+usa `memo-cli config --dir <pasta>`. `MemoService()` lança se ainda não houver
+pasta — quem cria o serviço deve garantir a pasta antes.
 
 ### Permitir renomear a chave (hoje não suportado)
 Renomear = `Salvar` com a chave nova + `Deletar` a antiga, no repositório, de
@@ -121,7 +123,7 @@ adulteração / legado. Ver [development.md](development.md) → Testes.
 
 ## Estado conhecido / pendências
 
-- `DiretorioPadrao` hardcoded (candidato a config).
+- Pasta dos documentos: sem caminho fixo (MEMO_DIR / config / pergunta na 1ª vez).
 - Sem projeto de testes versionado (recomendado adicionar xUnit).
 - `StringUtil` em `Memo.Service/Extensoes/StringExtensao.cs` é legado e não usado
   (alguns métodos têm bugs); pode ser removido.

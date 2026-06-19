@@ -40,6 +40,7 @@ memo-cli pass [<chave>] [--json]
 memo-cli guid [--json]
 memo-cli unlock | lock
 memo-cli migrar
+memo-cli config [--dir <pasta>]     # mostra/define a pasta dos documentos
 memo-cli version | help
 ```
 
@@ -52,8 +53,16 @@ Comandos que leem/gravam segredos precisam do cofre destrancado. A ordem é:
 Fluxo típico em scripts: `memo-cli unlock --password "$PW"` uma vez, depois
 `memo-cli get x --json` durante a janela da sessão.
 
+### Pasta dos documentos
+**Não há caminho fixo no código.** A pasta é resolvida assim:
+1. variável **`MEMO_DIR`** (prioridade — boa para automação);
+2. preferência salva (`Configuracoes.DiretorioDocumentos`).
+
+Se nenhuma estiver definida: a **GUI pergunta a pasta na primeira execução** (e
+salva); no CLI, defina com `memo-cli config --dir <pasta>` (ou `MEMO_DIR`).
+
 ### Variáveis de ambiente
-- **`MEMO_DIR`** — aponta o cofre para outro diretório (padrão: pasta no OneDrive).
+- **`MEMO_DIR`** — aponta o cofre para uma pasta (sobrepõe a configurada).
 - **`MEMO_PASSWORD`** — senha-mestra para destravar sem prompt.
 
 ### Exit codes

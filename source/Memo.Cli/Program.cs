@@ -49,6 +49,7 @@ namespace Memo.Cli
                     case "guid": return Guid(args);
                     case "unlock": return Unlock(args);
                     case "lock": return Lock();
+                    case "config": return Config(args);
                     case "migrar": case "migrate": return Migrar();
                     case "version": case "--version": case "-v": return Versao();
                     default:
@@ -206,9 +207,28 @@ namespace Memo.Cli
             return Codigo.Ok;
         }
 
+        private static int Config(Args a)
+        {
+            if (a.TemValor("--dir", out var dir) && !string.IsNullOrWhiteSpace(dir))
+            {
+                var cfg = Configuracoes.Atual;
+                cfg.DiretorioDocumentos = dir.Trim();
+                cfg.Salvar();
+                Console.Error.WriteLine($"Pasta de documentos definida: {dir.Trim()}");
+                return Codigo.Ok;
+            }
+
+            var atual = MemoService.DiretorioConfigurado;
+            if (a.Formato() == Formato.Json) EscreverJson(new { dir = atual });
+            else Console.Out.WriteLine(atual ?? "(não configurada)");
+            return Codigo.Ok;
+        }
+
         private static int Unlock(Args a)
         {
-            var cofre = new Cofre(MemoService.DiretorioPadrao);
+            var dir = MemoService.DiretorioConfigurado;
+            if (dir == null) { Erro("Pasta não configurada. Use 'memo-cli config --dir <pasta>' ou MEMO_DIR."); return Codigo.Erro; }
+            var cofre = new Cofre(dir);
             if (cofre.TentarDestrancarPelaSessao()) { Console.Error.WriteLine("Já destrancado (sessão válida)."); return Codigo.Ok; }
 
             var senha = ObterSenha(a);
@@ -221,7 +241,9 @@ namespace Memo.Cli
 
         private static int Lock()
         {
-            new Cofre(MemoService.DiretorioPadrao).Trancar();
+            var dir = MemoService.DiretorioConfigurado;
+            if (dir == null) { Erro("Pasta não configurada."); return Codigo.Erro; }
+            new Cofre(dir).Trancar();
             Console.Error.WriteLine("Cofre trancado.");
             return Codigo.Ok;
         }
@@ -266,9 +288,16 @@ namespace Memo.Cli
             var env = Environment.GetEnvironmentVariable("MEMO_PASSWORD");
             if (!string.IsNullOrEmpty(env)) return env;
 
-            // Terminal interativo: pergunta com máscara.
-            if (!Console.IsInputRedirected)
-                return LerSenhaMascarada("Senha-mestra: ");
+            // Só pergunta a senha se o console for REALMENTE interativo (stdin e
+            // stdout não redirecionados). Quando chamado por outro processo (saída
+            // capturada), NÃO pergunta — senão travaria no ReadKey esperando uma
+            // tecla que nunca chega. Nesse caso devolve null → comando sai com
+            // código 2 (trancado) e o chamador trata.
+            if (!Console.IsInputRedirected && !Console.IsOutputRedirected)
+            {
+                try { return LerSenhaMascarada("Senha-mestra: "); }
+                catch { return null; } // sem console real
+            }
 
             return null;
         }
@@ -324,6 +353,7 @@ Comandos:
   guid                    Gera um GUID
   unlock / lock           Destranca (pede senha) / tranca o cofre
   migrar                  Recifra documentos antigos
+  config [--dir <pasta>]  Mostra/define a pasta dos documentos
   version                 Versão
 
 Saída:
@@ -357,7 +387,7 @@ Exit codes: 0 ok · 1 erro · 2 trancado · 3 não encontrado · 64 uso");
                     if (eq > 0) { _valores[t.Substring(0, eq)] = t.Substring(eq + 1); continue; }
 
                     // flags que consomem o próximo token
-                    if ((t == "--password" || t == "--value") && i + 1 < argv.Length)
+                    if ((t == "--password" || t == "--value" || t == "--dir") && i + 1 < argv.Length)
                     {
                         _valores[t] = argv[++i];
                         continue;

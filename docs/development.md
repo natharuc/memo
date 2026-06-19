@@ -44,10 +44,11 @@ dotnet run --project source/Memo -- set teste = 123
 
 Ou rode o binário direto: `source/Memo/bin/Debug/net8.0-windows/Memo.exe`.
 
-> ⚠️ **Cuidado ao rodar/testar**: o app real usa `MemoService.DiretorioPadrao`
-> (a pasta de documentos do usuário). Para experimentar sem tocar nos dados
-> reais, use `new MemoService("<diretório de teste>")` num projeto de teste, ou
-> ajuste o diretório. Veja as lições em [agent-guide.md](agent-guide.md).
+> ⚠️ **Cuidado ao rodar/testar**: sem `MEMO_DIR`, o app usa a pasta configurada
+> do usuário (e a **sessão** pode estar válida, ignorando `--password`!). Para
+> testar sem tocar nos dados reais, **defina `MEMO_DIR` para uma pasta temporária**
+> (ou use `new MemoService("<dir de teste>")`). Veja as lições em
+> [agent-guide.md](agent-guide.md).
 
 ## Publicação
 
@@ -129,7 +130,7 @@ sessões ou certificados.
 
 Não há projeto de teste versionado. Durante o desenvolvimento, valida-se com
 consoles descartáveis que referenciam `Memo.Service` e usam um **diretório
-temporário** (jamais o `DiretorioPadrao`). Um bom teste cobre: round-trip de
+temporário** (jamais a pasta real do usuário; use `MEMO_DIR`). Um bom teste cobre: round-trip de
 cifragem (inclusive Unicode), senha errada rejeitada, detecção de adulteração
 (GCM), leitura/migração do formato legado, e bloqueio de path-traversal.
 Adicionar um projeto xUnit é uma melhoria recomendada.

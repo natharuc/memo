@@ -41,8 +41,8 @@ Fachada única usada pela GUI e pela CLI. Cria um `Cofre` e um
 - `CopiarValor(doc)` — copia para o clipboard (via TextCopy).
 - `ProcessarGet(args)`, `ProcessarSet(args)` — entradas de linha de comando,
   retornam `ResultadoCli { Sucesso, Mensagem }`.
-- `DiretorioPadrao` — caminho do diretório de documentos (hardcoded; ver nota
-  abaixo).
+- `DiretorioConfigurado` — pasta dos documentos, resolvida por `MEMO_DIR` (env) →
+  `Configuracoes.DiretorioDocumentos`. Null se ainda não escolhida.
 
 ### `Cofre` — `source/Memo.Service/Seguranca/Cofre.cs`
 Estado e ciclo de vida do cofre. Mantém a chave-mestra em memória quando
@@ -89,7 +89,8 @@ Detalhes de comportamento em [ui.md](ui.md).
 
 `App.OnStartup` (`source/Memo/App.xaml.cs`):
 
-1. Cria `MemoService` (→ `Cofre` no `DiretorioPadrao`).
+1. Se não há pasta configurada (`DiretorioConfigurado == null`), pergunta ao
+   usuário (`EscolherPastaDocumentos`) e salva. Depois cria `MemoService`.
 2. `TentarDestrancarPelaSessao()`. Se falhar, abre `JanelaSenha` (criar ou
    destrancar). Cancelar → encerra.
 3. **Sem argumentos** → roda `service.Migrar()` (auto-reparo; mostra relatório
@@ -107,10 +108,8 @@ A chave vem de `PBKDF2(senha, salt do vault.json)`. Ver [security.md](security.m
 
 ## Notas / dívidas conhecidas
 
-- **`DiretorioPadrao` é hardcoded** em `MemoService.cs`
-  (`C:\Users\natha\OneDrive\Atalhos\memoApplication\documents`). É o principal
-  candidato a virar configuração. `MemoService(string diretorio)` já aceita um
-  diretório, então a mudança é pequena.
+- **Pasta dos documentos**: sem caminho fixo. Vem de `MEMO_DIR` ou de
+  `Configuracoes.DiretorioDocumentos`; a GUI pergunta na 1ª execução.
 - **`source/Memo.Service/Extensoes/StringExtensao.cs`** contém utilitários de
   string legados (`StringUtil`) que **não são usados** pelo app atual. Mantidos
   por inércia; podem ser removidos. Não confie neles (alguns têm bugs, ex.:

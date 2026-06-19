@@ -12,18 +12,28 @@ namespace Memo.Services
 {
     public class MemoService
     {
-        // Diretório do cofre. Pode ser sobrescrito pela variável de ambiente
-        // MEMO_DIR (útil para apontar o memo a outro cofre / automação).
-        public static string DiretorioPadrao =>
-            Environment.GetEnvironmentVariable("MEMO_DIR") is string d && d.Trim().Length > 0
-                ? d.Trim()
-                : @"C:\Users\natha\OneDrive\Atalhos\memoApplication\documents";
+        // Pasta do cofre, resolvida na ordem: variável de ambiente MEMO_DIR →
+        // preferência salva (Configuracoes.DiretorioDocumentos). Null se ainda não
+        // foi escolhida (não há mais caminho fixo no código).
+        public static string DiretorioConfigurado
+        {
+            get
+            {
+                var env = Environment.GetEnvironmentVariable("MEMO_DIR");
+                if (!string.IsNullOrWhiteSpace(env)) return env.Trim();
+
+                var cfg = Configuracoes.Atual.DiretorioDocumentos;
+                return string.IsNullOrWhiteSpace(cfg) ? null : cfg.Trim();
+            }
+        }
 
         private readonly Cofre _cofre;
         private readonly DocumentoRepository _repositorio;
         private readonly Clipboard _clipboard = new Clipboard();
 
-        public MemoService() : this(DiretorioPadrao)
+        public MemoService() : this(DiretorioConfigurado ?? throw new InvalidOperationException(
+            "Pasta de documentos não configurada. Abra o Memo para escolher, defina MEMO_DIR " +
+            "ou use 'memo-cli config --dir <pasta>'."))
         {
         }
 

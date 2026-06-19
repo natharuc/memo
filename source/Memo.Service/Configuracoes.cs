@@ -21,11 +21,36 @@ namespace Memo.Service
             "Memo", "config.json");
 
         private static Configuracoes _atual;
+        private static DateTime _carregadoEm;
 
-        /// <summary>Instância única carregada do disco (cria padrões se não existir).</summary>
-        public static Configuracoes Atual => _atual ?? (_atual = Carregar());
+        /// <summary>
+        /// Configuração atual. Recarrega do disco se o arquivo mudou (assim a GUI e o
+        /// memo-cli sempre veem a mesma config, mesmo alterada por outro processo).
+        /// </summary>
+        public static Configuracoes Atual
+        {
+            get
+            {
+                var mtime = MtimeArquivo();
+                if (_atual == null || mtime != _carregadoEm)
+                {
+                    _atual = Carregar();
+                    _carregadoEm = mtime;
+                }
+                return _atual;
+            }
+        }
+
+        private static DateTime MtimeArquivo()
+        {
+            try { return File.Exists(Caminho) ? File.GetLastWriteTimeUtc(Caminho) : DateTime.MinValue; }
+            catch { return DateTime.MinValue; }
+        }
 
         public string Tema { get; set; } = TemaEscuro;
+
+        /// <summary>Pasta onde ficam os documentos cifrados. Vazio = ainda não escolhida.</summary>
+        public string DiretorioDocumentos { get; set; }
 
         public int DuracaoSessaoMinutos { get; set; } = 15;
 
@@ -57,6 +82,7 @@ namespace Memo.Service
             Directory.CreateDirectory(Path.GetDirectoryName(Caminho));
             File.WriteAllText(Caminho, JsonConvert.SerializeObject(this, Formatting.Indented));
             _atual = this;
+            _carregadoEm = MtimeArquivo();
         }
     }
 }

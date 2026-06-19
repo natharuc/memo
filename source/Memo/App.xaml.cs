@@ -32,6 +32,15 @@ namespace Memo
             base.OnStartup(e);
 
             Tema.Aplicar(Configuracoes.Atual.Tema);
+
+            // Primeira execução: o Memo não sabe onde guardar os documentos.
+            // Pede ao usuário e salva a escolha.
+            if (MemoService.DiretorioConfigurado == null && !EscolherPastaDocumentos())
+            {
+                Shutdown();
+                return;
+            }
+
             _service = new MemoService();
 
             var args = e.Args;
@@ -156,6 +165,30 @@ namespace Memo
             if (_bandeja != null) { _bandeja.Visible = false; _bandeja.Dispose(); }
             _instancia?.Dispose();
             Shutdown();
+        }
+
+        /// <summary>Pede ao usuário a pasta dos documentos e salva. False se cancelar.</summary>
+        private static bool EscolherPastaDocumentos()
+        {
+            JanelaDialogo.Informar(null, "Bem-vindo ao Memo",
+                "Escolha a pasta onde o Memo vai guardar seus documentos cifrados.\n" +
+                "Dica: uma pasta sincronizada (ex.: OneDrive) deixa o cofre disponível em outros PCs.");
+
+            using (var dlg = new System.Windows.Forms.FolderBrowserDialog
+            {
+                Description = "Pasta dos documentos do Memo",
+                UseDescriptionForTitle = true,
+                ShowNewFolderButton = true
+            })
+            {
+                if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                    return false;
+
+                var cfg = Configuracoes.Atual;
+                cfg.DiretorioDocumentos = dlg.SelectedPath;
+                cfg.Salvar();
+                return true;
+            }
         }
 
         private static void EsperarProcessoSair(int pid, TimeSpan timeout)

@@ -228,8 +228,10 @@ namespace Memo
 
         private void TickSessao()
         {
-            var restante = _service.Cofre.TempoRestante;
-            if (restante == null || restante.Value <= TimeSpan.Zero)
+            // A sessão vem do DISCO (estado compartilhado com o memo-cli). Se o CLI
+            // trancou (apagou a sessão) ou o prazo venceu, a tela tranca também.
+            var expira = _service.Cofre.ExpiraEmDiscoUtc();
+            if (expira == null || expira.Value <= DateTime.UtcNow)
             {
                 Bloquear();
                 return;
@@ -239,14 +241,14 @@ namespace Memo
 
         private void AtualizarBadge()
         {
-            var restante = _service.Cofre.TempoRestante;
-            if (restante == null)
+            var expira = _service.Cofre.ExpiraEmDiscoUtc();
+            if (expira == null)
             {
                 botaoSessao.Content = "🔒 bloqueado";
                 return;
             }
 
-            var ts = restante.Value;
+            var ts = expira.Value - DateTime.UtcNow;
             if (ts < TimeSpan.Zero) ts = TimeSpan.Zero;
 
             string texto;

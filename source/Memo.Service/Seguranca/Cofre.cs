@@ -53,6 +53,26 @@ namespace Memo.Service.Seguranca
         /// <summary>Tempo até pedir a senha de novo, ou null se trancado (pode ser negativo).</summary>
         public TimeSpan? TempoRestante => _chave != null ? (TimeSpan?)(_expiraEm - DateTime.UtcNow) : null;
 
+        /// <summary>
+        /// Expiração da sessão lida do DISCO (UTC), ou null se não há sessão.
+        /// É o estado compartilhado entre processos: se o CLI faz "lock" (apaga o
+        /// arquivo de sessão), isto vira null e a GUI percebe na hora.
+        /// </summary>
+        public DateTime? ExpiraEmDiscoUtc()
+        {
+            try
+            {
+                if (!File.Exists(_arquivoSessao)) return null;
+                var protegido = File.ReadAllBytes(_arquivoSessao);
+                var dados = ProtectedData.Unprotect(protegido, null, DataProtectionScope.CurrentUser);
+                return new DateTime(BitConverter.ToInt64(dados, 0), DateTimeKind.Utc);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private class Config
         {
             public int Versao { get; set; } = 1;
