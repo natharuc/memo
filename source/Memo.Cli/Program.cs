@@ -29,6 +29,10 @@ namespace Memo.Cli
         {
             Console.OutputEncoding = Encoding.UTF8;
 
+            // Segurança: remove do histórico do Win+R os "memo set ..." (segredo
+            // em texto puro) — inclusive o comando que acabou de nos lançar.
+            HistoricoExecutar.LimparComandosSet();
+
             var args = new Args(argv);
             if (args.Comando == null || args.Comando == "help" || args.Tem("--help") || args.Tem("-h"))
             {
@@ -129,6 +133,7 @@ namespace Memo.Cli
             if (!Destrancar(svc.Cofre, a)) return Codigo.Trancado;
 
             svc.Salvar(new Documento(key, value));
+            HistoricoExecutar.LimparComandosSet(); // reforço: tira o set do histórico do Win+R
             if (a.Formato() == Formato.Json) EscreverJson(new { key, saved = true });
             else Console.Error.WriteLine($"\"{key}\" salvo");
             return Codigo.Ok;

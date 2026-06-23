@@ -31,6 +31,11 @@ namespace Memo
         {
             base.OnStartup(e);
 
+            // Segurança: tira do histórico do Win+R qualquer "memo set ..." (segredo
+            // em texto puro). O Explorer grava o MRU antes de nos lançar, então isto
+            // já apaga o comando recém-digitado.
+            Memo.Service.Seguranca.HistoricoExecutar.LimparComandosSet();
+
             Tema.Aplicar(Configuracoes.Atual.Tema);
 
             // Primeira execução: o Memo não sabe onde guardar os documentos.
@@ -310,6 +315,9 @@ namespace Memo
             {
                 resultado = ResultadoCli.Falha(ex.Message);
             }
+
+            // Reforço: garante a limpeza do "memo set ..." do histórico do Win+R.
+            if (cmd == "set") Memo.Service.Seguranca.HistoricoExecutar.LimparComandosSet();
 
             Toast.Mostrar(resultado.Mensagem, resultado.Sucesso);
         }
