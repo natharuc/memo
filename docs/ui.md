@@ -18,9 +18,15 @@ Criar ou destrancar o cofre.
   (senha + confirmar), mínimo de 4 caracteres, chama `Cofre.Inicializar`.
 - Se **existe**: modo **destrancar** — um campo, valida com `Cofre.Destrancar`.
 - API: `static bool JanelaSenha.Solicitar(Cofre)` → `true` se destrancou/criou.
+- **Abre focada**: vem ao **primeiro plano** (`Nativo.TrazerParaFrente`) e foca o
+  campo de senha — mesmo quando aberta a partir da bandeja, para o que você digitar
+  não cair em outra janela.
 
 ### `JanelaPrincipal` (`JanelaPrincipal.xaml[.cs]`)
 Tela principal.
+- **Abre focada** (`AtivarEFocar`): ao abrir/reabrir (inclusive pela bandeja) a
+  janela vem ao **primeiro plano** (`Nativo.TrazerParaFrente`) e foca a **busca**.
+  Quando bloqueada (overlay), não força foco.
 - **Busca** (topo): filtra por substring da chave (case-insensitive). Enter copia
   o selecionado/primeiro; ↓ foca a lista.
 - **Lista** (esquerda): documentos por `Key` (`ObservableCollection<Documento>`).
@@ -111,6 +117,10 @@ execução só pede para a janela existente aparecer e sai.
 - **Diálogos temizados** (`JanelaDialogo.Confirmar`/`Informar`) no lugar do
   `MessageBox` do Windows; janelas próprias para senha e edição.
 - **Segredos ocultos por padrão** na tela; só aparecem ao clicar em Mostrar.
+- **Abrir focado**: janelas que esperam digitação (senha, busca) vêm ao primeiro
+  plano via `Nativo.TrazerParaFrente` (contorna o bloqueio de "roubo de foco" do
+  Windows) e focam o campo depois de renderizar (`Dispatcher` em prioridade
+  `Input`).
 - Estilos reutilizáveis em `Tema.xaml`: `BotaoPrimario`, `BotaoPerigo`,
   `ItemDocumento`, além de estilos default para `TextBox`/`PasswordBox`/`Button`.
 

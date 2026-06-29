@@ -38,7 +38,35 @@ namespace Memo
             _timerSessao.Start();
             AtualizarBadge();
 
-            Loaded += (_, __) => campoBusca.Focus();
+            Loaded += (_, __) => FocarBusca();
+        }
+
+        /// <summary>
+        /// Mostra a janela, traz ao primeiro plano (prioridade do Windows) e foca o
+        /// campo de busca. Chamada ao abrir/reabrir pela bandeja ou ao destrancar.
+        /// </summary>
+        public void AtivarEFocar()
+        {
+            if (!IsVisible) Show();
+            if (WindowState == WindowState.Minimized) WindowState = WindowState.Normal;
+
+            Nativo.TrazerParaFrente(this);
+            FocarBusca();
+        }
+
+        /// <summary>
+        /// Foca o campo de busca de forma confiável (depois da janela renderizada).
+        /// Quando o cofre está bloqueado (overlay), não há o que focar.
+        /// </summary>
+        private void FocarBusca()
+        {
+            if (overlayBloqueio.Visibility == Visibility.Visible) return;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                campoBusca.Focus();
+                Keyboard.Focus(campoBusca);
+            }), DispatcherPriority.Input);
         }
 
         private void Recarregar(string selecionarKey = null)
@@ -296,7 +324,7 @@ namespace Memo
             Recarregar();
             _timerSessao.Start();
             AtualizarBadge();
-            campoBusca.Focus();
+            FocarBusca();
         }
     }
 }

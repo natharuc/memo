@@ -93,9 +93,7 @@ namespace Memo
         {
             if (_janela != null && _janela.IsLoaded)
             {
-                if (!_janela.IsVisible) _janela.Show();
-                if (_janela.WindowState == WindowState.Minimized) _janela.WindowState = WindowState.Normal;
-                _janela.Activate();
+                _janela.AtivarEFocar();
                 return;
             }
 
@@ -131,6 +129,7 @@ namespace Memo
                 }
             };
             _janela.Show();
+            _janela.AtivarEFocar();
 
             VerificarAtualizacaoEmBackground(_janela);
         }

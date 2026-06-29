@@ -1,4 +1,7 @@
+using System;
 using System.Windows;
+using System.Windows.Input;
+using System.Windows.Threading;
 using Memo.Service.Seguranca;
 
 namespace Memo
@@ -25,7 +28,24 @@ namespace Memo
                 botaoConfirmar.Content = "Criar";
             }
 
-            Loaded += (_, __) => campoSenha.Focus();
+            // Ao abrir (inclusive a partir da bandeja), garante prioridade do Windows
+            // e foco no campo de senha — senão o que o usuário digita iria pra outra
+            // janela.
+            Loaded += (_, __) =>
+            {
+                Nativo.TrazerParaFrente(this);
+                FocarSenha();
+            };
+        }
+
+        /// <summary>Foca o campo de senha de forma confiável (após a janela renderizar).</summary>
+        private void FocarSenha()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                campoSenha.Focus();
+                Keyboard.Focus(campoSenha);
+            }), DispatcherPriority.Input);
         }
 
         /// <summary>Mostra a janela e devolve true se o cofre foi destrancado/criado.</summary>
