@@ -16,19 +16,16 @@ namespace Memo.Service.Repositorio
     public class DocumentoRepository
     {
         private const string ArquivoConfig = "vault.json";
-        private const string PastaDeletados = "deletados";
         private const string PastaFalhas = "falhas";
 
         private readonly Cofre _cofre;
         private readonly string _diretorio;
-        private readonly string _diretorioDeletados;
         private readonly string _diretorioFalhas;
 
         public DocumentoRepository(Cofre cofre, string diretorio)
         {
             _cofre = cofre;
             _diretorio = diretorio;
-            _diretorioDeletados = Path.Combine(diretorio, PastaDeletados);
             _diretorioFalhas = Path.Combine(diretorio, PastaFalhas);
             Directory.CreateDirectory(_diretorio);
         }
@@ -50,7 +47,7 @@ namespace Memo.Service.Repositorio
 
         private IEnumerable<string> ArquivosDocumentos()
         {
-            // Apenas arquivos do diretório raiz (subpastas deletados/falhas ficam de fora),
+            // Apenas arquivos do diretório raiz (a subpasta "falhas" fica de fora),
             // ignorando o vault.json.
             return Directory.GetFiles(_diretorio)
                 .Where(a => !string.Equals(Path.GetFileName(a), ArquivoConfig, StringComparison.OrdinalIgnoreCase));
@@ -105,13 +102,16 @@ namespace Memo.Service.Repositorio
             File.WriteAllText(caminho, _cofre.Cifrar(json));
         }
 
+        /// <summary>
+        /// Exclusão DEFINITIVA: remove o arquivo de vez (não há lixeira). A
+        /// confirmação na UI deixa explícito que a ação é irreversível.
+        /// </summary>
         public void Deletar(string key)
         {
             var caminho = CaminhoDe(key);
             if (!File.Exists(caminho)) return;
 
-            Directory.CreateDirectory(_diretorioDeletados);
-            MoverSobrescrevendo(caminho, Path.Combine(_diretorioDeletados, SanitizarChave(key)));
+            File.Delete(caminho);
         }
 
         /// <summary>

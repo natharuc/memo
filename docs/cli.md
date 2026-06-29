@@ -34,7 +34,7 @@ App console que "cospe" o resultado no stdout. Implementado em
 memo-cli get <chave> [--json|--text|--bytes|--copy]
 memo-cli set <chave> <valor>        # ou <chave>=<valor>, --value <v>, --stdin
 memo-cli list [--json]
-memo-cli del <chave>
+memo-cli del <chave>                # exclusão DEFINITIVA (sem lixeira)
 memo-cli remember <texto/quando>    # mesmas regras do "memo remember"
 memo-cli pass [<chave>] [--json]
 memo-cli guid [--json]
@@ -46,7 +46,7 @@ memo-cli version | help
 
 ### Cofre trancado (automação)
 Comandos que leem/gravam segredos precisam do cofre destrancado. A ordem é:
-1. **sessão** válida (DPAPI, 15 min) — reaproveitada entre processos;
+1. **sessão** válida (DPAPI, 15 min por padrão) — reaproveitada entre processos;
 2. `--password <senha>` ou variável **`MEMO_PASSWORD`**;
 3. **prompt** mascarado, se rodando num terminal interativo.
 
@@ -110,6 +110,8 @@ memo set so a chave            (cria com valor vazio)
   (ambos com `Trim`). Sem `=`, tudo vira chave e o valor fica vazio
   (`MemoService.ProcessarSet`).
 - A chave é sanitizada (sem `/`, `\`, `..`).
+- Se você rodou o `set` pelo **Win+R**, o comando (com o segredo em texto puro) é
+  apagado do histórico do "Executar" automaticamente — ver [security.md](security.md).
 
 ### `memo new`
 Abre a janela de **novo documento** (modo gráfico). Ao salvar, grava o documento e

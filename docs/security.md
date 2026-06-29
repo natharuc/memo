@@ -113,12 +113,28 @@ A chave do documento vira nome de arquivo. `DocumentoRepository.SanitizarChave`
 rejeita qualquer chave cujo `Path.GetFileName` difira dela (bloqueia `..`, `/`,
 `\`). Toda leitura/escrita/exclusão passa por aí.
 
+## Histórico do "Executar" (Win+R / RunMRU)
+
+Rodar `memo set <chave> = <segredo>` pelo Win+R faz o Windows gravar a linha
+inteira — **com o segredo em texto puro** — no registro
+(`HKCU\...\Explorer\RunMRU`), e ela voltaria no autocomplete. Para mitigar,
+`HistoricoExecutar.LimparComandosSet` apaga do RunMRU as entradas cujo comando é
+`memo set ...` / `memo-cli set ...`. Roda no startup da GUI e do `memo-cli` (o
+Explorer grava o MRU **antes** de nos lançar, então o comando recém-digitado já é
+removido) e de novo após cada `set`. É **best-effort**: qualquer falha é ignorada
+para nunca quebrar o app.
+
+> Cobre só o histórico do Win+R. Segredos digitados num terminal podem ficar no
+> histórico do shell (PowerShell/cmd) — fora do alcance do Memo. Em scripts,
+> prefira `--stdin` ou `MEMO_PASSWORD`.
+
 ## Modelo de ameaças (o que protege e o que não)
 
 **Protege contra:**
 - Leitura dos arquivos por quem não tem a senha (cifra autenticada + KDF forte).
 - Adulteração dos arquivos (GCM detecta).
 - Vazamento via sincronização na nuvem — o conteúdo no provedor é só ciphertext.
+- Segredo vazando no histórico do Win+R (limpeza automática do RunMRU; ver acima).
 
 **Não protege contra:**
 - Senha-mestra fraca (PBKDF2 ajuda, mas senha boa é responsabilidade do usuário).

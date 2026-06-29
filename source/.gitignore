@@ -21,8 +21,11 @@ packages/
 # Resultados de teste
 [Tt]est[Rr]esult*/
 
-# Segredos / artefatos locais (NUNCA versionar)
+# Segredos / artefatos locais (NUNCA versionar).
+# A pasta-cofre é escolhida pelo usuário e normalmente fica FORA do repo
+# (ex.: OneDrive); estes padrões são uma rede de segurança caso um cofre
+# (ou um MEMO_DIR de teste) acabe dentro do repositório.
 *.pfx
-documents/
 vault.json
 session*.bin
+falhas/

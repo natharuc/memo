@@ -27,7 +27,8 @@ Tela principal.
 - **Painel de detalhes** (direita): mostra a chave e o valor. O valor começa
   **oculto** (`••••••`); botão **Mostrar/Ocultar** alterna.
 - **Ações**: **Copiar** (clipboard), **Mostrar/Ocultar**, **Editar**, **Excluir**
-  (com confirmação via `MessageBox` nativo), **+ Novo**.
+  (confirmação via `JanelaDialogo`, avisando que é **definitiva/irreversível** —
+  não há lixeira), **+ Novo**.
 - Duplo-clique ou Enter na lista = copiar; Delete = excluir.
 - **Badge de sessão** (`botaoSessao`, topo): contagem regressiva até pedir a senha
   de novo (`Cofre.TempoRestante`), atualizada por um `DispatcherTimer` de 1s. Fica
@@ -59,17 +60,56 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
 - `static bool JanelaConfiguracoes.Mostrar(owner)` → `true` se o usuário salvou
   (a `JanelaPrincipal` usa isso para re-ancorar a sessão com a nova duração).
 
+### `JanelaGerarSenha` (`JanelaGerarSenha.xaml[.cs]`)
+Gerador de senha: comprimento e tipos de caractere (maiúsculas, minúsculas,
+números, símbolos). As preferências são salvas em `Configuracoes.Senha` e
+**reusadas pelo comando `pass`** (GUI e `memo-cli`). Aberta pelo botão **Gerar
+senha** nas janelas de novo/editar documento.
+
+### `JanelaLembrete` (`JanelaLembrete.xaml[.cs]`)
+Popup de um lembrete que **venceu**: mostra o texto e oferece **Concluir** ou
+**Adiar** (soneca, N min). Disparado pelo agendador da bandeja (ver
+[Bandeja e lembretes](#bandeja-e-lembretes)).
+
+### `JanelaLembretes` (`JanelaLembretes.xaml[.cs]`)
+Lista dos lembretes ativos, aberta pelo menu da bandeja ("Lembretes…") ou pelo
+botão na `JanelaPrincipal`. Permite ver/remover lembretes.
+
+### `JanelaAtualizacao` (`JanelaAtualizacao.xaml[.cs]`)
+Aparece quando o auto-update encontra uma versão mais nova: mostra a versão e
+oferece baixar/instalar (ver [development.md](development.md) → Auto-update).
+
+### `JanelaDialogo` (`JanelaDialogo.xaml[.cs]`)
+Diálogo temizado que substitui o `MessageBox` do Windows.
+`static bool JanelaDialogo.Confirmar(owner, titulo, msg, perigo, aviso)` (Sim/Não;
+`aviso` opcional mostra um **rótulo de alerta destacado** em cor de perigo, com
+ícone ⚠ — usado na exclusão para deixar claro que é **irreversível**) e
+`static void JanelaDialogo.Informar(owner, titulo, msg)` (só OK).
+
 ### `Toast` (`Toast.xaml[.cs]`)
 Aviso flutuante no canto inferior direito, com fade-in/out e auto-fechamento
-(~2,2 s). Usado no **modo CLI** para mostrar o resultado. `static void
+(~2,2 s). Usado no **modo CLI** da GUI para mostrar o resultado. `static void
 Toast.Mostrar(mensagem, sucesso)`.
+
+## Bandeja e lembretes
+
+Sem argumentos (ou com `--tray`), o `Memo.exe` roda como app de **bandeja**
+(ícone na área de notificação), em **instância única** (`InstanciaUnica`): uma 2ª
+execução só pede para a janela existente aparecer e sai.
+
+- **Menu da bandeja**: *Abrir Memo*, *Lembretes…*, *Sair*. Duplo-clique abre a
+  janela. Fechar a `JanelaPrincipal` no **X** apenas esconde na bandeja (o app
+  segue rodando para disparar lembretes); para encerrar de vez, use *Sair*.
+- **Agendador**: um `DispatcherTimer` (~20 s) verifica os lembretes **devidos** e
+  abre uma `JanelaLembrete` (+ balão na bandeja e som via `Som.cs`). Detalhes do
+  modelo em [architecture.md](architecture.md) → Lembretes.
 
 ## Padrões de UI
 
 - **Sem MVVM**: code-behind direto, simples. A `JanelaPrincipal` mantém a lista
   completa e uma `ObservableCollection` filtrada.
-- **Diálogos nativos** para confirmação (`MessageBox`); janelas próprias
-  (temizadas) para senha e edição.
+- **Diálogos temizados** (`JanelaDialogo.Confirmar`/`Informar`) no lugar do
+  `MessageBox` do Windows; janelas próprias para senha e edição.
 - **Segredos ocultos por padrão** na tela; só aparecem ao clicar em Mostrar.
 - Estilos reutilizáveis em `Tema.xaml`: `BotaoPrimario`, `BotaoPerigo`,
   `ItemDocumento`, além de estilos default para `TextBox`/`PasswordBox`/`Button`.

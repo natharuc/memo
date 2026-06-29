@@ -19,7 +19,7 @@
 - `System.Security.Cryptography.ProtectedData` — DPAPI para o cache de sessão.
 - `TextCopy` — clipboard.
 
-`Memo` referencia `Memo.Service` via `ProjectReference`.
+`Memo` e `Memo.Cli` referenciam `Memo.Service` via `ProjectReference`.
 
 ## Build
 
@@ -123,8 +123,10 @@ GitHub Actions**. O botão de download aponta para `releases/latest`.
 ## `.gitignore` e segredos
 
 `source/.gitignore` exclui `bin/`, `obj/`, `*.user`, `*.pfx`, e também
-`documents/`, `vault.json`, `session*.bin`. **Nunca** versione cofres, salts,
-sessões ou certificados.
+`vault.json`, `session*.bin` e `falhas/`. **Nunca** versione cofres, salts,
+sessões ou certificados. A pasta-cofre é escolhida pelo usuário e normalmente fica
+**fora** do repositório (ex.: OneDrive); esses padrões são uma rede de segurança
+caso um cofre (ou um `MEMO_DIR` de teste) acabe dentro do repo.
 
 ## Testes
 

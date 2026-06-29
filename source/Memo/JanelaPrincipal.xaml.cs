@@ -214,7 +214,8 @@ namespace Memo
             if (doc == null) return;
 
             if (!JanelaDialogo.Confirmar(this, "Confirmar exclusão",
-                    $"Excluir \"{doc.Key}\"?", perigo: true))
+                    $"Excluir \"{doc.Key}\"?", perigo: true,
+                    aviso: "Atenção: esta ação é irreversível."))
                 return;
 
             _service.Deletar(doc);

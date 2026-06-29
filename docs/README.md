@@ -10,7 +10,7 @@ que vão dar manutenção no código.
 | [agent-guide.md](agent-guide.md) | **Comece aqui se você é um agente de IA.** Mapa do código, como fazer mudanças comuns, invariantes que não podem ser quebradas e lições do incidente de perda de dados. |
 | [architecture.md](architecture.md) | Visão geral, componentes, fluxo de dados e camadas. |
 | [security.md](security.md) | Criptografia, formatos de arquivo (vault.json, documentos, sessão), modelo de ameaças e o formato legado. |
-| [cli.md](cli.md) | Referência da linha de comando (`get`, `set`, `migrar`). |
+| [cli.md](cli.md) | Linha de comando: o `memo-cli` (console scriptável, exit codes) e a GUI em modo CLI. |
 | [ui.md](ui.md) | A interface WPF: janelas, comportamento e tema. |
 | [development.md](development.md) | Build, execução, publicação, dependências e convenções de código. |
 
@@ -29,3 +29,5 @@ biblioteca `Memo.Service`.
 - **Sessão**: cache temporário da chave-mestra para não pedir a senha a cada uso.
 - **Formato legado**: o esquema de criptografia antigo (AES-128-CBC com chave
   fixa), lido apenas para migração.
+- **Lembrete**: aviso em linguagem natural (**não é segredo**), disparado pelo app
+  na bandeja. Guardado em `lembretes.json`.

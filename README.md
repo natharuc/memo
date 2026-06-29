@@ -51,9 +51,12 @@ Esse modelo file-based é proposital — é o diferencial do Memo, não um acide
 ```
 /                 (este README + docs/)
 docs/             Documentação completa (ver docs/README.md)
+assets/           Ícones e logos
+site/             Landing page (GitHub Pages)
 source/           Código-fonte
   Memo.slnx         Solution
-  Memo/             App WPF (.NET 8) + entrada de linha de comando
+  Memo/             App WPF (.NET 8); também age como CLI quando recebe args
+  Memo.Cli/         CLI console scriptável (memo-cli.exe) — stdout + exit codes
   Memo.Service/     Núcleo: cofre, criptografia e repositório
 ```
 

@@ -6,9 +6,10 @@ produtivo e, principalmente, para **não destruir dados do usuário**.
 ## O que é, em 30 segundos
 
 Cofre de segredos **file-based**: cada segredo é um arquivo cifrado
-(AES-256-GCM) num diretório; a chave vem de uma senha-mestra (PBKDF2). Dois
-projetos: `source/Memo` (WPF + CLI) e `source/Memo.Service` (núcleo). A UI só
-chama `MemoService`. Plataforma: Windows, .NET 8.
+(AES-256-GCM) num diretório; a chave vem de uma senha-mestra (PBKDF2). Três
+projetos: `source/Memo` (WPF + bandeja, também age como CLI), `source/Memo.Cli`
+(CLI console scriptável) e `source/Memo.Service` (núcleo). Os front-ends só
+chamam `MemoService`. Plataforma: Windows, .NET 8.
 
 ## Mapa do código (onde mexer)
 
@@ -17,11 +18,13 @@ chama `MemoService`. Plataforma: Windows, .NET 8.
 | Mudar criptografia / formato de arquivo | `Memo.Service/Seguranca/CryptoCofre.cs` |
 | Mudar senha-mestra / sessão / vault.json | `Memo.Service/Seguranca/Cofre.cs` |
 | Mudar leitura/escrita/migração de documentos | `Memo.Service/Repositorio/DocumentoRepository.cs` |
-| Adicionar uma operação de negócio ou comando CLI | `Memo.Service/MemoService.cs` + `Memo/App.xaml.cs` |
-| Mudar o roteamento de inicialização | `Memo/App.xaml.cs` (`OnStartup`) |
+| Adicionar uma operação de negócio | `Memo.Service/MemoService.cs` |
+| Adicionar/alterar um comando da CLI | `Memo.Cli/Program.cs` (console) **e** `Memo/App.xaml.cs` (GUI) |
+| Mexer nos lembretes (parser/persistência) | `Memo.Service/Lembretes/*` |
+| Mudar o roteamento de inicialização / bandeja | `Memo/App.xaml.cs` (`OnStartup`) |
 | Mexer na tela principal | `Memo/JanelaPrincipal.xaml[.cs]` |
 | Telas de senha / edição / toast | `Memo/JanelaSenha.*`, `JanelaEditar.*`, `Toast.*` |
-| Tema / cores / estilos | `Memo/Tema.xaml` |
+| Tema (estilos) / cores | `Memo/Tema.xaml` (estilos) + `PaletaEscura.xaml`/`PaletaClara.xaml` (cores); troca em `Memo/Tema.cs` |
 
 Detalhes em [architecture.md](architecture.md), [security.md](security.md),
 [cli.md](cli.md), [ui.md](ui.md).
@@ -80,11 +83,14 @@ Correções já aplicadas (invariantes 3 e 4 acima): sessão validada
 
 ## Como fazer mudanças comuns
 
-### Adicionar um comando de CLI (ex.: `memo del <chave>`)
-1. Em `MemoService`, adicione um método `ProcessarDel(args)` retornando
-   `ResultadoCli`.
-2. Em `App.ExecutarLinhaDeComando`, adicione o `else if (acao == "del")`.
-3. Atualize [cli.md](cli.md).
+### Adicionar um comando de CLI (ex.: `memo arquivar <chave>`)
+1. Se for lógica de negócio, coloque em `MemoService` (método retornando
+   `ResultadoCli`) para os dois front-ends reusarem.
+2. **Console** (`memo-cli`): adicione um `case` no `switch` de `Program.Main` e o
+   método correspondente, com o **exit code** certo (`Codigo.*`).
+3. **GUI** (`Memo.exe <args>`): adicione o ramo em `App.ExecutarComando`
+   (mostra um `Toast`).
+4. Atualize [cli.md](cli.md) **e** este guia.
 
 ### Pasta dos documentos (sem caminho fixo)
 Resolvida por `MemoService.DiretorioConfigurado`: `MEMO_DIR` (env) → senão
@@ -99,8 +105,12 @@ forma atômica o suficiente (escreve o novo antes de apagar o velho). Hoje
 `JanelaEditar` trava a chave na edição justamente por isso.
 
 ### Mexer no tema
-Edite `Memo/Tema.xaml`. As cores são `Color`/`SolidColorBrush` nomeados
-(`CorFundo`, `CorPainel`, `CorDestaque`, …). Reutilize estilos existentes.
+**Estilos** ficam em `Memo/Tema.xaml`; **cores** em `PaletaEscura.xaml` e
+`PaletaClara.xaml` (mescladas em `App.xaml`). Os estilos referenciam as cores por
+**`DynamicResource`** (`CorFundo`, `CorPainel`, `CorDestaque`, …), então
+`Tema.Aplicar(...)` (em `Memo/Tema.cs`) troca a paleta em runtime. Para uma cor
+nova, declare-a nas **duas** paletas. Reutilize estilos existentes. Ver
+[ui.md](ui.md).
 
 ## Build e teste rápido
 
@@ -115,11 +125,15 @@ adulteração / legado. Ver [development.md](development.md) → Testes.
 
 ## Convenções
 
+- **Documentação primeiro.** Comece pela documentação (`docs/`) antes de mexer no
+  código e **atualize-a na mesma alteração** sempre que mudar comportamento,
+  formato de arquivo, fluxo ou comandos. Ver [CLAUDE.md](../CLAUDE.md) /
+  [AGENTS.md](../AGENTS.md).
 - Código e nomes em **português**. Mantenha.
 - `Memo.Service` **não** depende de WPF — não traga UI para lá.
 - UI sem MVVM (code-behind simples).
-- Segredos: nunca logar `Value`; nunca versionar `documents/`, `vault.json`,
-  `session*.bin`, `*.pfx`.
+- Segredos: nunca logar `Value`; nunca versionar `vault.json`, `session*.bin`,
+  `falhas/`, `*.pfx`.
 
 ## Estado conhecido / pendências
 
@@ -129,4 +143,7 @@ adulteração / legado. Ver [development.md](development.md) → Testes.
   (alguns métodos têm bugs); pode ser removido.
 - Sem limpeza automática do clipboard após `get` (possível melhoria de
   segurança).
-- CLI não define exit codes por sucesso/erro.
+- O **`memo-cli`** já define exit codes por sucesso/erro; a **GUI em modo CLI**
+  (`Memo.exe <args>`) não — ela só mostra um `Toast`.
+- A subpasta `deletados/` **não é mais criada** (exclusão virou definitiva); pode
+  haver pastas `deletados/` antigas em cofres já existentes, sem uso pelo app.
