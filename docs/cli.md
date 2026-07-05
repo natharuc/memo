@@ -36,6 +36,7 @@ memo-cli set <chave> <valor>        # ou <chave>=<valor>, --value <v>, --stdin
 memo-cli list [--json]
 memo-cli del <chave>                # exclusão DEFINITIVA (sem lixeira)
 memo-cli remember <texto/quando>    # mesmas regras do "memo remember"
+memo-cli notify [canal] [-t <titulo>] <mensagem>   # telegram|email; sem canal = todos habilitados
 memo-cli pass [<chave>] [--json]
 memo-cli guid [--json]
 memo-cli unlock | lock
@@ -174,6 +175,25 @@ Regras (em [ParserLembrete](../source/Memo.Service/Lembretes/ParserLembrete.cs))
 
 > O lembrete é gravado no `lembretes.json`; quem dispara é o app na bandeja. Se
 > não houver instância na bandeja rodando, ele só aparece quando o app abrir.
+
+### `memo notify [<canal>] [-t <titulo>] <mensagem>`
+Envia uma notificação para os **canais configurados** (Telegram e/ou e-mail).
+Não pede a senha-mestra — usa credenciais próprias, cifradas por DPAPI
+(ver [security.md](security.md)). Alias: `notificar`.
+
+```
+memo notify produção no ar                 # todos os canais habilitados
+memo notify telegram deploy concluído      # só o Telegram
+memo notify email backup finalizado        # só o e-mail
+memo notify -t "Deploy" produção no ar      # com título/assunto
+```
+
+- **Canal** (opcional, primeiro token): `telegram` ou `email`. Sem canal, envia a
+  todos os habilitados.
+- **Título** (opcional): `-t`/`--titulo` seguido de um argumento (use aspas se tiver
+  espaço). Vira o assunto do e-mail e o cabeçalho da mensagem do Telegram. Padrão: `Memo`.
+- Os canais são configurados em **Configurações → Notificações**
+  (`MemoService`/`NotificacaoService`). Sem nenhum canal habilitado, mostra aviso.
 
 ### `memo migrar`
 Recifra todos os documentos no formato atual e move para `falhas/` os que não

@@ -12,6 +12,7 @@ memo pass cofre banco            # gera a senha, salva em "cofre banco" e copia
 memo guid                        # gera um GUID e copia
 memo new                         # abre a janela de novo documento
 memo remember pagar boleto 9h tomorrow   # cria um lembrete (linguagem natural)
+memo notify -t "Deploy" produção no ar   # notifica nos canais configurados (Telegram/e-mail)
 memo lock                        # tranca o cofre (próximo acesso pede a senha)
 memo unlock                      # destranca pedindo a senha
 memo                             # abre a interface gráfica
@@ -51,6 +52,7 @@ Esse modelo file-based é proposital — é o diferencial do Memo, não um acide
 ```
 /                 (este README + docs/)
 docs/             Documentação completa (ver docs/README.md)
+skills/           Agent Skills para operar o Memo via memo-cli (ver skills/README.md)
 assets/           Ícones e logos
 site/             Landing page (GitHub Pages)
 source/           Código-fonte

@@ -1,7 +1,7 @@
 <Window x:Class="Memo.JanelaConfiguracoes"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Configurações" Width="480" SizeToContent="Height"
+        Title="Configurações" Width="560" MinHeight="520" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         FontFamily="Segoe UI" Background="{DynamicResource CorFundo}">
     <Grid Margin="24">
@@ -129,6 +129,80 @@
                         </StackPanel>
                     </ScrollViewer>
                 </StackPanel>
+            </TabItem>
+
+            <!-- ===== Notificações ===== -->
+            <TabItem Header="Notificações">
+                <DockPanel>
+                    <!-- Status do teste, compartilhado pelos canais -->
+                    <TextBlock x:Name="notifStatus" DockPanel.Dock="Bottom" TextWrapping="Wrap" FontSize="12"
+                               Margin="0,12,0,0" Foreground="{DynamicResource CorTextoFraco}"
+                               Visibility="Collapsed" />
+
+                    <TabControl>
+
+                        <!-- Telegram -->
+                        <TabItem Header="Telegram">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="420">
+                                <StackPanel Margin="0,4,8,0">
+                                    <CheckBox x:Name="tgHabilitado" Content="Habilitar Telegram"
+                                              FontWeight="SemiBold" Margin="0,0,0,14" />
+                                    <TextBlock Text="BOT TOKEN" Foreground="{DynamicResource CorTextoFraco}"
+                                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <TextBox x:Name="tgToken" Margin="0,0,0,12" />
+                                    <TextBlock Text="CHAT ID" Foreground="{DynamicResource CorTextoFraco}"
+                                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <TextBox x:Name="tgChatId" Margin="0,0,0,14" />
+                                    <Button Content="Testar Telegram" HorizontalAlignment="Left"
+                                            Click="TestarTelegram_Click" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                        <!-- E-mail -->
+                        <TabItem Header="E-mail">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="420">
+                                <StackPanel Margin="0,4,8,0">
+                                    <CheckBox x:Name="emHabilitado" Content="Habilitar e-mail (SMTP)"
+                                              FontWeight="SemiBold" Margin="0,0,0,14" />
+                                    <Grid Margin="0,0,0,12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="90" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="SERVIDOR SMTP" Foreground="{DynamicResource CorTextoFraco}"
+                                                       FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                            <TextBox x:Name="emServidor" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="PORTA" Foreground="{DynamicResource CorTextoFraco}"
+                                                       FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                            <TextBox x:Name="emPorta" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <CheckBox x:Name="emSsl" Content="Usar SSL/TLS" Margin="0,0,0,12" />
+                                    <TextBlock Text="USUÁRIO" Foreground="{DynamicResource CorTextoFraco}"
+                                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <TextBox x:Name="emUsuario" Margin="0,0,0,12" />
+                                    <TextBlock Text="SENHA" Foreground="{DynamicResource CorTextoFraco}"
+                                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <PasswordBox x:Name="emSenha" Margin="0,0,0,12" />
+                                    <TextBlock Text="DE (REMETENTE)" Foreground="{DynamicResource CorTextoFraco}"
+                                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <TextBox x:Name="emDe" Margin="0,0,0,12" />
+                                    <TextBlock Text="PARA (DESTINATÁRIO)" Foreground="{DynamicResource CorTextoFraco}"
+                                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                                    <TextBox x:Name="emPara" Margin="0,0,0,14" />
+                                    <Button Content="Testar e-mail" HorizontalAlignment="Left"
+                                            Click="TestarEmail_Click" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </TabItem>
+
+                    </TabControl>
+                </DockPanel>
             </TabItem>
 
         </TabControl>

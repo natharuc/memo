@@ -1,6 +1,7 @@
 using Memo.Service;
 using Memo.Service.Atualizacao;
 using Memo.Service.Lembretes;
+using Memo.Service.Notificacoes;
 using Memo.Service.Repositorio;
 using Memo.Services;
 using System;
@@ -283,6 +284,14 @@ namespace Memo
             if (cmd == "remember" || cmd == "lembrar" || cmd == "lembrete")
             {
                 var r = _service.ProcessarRemember(args);
+                Toast.Mostrar(r.Mensagem, r.Sucesso);
+                return;
+            }
+
+            // Notificações usam credenciais próprias (DPAPI), não o cofre.
+            if (cmd == "notify" || cmd == "notificar")
+            {
+                var r = new NotificacaoService().Notificar(args);
                 Toast.Mostrar(r.Mensagem, r.Sucesso);
                 return;
             }

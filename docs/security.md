@@ -89,6 +89,18 @@ compartilham sessão.
   **bloqueia** (limpa a tela, `Trancar()`, pede a senha). Clicar no badge pede a
   senha e renova (`RenovarSessao`).
 
+## Credenciais de notificação
+
+Arquivo: `%LOCALAPPDATA%\Memo\notificacoes.bin` (`NotificacaoService`). Guarda os
+canais de notificação — incluindo **segredos** (bot token do Telegram, senha SMTP).
+
+- Conteúdo: JSON da `NotificacaoConfig` **cifrado com DPAPI** (`ProtectedData.Protect`,
+  escopo `CurrentUser`) — só o mesmo usuário Windows consegue ler.
+- **Local, não sincroniza** (fica fora da pasta do cofre) e **não é versionado**.
+- Independente do cofre: `memo notify` lê essas credenciais **sem** exigir a
+  senha-mestra (o cofre pode estar trancado).
+- Nunca logar `NotificacaoConfig` nem os argumentos de envio.
+
 ## Formato legado (somente leitura)
 
 Esquema antigo, mantido só para migrar documentos antigos:

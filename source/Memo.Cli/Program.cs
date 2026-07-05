@@ -6,6 +6,7 @@ using System.Text.Json;
 using Memo.Service;
 using Memo.Service.Classes;
 using Memo.Service.Lembretes;
+using Memo.Service.Notificacoes;
 using Memo.Service.Seguranca;
 using Memo.Services;
 
@@ -49,6 +50,7 @@ namespace Memo.Cli
                     case "list": case "ls": return List(args);
                     case "del": case "rm": case "delete": return Del(args);
                     case "remember": case "lembrar": case "lembrete": return Remember(args);
+                    case "notify": case "notificar": return Notify(args);
                     case "pass": return Pass(args);
                     case "guid": return Guid(args);
                     case "unlock": return Unlock(args);
@@ -183,6 +185,39 @@ namespace Memo.Cli
             else
                 Console.Error.WriteLine($"Lembrete \"{p.Texto}\" criado");
             return Codigo.Ok;
+        }
+
+        private static int Notify(Args a)
+        {
+            var pos = a.Positionals();
+
+            // Canal opcional no primeiro posicional.
+            string canal = null;
+            if (pos.Count > 0 &&
+                (pos[0].Equals("telegram", StringComparison.OrdinalIgnoreCase) ||
+                 pos[0].Equals("email", StringComparison.OrdinalIgnoreCase)))
+            {
+                canal = pos[0];
+                pos = pos.Skip(1).ToList();
+            }
+
+            var titulo = a.TemValor("--titulo", out var t) && !string.IsNullOrWhiteSpace(t) ? t : "Memo";
+            var mensagem = string.Join(" ", pos);
+            if (string.IsNullOrWhiteSpace(mensagem))
+            {
+                Erro("Uso: memo-cli notify [telegram|email] [-t <titulo>] <mensagem>");
+                return Codigo.Uso;
+            }
+
+            // Notificação usa credenciais próprias (DPAPI): não precisa do cofre.
+            var r = new NotificacaoService().Enviar(canal, titulo, mensagem);
+
+            if (a.Formato() == Formato.Json)
+                EscreverJson(new { ok = r.Sucesso, message = r.Mensagem });
+            else
+                Console.Error.WriteLine(r.Mensagem);
+
+            return r.Sucesso ? Codigo.Ok : Codigo.Erro;
         }
 
         private static int Pass(Args a)
@@ -354,6 +389,7 @@ Comandos:
   list                    Lista as chaves
   del <chave>             Exclui um segredo
   remember <texto/quando> Cria um lembrete (ex.: ""ver tarefa 10:00 tomorrow"")
+  notify [canal] <msg>    Notifica nos canais (telegram/email); -t <titulo> opcional
   pass [chave]            Gera uma senha (e salva, se der uma chave)
   guid                    Gera um GUID
   unlock / lock           Destranca (pede senha) / tranca o cofre
@@ -392,12 +428,16 @@ Exit codes: 0 ok · 1 erro · 2 trancado · 3 não encontrado · 64 uso");
                     if (eq > 0) { _valores[t.Substring(0, eq)] = t.Substring(eq + 1); continue; }
 
                     // flags que consomem o próximo token
-                    if ((t == "--password" || t == "--value" || t == "--dir") && i + 1 < argv.Length)
+                    if ((t == "--password" || t == "--value" || t == "--dir" || t == "--titulo") && i + 1 < argv.Length)
                     {
                         _valores[t] = argv[++i];
                         continue;
                     }
                     _flags.Add(t);
+                }
+                else if (t == "-t" && i + 1 < argv.Length)
+                {
+                    _valores["--titulo"] = argv[++i]; // -t é atalho de --titulo
                 }
                 else if (t.StartsWith("-") && t.Length > 1 && !char.IsDigit(t[1]))
                 {

@@ -31,3 +31,6 @@ biblioteca `Memo.Service`.
   fixa), lido apenas para migração.
 - **Lembrete**: aviso em linguagem natural (**não é segredo**), disparado pelo app
   na bandeja. Guardado em `lembretes.json`.
+- **Canal de notificação**: destino externo (Telegram ou e-mail/SMTP) para onde o
+  `memo notify` envia mensagens. Configurado na aba Notificações; credenciais
+  cifradas por DPAPI em `notificacoes.bin`.

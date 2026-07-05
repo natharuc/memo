@@ -63,6 +63,11 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
 - **Atalhos**: texto didático explicando cada comando de CLI (`get`, `set`, `new`,
   `pass`, `guid`, `lock`, `unlock`, `migrar`). É só conteúdo estático — para mudar
   a explicação, edite o XAML; a referência completa fica em [cli.md](cli.md).
+- **Notificações**: configura os canais **Telegram** (bot token + chat id) e
+  **e-mail/SMTP** (servidor, porta, SSL, usuário, senha, de, para), cada um com um
+  botão **Testar** (envia fora da thread de UI via `Task.Run`). Persistido cifrado
+  por DPAPI pelo `NotificacaoService` (não vai para `Configuracoes`). Reusado pelo
+  comando `memo notify`.
 - `static bool JanelaConfiguracoes.Mostrar(owner)` → `true` se o usuário salvou
   (a `JanelaPrincipal` usa isso para re-ancorar a sessão com a nova duração).
 
