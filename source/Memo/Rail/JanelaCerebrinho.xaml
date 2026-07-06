@@ -1,0 +1,70 @@
+<Window x:Class="Memo.Rail.JanelaCerebrinho"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        SizeToContent="WidthAndHeight" WindowStartupLocation="Manual"
+        Topmost="True" ShowInTaskbar="False" ShowActivated="False"
+        FontFamily="Segoe UI" Title="Memo Rail">
+    <Grid Margin="14">
+
+        <!-- Estágio 1: a bolha — só o cerebrinho, pulsando na posição do mouse. -->
+        <Border x:Name="bolha" Width="60" Height="60" CornerRadius="30"
+                Background="{DynamicResource CorPainel}"
+                BorderBrush="{DynamicResource CorDestaque}" BorderThickness="2"
+                Cursor="Hand" ToolTip="Memo Rail — clique"
+                MouseLeftButtonUp="Bolha_Click"
+                RenderTransformOrigin="0.5,0.5">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="0" Opacity="0.55" />
+            </Border.Effect>
+            <Border.RenderTransform>
+                <ScaleTransform x:Name="escalaBolha" ScaleX="1" ScaleY="1" />
+            </Border.RenderTransform>
+            <TextBlock Text="🧠" FontSize="26" Foreground="{DynamicResource CorDestaque}"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+
+        <!-- Estágio 2: o cartão — mensagem e botões, aberto ao clicar na bolha. -->
+        <Border x:Name="cartao" Visibility="Collapsed" CornerRadius="14" MaxWidth="360" Padding="18"
+                Background="{DynamicResource CorPainel}"
+                BorderBrush="{DynamicResource CorBorda}" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="0" Opacity="0.5" />
+            </Border.Effect>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="🧠" FontSize="34" Margin="0,0,14,0"
+                           Foreground="{DynamicResource CorDestaque}" VerticalAlignment="Top" />
+
+                <StackPanel Grid.Column="1">
+                    <TextBlock x:Name="textoTitulo" Foreground="{DynamicResource CorDestaque}"
+                               FontSize="13" FontWeight="SemiBold" />
+                    <TextBlock x:Name="textoMensagem" Foreground="{DynamicResource CorTexto}"
+                               FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"
+                               Margin="0,4,0,14" />
+
+                    <!-- Botões do modo check-in -->
+                    <WrapPanel x:Name="painelCheckIn" Visibility="Collapsed">
+                        <Button Content="✔ Concluí" Style="{StaticResource BotaoPrimario}"
+                                Click="Conclui_Click" Margin="0,0,8,6" />
+                        <Button Content="Ainda nela" Click="AindaNela_Click" Margin="0,0,8,6" />
+                        <Button Content="+15 min" Click="Adiar_Click" Margin="0,0,8,6" />
+                        <Button x:Name="botaoAcao" Content="🔗 Abrir" Visibility="Collapsed"
+                                Click="Acao_Click" Margin="0,0,0,6" />
+                    </WrapPanel>
+
+                    <!-- Botões do modo desvio -->
+                    <WrapPanel x:Name="painelDesvio" Visibility="Collapsed">
+                        <Button Content="Voltar pro trilho" Style="{StaticResource BotaoPrimario}"
+                                Click="VoltarTrilho_Click" Margin="0,0,8,6" />
+                        <Button Content="Estou trabalhando" Click="Trabalhando_Click" Margin="0,0,0,6" />
+                    </WrapPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

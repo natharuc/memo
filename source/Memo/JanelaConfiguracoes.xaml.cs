@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,10 @@ namespace Memo
 
         private readonly NotificacaoService _notificacoes = new NotificacaoService();
 
+        private int _railCheckIn;
+        private int _railDesvio;
+        private int _railCooldown;
+
         public JanelaConfiguracoes()
         {
             InitializeComponent();
@@ -32,6 +37,7 @@ namespace Memo
             Destacar(painelDuracao, _minutosSelecionado.ToString(CultureInfo.InvariantCulture));
 
             CarregarNotificacoes();
+            CarregarRail();
         }
 
         /// <summary>Mostra as configurações. Retorna true se o usuário salvou.</summary>
@@ -61,6 +67,7 @@ namespace Memo
             var cfg = Configuracoes.Atual;
             cfg.Tema = _temaSelecionado;
             cfg.DuracaoSessaoMinutos = _minutosSelecionado;
+            SalvarRail(cfg);
             cfg.Salvar();
 
             _notificacoes.Salvar(LerNotificacoes());
@@ -68,6 +75,65 @@ namespace Memo
             Tema.Aplicar(_temaSelecionado);
             _salvou = true;
             Close();
+        }
+
+        // ----------------- Memo Rail -----------------
+
+        private void CarregarRail()
+        {
+            var r = Configuracoes.Atual.Rail ?? new Service.Rail.RailConfig();
+
+            railHabilitado.IsChecked = r.Habilitado;
+            railPerguntar.IsChecked = r.PerguntarMissao;
+            railInicio.Text = r.HoraInicio;
+            railFim.Text = r.HoraFim;
+            railDiasUteis.IsChecked = r.SomenteDiasUteis;
+            railDistracoes.Text = string.Join(Environment.NewLine, r.Distracoes ?? new System.Collections.Generic.List<string>());
+
+            _railCheckIn = r.CheckInMinutos;
+            _railDesvio = r.DesvioMinutos;
+            _railCooldown = r.CooldownMinutos;
+
+            Destacar(painelRailCheckIn, _railCheckIn.ToString(CultureInfo.InvariantCulture));
+            Destacar(painelRailDesvio, _railDesvio.ToString(CultureInfo.InvariantCulture));
+            Destacar(painelRailCooldown, _railCooldown.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private void SalvarRail(Configuracoes cfg)
+        {
+            var r = cfg.Rail ?? (cfg.Rail = new Service.Rail.RailConfig());
+
+            r.Habilitado = railHabilitado.IsChecked == true;
+            r.PerguntarMissao = railPerguntar.IsChecked == true;
+            r.CheckInMinutos = _railCheckIn;
+            r.DesvioMinutos = _railDesvio;
+            r.CooldownMinutos = _railCooldown;
+            r.HoraInicio = railInicio.Text?.Trim();
+            r.HoraFim = railFim.Text?.Trim();
+            r.SomenteDiasUteis = railDiasUteis.IsChecked == true;
+            r.Distracoes = railDistracoes.Text
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.Trim())
+                .Where(t => t.Length > 0)
+                .ToList();
+        }
+
+        private void RailCheckIn_Click(object sender, RoutedEventArgs e)
+        {
+            _railCheckIn = int.Parse((string)((Button)sender).Tag, CultureInfo.InvariantCulture);
+            Destacar(painelRailCheckIn, _railCheckIn.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private void RailDesvio_Click(object sender, RoutedEventArgs e)
+        {
+            _railDesvio = int.Parse((string)((Button)sender).Tag, CultureInfo.InvariantCulture);
+            Destacar(painelRailDesvio, _railDesvio.ToString(CultureInfo.InvariantCulture));
+        }
+
+        private void RailCooldown_Click(object sender, RoutedEventArgs e)
+        {
+            _railCooldown = int.Parse((string)((Button)sender).Tag, CultureInfo.InvariantCulture);
+            Destacar(painelRailCooldown, _railCooldown.ToString(CultureInfo.InvariantCulture));
         }
 
         // ----------------- Notificações -----------------

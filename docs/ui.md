@@ -68,8 +68,32 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
   botão **Testar** (envia fora da thread de UI via `Task.Run`). Persistido cifrado
   por DPAPI pelo `NotificacaoService` (não vai para `Configuracoes`). Reusado pelo
   comando `memo notify`.
+- **Memo Rail**: habilitar, intervalos (check-in/desvio/cooldown), horário de
+  atuação e lista de distrações do assistente de foco (→ `Configuracoes.Rail`;
+  ver [rail.md](rail.md)).
 - `static bool JanelaConfiguracoes.Mostrar(owner)` → `true` se o usuário salvou
   (a `JanelaPrincipal` usa isso para re-ancorar a sessão com a nova duração).
+
+### `JanelaMissao` (`Rail/JanelaMissao.xaml[.cs]`)
+Checklist da missão do dia (Memo Rail). Aberta pelo botão **🚂** na barra da
+`JanelaPrincipal`, pelo menu da bandeja (*Missão do dia…*), pelo comando
+`memo rail` ou automaticamente de manhã (se habilitado).
+Cada tarefa é um **card** (montado no code-behind em `CriarCard`): check de
+concluído, título (tachado quando feito), linha de detalhes (nº, host do link,
+hora de conclusão) e botões próprios — **🔗 Abrir** (ação da tarefa) e **✕**
+(remover). Botão **Testar** no cabeçalho mostra uma prévia do cerebrinho com a
+tarefa atual. Adicionar com Enter; "Recomeçar o dia" apaga a missão. Persiste
+via `RailService` a cada mudança. Não exige o cofre.
+
+### `JanelaCerebrinho` (`Rail/JanelaCerebrinho.xaml[.cs]`)
+O widget 🧠 do Rail, em **dois estágios**: primeiro uma **bolha redonda** com o
+cerebrinho roxo **pulsando, centrada na posição do mouse** (`PosicionarNoMouse`,
+com conversão de DPI e limite à área útil); clicar expande para o **cartão** com
+a pergunta e os botões. `Topmost`, **`ShowActivated=False`** (não rouba o foco do
+teclado), auto-fecha em ~30s se ignorada. Dois modos (fábricas estáticas):
+`CheckIn(tarefa, link)` — **✔ Concluí / Ainda nela / +15 min / 🔗 Abrir** — e
+`Desvio(distracao, tarefa, link)` — **Voltar pro trilho / Estou trabalhando**.
+Quem decide quando abrir é o `RailCoordenador` (ver [rail.md](rail.md)).
 
 ### `JanelaGerarSenha` (`JanelaGerarSenha.xaml[.cs]`)
 Gerador de senha: comprimento e tipos de caractere (maiúsculas, minúsculas,

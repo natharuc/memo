@@ -10,6 +10,7 @@ completas, exemplos e códigos de saída.
 | [memo-passwords](memo-passwords/SKILL.md) | Gerar senhas fortes (e opcionalmente salvá-las como segredo). |
 | [memo-reminders](memo-reminders/SKILL.md) | Criar lembretes em linguagem natural. |
 | [memo-notify](memo-notify/SKILL.md) | Enviar notificações para Telegram / e-mail. |
+| [memo-rail](memo-rail/SKILL.md) | Gerenciar a missão do dia (checklist de foco do Memo Rail). |
 
 ## O que é o Memo (resumo para agentes)
 
@@ -33,7 +34,7 @@ arquivo cifrado em **AES-256-GCM**, com a chave derivada de uma **senha-mestra**
   salva (`memo-cli config --dir <pasta>`). Sem isso, comandos que tocam o cofre falham.
 - **Destravar**: comandos que leem/gravam segredos precisam do cofre destrancado —
   via **sessão** (cache DPAPI, ~15 min), `--password`/`MEMO_PASSWORD` ou
-  `memo-cli unlock`. `remember` e `notify` **não** precisam do cofre.
+  `memo-cli unlock`. `remember`, `notify` e `rail` **não** precisam do cofre.
 - **Saída**: `--text` (padrão, valor cru no stdout), `--json`, `--bytes`, `--copy`.
   Mensagens de status vão para o **stderr**; o **valor** vai para o **stdout**.
 - **Códigos de saída**: `0` ok · `1` erro · `2` trancado · `3` não encontrado · `64` uso.

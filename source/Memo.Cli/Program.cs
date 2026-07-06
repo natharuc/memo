@@ -51,6 +51,7 @@ namespace Memo.Cli
                     case "del": case "rm": case "delete": return Del(args);
                     case "remember": case "lembrar": case "lembrete": return Remember(args);
                     case "notify": case "notificar": return Notify(args);
+                    case "rail": case "missao": return RailCmd(args);
                     case "pass": return Pass(args);
                     case "guid": return Guid(args);
                     case "unlock": return Unlock(args);
@@ -184,6 +185,74 @@ namespace Memo.Cli
                 EscreverJson(new { text = p.Texto, next = p.Proximo, repeatMinutes = p.RepetirMinutos });
             else
                 Console.Error.WriteLine($"Lembrete \"{p.Texto}\" criado");
+            return Codigo.Ok;
+        }
+
+        private static int RailCmd(Args a)
+        {
+            // Missão do dia (Memo Rail). Não é segredo: não exige o cofre.
+            var rail = new Memo.Service.Rail.RailService();
+            var pos = a.Positionals();
+            var sub = pos.Count > 0 ? pos[0].ToLowerInvariant() : "status";
+
+            if (sub == "add")
+            {
+                var texto = string.Join(" ", pos.Skip(1)).Trim();
+                a.TemValor("--link", out var link); // URL no texto também vira link (auto)
+                var item = rail.Adicionar(texto, link);
+                if (item == null) { Erro("Uso: memo-cli rail add <tarefa> [--link <url>]"); return Codigo.Uso; }
+
+                if (a.Formato() == Formato.Json) EscreverJson(new { added = item.Texto, link = item.Link });
+                else Console.Error.WriteLine($"\"{item.Texto}\" adicionada à missão de hoje" +
+                                             (item.Link != null ? $" (🔗 {item.Link})" : ""));
+                return Codigo.Ok;
+            }
+
+            if (sub == "done")
+            {
+                if (pos.Count < 2 || !int.TryParse(pos[1], out var numero))
+                { Erro("Uso: memo-cli rail done <numero>"); return Codigo.Uso; }
+
+                if (!rail.Concluir(numero)) { Erro($"Tarefa {numero} não encontrada."); return Codigo.NaoEncontrado; }
+
+                if (a.Formato() == Formato.Json) EscreverJson(new { done = numero });
+                else Console.Error.WriteLine($"Tarefa {numero} concluída");
+                return Codigo.Ok;
+            }
+
+            if (sub == "clear")
+            {
+                rail.LimparHoje();
+                Console.Error.WriteLine("Missão de hoje apagada.");
+                return Codigo.Ok;
+            }
+
+            // status (padrão) / list
+            var missao = rail.MissaoDeHoje();
+            if (a.Formato() == Formato.Json)
+            {
+                EscreverJson(new
+                {
+                    date = missao?.Data,
+                    items = (missao?.Itens ?? new List<Memo.Service.Rail.ItemMissao>())
+                        .Select((i, n) => new { n = n + 1, text = i.Texto, done = i.Concluido, link = i.Link })
+                });
+                return Codigo.Ok;
+            }
+
+            if (missao == null || missao.Itens.Count == 0)
+            {
+                Console.Out.WriteLine("(sem missão hoje — use: memo-cli rail add <tarefa>)");
+                return Codigo.Ok;
+            }
+
+            for (var i = 0; i < missao.Itens.Count; i++)
+            {
+                var item = missao.Itens[i];
+                Console.Out.WriteLine($"[{(item.Concluido ? "x" : " ")}] {i + 1}. {item.Texto}" +
+                                      (item.Link != null ? $"  → {item.Link}" : ""));
+            }
+            Console.Error.WriteLine($"{missao.Concluidos}/{missao.Itens.Count} concluída(s)");
             return Codigo.Ok;
         }
 
@@ -390,6 +459,7 @@ Comandos:
   del <chave>             Exclui um segredo
   remember <texto/quando> Cria um lembrete (ex.: ""ver tarefa 10:00 tomorrow"")
   notify [canal] <msg>    Notifica nos canais (telegram/email); -t <titulo> opcional
+  rail [status|add <tarefa>|done <n>|clear]   Missão do dia (Memo Rail)
   pass [chave]            Gera uma senha (e salva, se der uma chave)
   guid                    Gera um GUID
   unlock / lock           Destranca (pede senha) / tranca o cofre
@@ -428,7 +498,7 @@ Exit codes: 0 ok · 1 erro · 2 trancado · 3 não encontrado · 64 uso");
                     if (eq > 0) { _valores[t.Substring(0, eq)] = t.Substring(eq + 1); continue; }
 
                     // flags que consomem o próximo token
-                    if ((t == "--password" || t == "--value" || t == "--dir" || t == "--titulo") && i + 1 < argv.Length)
+                    if ((t == "--password" || t == "--value" || t == "--dir" || t == "--titulo" || t == "--link") && i + 1 < argv.Length)
                     {
                         _valores[t] = argv[++i];
                         continue;

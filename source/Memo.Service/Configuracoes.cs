@@ -57,6 +57,9 @@ namespace Memo.Service
         /// <summary>Preferências do gerador de senha (reusadas na UI e na CLI).</summary>
         public OpcoesSenha Senha { get; set; } = new OpcoesSenha();
 
+        /// <summary>Preferências do Memo Rail (assistente de foco).</summary>
+        public Rail.RailConfig Rail { get; set; } = new Rail.RailConfig();
+
         [JsonIgnore]
         public TimeSpan DuracaoSessao =>
             TimeSpan.FromMinutes(Math.Min(MinutosMaximo, Math.Max(MinutosMinimo, DuracaoSessaoMinutos)));

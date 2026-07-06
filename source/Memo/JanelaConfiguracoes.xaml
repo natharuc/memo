@@ -114,6 +114,13 @@
 
                             <StackPanel Margin="0,0,0,12">
                                 <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo rail [add &lt;tarefa&gt; | done &lt;n&gt;]" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Missão do dia do Memo Rail: sem nada abre o checklist; add adiciona tarefa; done conclui." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
                                            Text="memo migrar" />
                                 <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
                                            Text="Reorganiza/atualiza os documentos antigos para o formato de criptografia atual." />
@@ -203,6 +210,66 @@
 
                     </TabControl>
                 </DockPanel>
+            </TabItem>
+
+            <!-- ===== Memo Rail ===== -->
+            <TabItem Header="Memo Rail">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="420">
+                    <StackPanel Margin="0,4,8,0">
+                        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                                   Margin="0,0,0,12"
+                                   Text="Assistente de foco: pergunta a missão do dia, faz check-ins periódicos e avisa quando detecta distração. Tudo é analisado localmente e nada é gravado — só o título da janela ativa é lido, em memória." />
+
+                        <CheckBox x:Name="railHabilitado" Content="Habilitar Memo Rail"
+                                  FontWeight="SemiBold" Margin="0,0,0,10" />
+                        <CheckBox x:Name="railPerguntar" Content="Perguntar a missão do dia ao iniciar"
+                                  Margin="0,0,0,16" />
+
+                        <TextBlock Text="CHECK-IN A CADA" Foreground="{DynamicResource CorTextoFraco}"
+                                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <WrapPanel x:Name="painelRailCheckIn" Margin="0,0,0,12">
+                            <Button Content="25 min" Tag="25" Click="RailCheckIn_Click" Margin="0,0,8,8" />
+                            <Button Content="45 min" Tag="45" Click="RailCheckIn_Click" Margin="0,0,8,8" />
+                            <Button Content="1 hora" Tag="60" Click="RailCheckIn_Click" Margin="0,0,8,8" />
+                            <Button Content="1h30" Tag="90" Click="RailCheckIn_Click" Margin="0,0,8,8" />
+                        </WrapPanel>
+
+                        <TextBlock Text="AVISAR DESVIO APÓS" Foreground="{DynamicResource CorTextoFraco}"
+                                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <WrapPanel x:Name="painelRailDesvio" Margin="0,0,0,12">
+                            <Button Content="3 min" Tag="3" Click="RailDesvio_Click" Margin="0,0,8,8" />
+                            <Button Content="5 min" Tag="5" Click="RailDesvio_Click" Margin="0,0,8,8" />
+                            <Button Content="10 min" Tag="10" Click="RailDesvio_Click" Margin="0,0,8,8" />
+                        </WrapPanel>
+
+                        <TextBlock Text="SILÊNCIO MÍNIMO ENTRE AVISOS" Foreground="{DynamicResource CorTextoFraco}"
+                                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <WrapPanel x:Name="painelRailCooldown" Margin="0,0,0,12">
+                            <Button Content="5 min" Tag="5" Click="RailCooldown_Click" Margin="0,0,8,8" />
+                            <Button Content="10 min" Tag="10" Click="RailCooldown_Click" Margin="0,0,8,8" />
+                            <Button Content="20 min" Tag="20" Click="RailCooldown_Click" Margin="0,0,8,8" />
+                        </WrapPanel>
+
+                        <TextBlock Text="HORÁRIO DE ATUAÇÃO" Foreground="{DynamicResource CorTextoFraco}"
+                                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBox x:Name="railInicio" Width="70" />
+                            <TextBlock Text="até" Foreground="{DynamicResource CorTextoFraco}"
+                                       VerticalAlignment="Center" Margin="10,0" />
+                            <TextBox x:Name="railFim" Width="70" />
+                        </StackPanel>
+                        <CheckBox x:Name="railDiasUteis" Content="Somente dias úteis" Margin="0,0,0,16" />
+
+                        <TextBlock Text="DISTRAÇÕES (UMA POR LINHA)" Foreground="{DynamicResource CorTextoFraco}"
+                                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                                   Margin="0,0,0,8"
+                                   Text="Se o título da janela ativa (ou o nome do programa) contiver um destes termos, conta como distração." />
+                        <TextBox x:Name="railDistracoes" MinHeight="90" MaxHeight="140"
+                                 AcceptsReturn="True" TextWrapping="NoWrap"
+                                 VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="13" />
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
         </TabControl>

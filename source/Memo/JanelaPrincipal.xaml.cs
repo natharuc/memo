@@ -215,6 +215,8 @@ namespace Memo
             new JanelaLembretes(new Memo.Service.Lembretes.LembreteService()) { Owner = this }.ShowDialog();
         }
 
+        private void Rail_Click(object sender, RoutedEventArgs e) => Rail.JanelaMissao.Mostrar(this);
+
         private void Novo_Click(object sender, RoutedEventArgs e)
         {
             var novo = JanelaEditar.Criar(this);

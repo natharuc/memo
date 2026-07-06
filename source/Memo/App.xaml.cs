@@ -28,6 +28,10 @@ namespace Memo
         private readonly LembreteService _lembretes = new LembreteService();
         private readonly HashSet<string> _popupsAbertos = new HashSet<string>();
 
+        // Memo Rail (assistente de foco), dirigido pelo mesmo agendador.
+        private readonly Rail.RailCoordenador _railCoordenador =
+            new Rail.RailCoordenador(TimeSpan.FromSeconds(20));
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -149,6 +153,7 @@ namespace Memo
 
             var menu = new System.Windows.Forms.ContextMenuStrip();
             menu.Items.Add("Abrir Memo", null, (_, __) => Dispatcher.Invoke(MostrarJanela));
+            menu.Items.Add("Missão do dia…", IconeCerebro(), (_, __) => Dispatcher.Invoke(() => Rail.JanelaMissao.Mostrar()));
             menu.Items.Add("Lembretes…", null, (_, __) => Dispatcher.Invoke(AbrirLembretes));
             menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
             menu.Items.Add("Sair", null, (_, __) => Dispatcher.Invoke(Encerrar));
@@ -209,6 +214,29 @@ namespace Memo
             }
         }
 
+        /// <summary>
+        /// 🧠 na cor de destaque para o menu da bandeja. No GDI o emoji é um glifo
+        /// monocromático, então dá para "pintá-lo" com o pincel.
+        /// </summary>
+        private static System.Drawing.Image IconeCerebro()
+        {
+            var bmp = new System.Drawing.Bitmap(20, 20);
+            try
+            {
+                using var g = System.Drawing.Graphics.FromImage(bmp);
+                using var fonte = new System.Drawing.Font("Segoe UI Emoji", 11f);
+                using var roxo = new System.Drawing.SolidBrush(
+                    System.Drawing.Color.FromArgb(0x7A, 0x89, 0xFF)); // CorDestaque
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                g.DrawString("🧠", fonte, roxo, -2, 0);
+            }
+            catch
+            {
+                // Sem a fonte de emoji: fica sem ícone mesmo.
+            }
+            return bmp;
+        }
+
         private static System.Drawing.Icon ObterIcone()
         {
             // Carrega o memo.ico empacotado e escolhe o frame do tamanho do ícone de bandeja.
@@ -229,7 +257,11 @@ namespace Memo
         private void IniciarAgendador()
         {
             _agendador = new DispatcherTimer { Interval = TimeSpan.FromSeconds(20) };
-            _agendador.Tick += (_, __) => VerificarLembretes();
+            _agendador.Tick += (_, __) =>
+            {
+                VerificarLembretes();
+                _railCoordenador.Tick();
+            };
             _agendador.Start();
             VerificarLembretes(); // pega atrasados logo ao iniciar
         }
@@ -296,6 +328,13 @@ namespace Memo
                 return;
             }
 
+            // Missão do dia (Memo Rail) não é segredo: não exige o cofre.
+            if (cmd == "rail" || cmd == "missao" || cmd == "missão")
+            {
+                ExecutarRail(args);
+                return;
+            }
+
             // Demais comandos precisam do cofre aberto.
             if (!cofre.TentarDestrancarPelaSessao() && !JanelaSenha.Solicitar(cofre))
             {
@@ -328,6 +367,44 @@ namespace Memo
             if (cmd == "set") Memo.Service.Seguranca.HistoricoExecutar.LimparComandosSet();
 
             Toast.Mostrar(resultado.Mensagem, resultado.Sucesso);
+        }
+
+        private void ExecutarRail(string[] args)
+        {
+            // Sem subcomando: abre o checklist da missão do dia.
+            if (args.Length == 1)
+            {
+                Rail.JanelaMissao.Mostrar();
+                return;
+            }
+
+            var rail = new Memo.Service.Rail.RailService();
+            var sub = args[1].ToLowerInvariant();
+
+            if (sub == "add")
+            {
+                var texto = string.Join(" ", args.Skip(2)).Trim();
+                var item = rail.Adicionar(texto);
+                Toast.Mostrar(item != null ? $"Missão: \"{item.Texto}\" adicionada" : "Informe a tarefa", item != null);
+                return;
+            }
+
+            if (sub == "done" && args.Length >= 3 && int.TryParse(args[2], out var numero))
+            {
+                var ok = rail.Concluir(numero);
+                var proxima = rail.MissaoDeHoje()?.ProximaPendente();
+                Toast.Mostrar(!ok ? $"Tarefa {numero} não encontrada"
+                    : proxima == null ? "Missão do dia concluída! 🎉"
+                    : $"Boa! Próxima: \"{proxima.Texto}\"", ok);
+                return;
+            }
+
+            // status (padrão)
+            var missao = rail.MissaoDeHoje();
+            Toast.Mostrar(missao == null || missao.Itens.Count == 0
+                ? "Sem missão hoje. Use \"memo rail\" para definir."
+                : $"Missão: {missao.Concluidos}/{missao.Itens.Count} · atual: \"{missao.ProximaPendente()?.Texto ?? "—"}\"",
+                true);
         }
 
         private void ExecutarNovo()

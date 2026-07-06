@@ -13,6 +13,7 @@ memo guid                        # gera um GUID e copia
 memo new                         # abre a janela de novo documento
 memo remember pagar boleto 9h tomorrow   # cria um lembrete (linguagem natural)
 memo notify -t "Deploy" produção no ar   # notifica nos canais configurados (Telegram/e-mail)
+memo rail add revisar PR 42      # adiciona à missão do dia (assistente de foco)
 memo lock                        # tranca o cofre (próximo acesso pede a senha)
 memo unlock                      # destranca pedindo a senha
 memo                             # abre a interface gráfica
@@ -46,6 +47,9 @@ Esse modelo file-based é proposital — é o diferencial do Memo, não um acide
   documentos em formato antigo.
 - **Atualização automática**: verifica novas releases no GitHub, valida o
   download por SHA256 e troca o executável com um clique.
+- **Memo Rail**: assistente de foco (TDAH-friendly) — missão do dia em checklist,
+  check-ins periódicos e aviso gentil quando detecta distração. 100% local
+  (ver [docs/rail.md](docs/rail.md)).
 
 ## Estrutura do repositório
 

@@ -12,6 +12,7 @@ que vão dar manutenção no código.
 | [security.md](security.md) | Criptografia, formatos de arquivo (vault.json, documentos, sessão), modelo de ameaças e o formato legado. |
 | [cli.md](cli.md) | Linha de comando: o `memo-cli` (console scriptável, exit codes) e a GUI em modo CLI. |
 | [ui.md](ui.md) | A interface WPF: janelas, comportamento e tema. |
+| [rail.md](rail.md) | Memo Rail: assistente de foco (missão do dia, check-ins, detector de desvio). |
 | [development.md](development.md) | Build, execução, publicação, dependências e convenções de código. |
 
 ## Resumo de uma linha
@@ -34,3 +35,6 @@ biblioteca `Memo.Service`.
 - **Canal de notificação**: destino externo (Telegram ou e-mail/SMTP) para onde o
   `memo notify` envia mensagens. Configurado na aba Notificações; credenciais
   cifradas por DPAPI em `notificacoes.bin`.
+- **Missão do dia (Memo Rail)**: checklist diário do assistente de foco (**não é
+  segredo**), guardado em `rail.json`. O Rail faz check-ins e avisa desvios;
+  ver [rail.md](rail.md).
