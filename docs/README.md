@@ -35,6 +35,7 @@ biblioteca `Memo.Service`.
 - **Canal de notificação**: destino externo (Telegram ou e-mail/SMTP) para onde o
   `memo notify` envia mensagens. Configurado na aba Notificações; credenciais
   cifradas por DPAPI em `notificacoes.bin`.
-- **Missão do dia (Memo Rail)**: checklist diário do assistente de foco (**não é
-  segredo**), guardado em `rail.json`. O Rail faz check-ins e avisa desvios;
-  ver [rail.md](rail.md).
+- **Missão do dia (Memo Rail)**: checklist do assistente de foco (**não é
+  segredo**), guardado em `rail.json` como um pool de tarefas com data —
+  pendências de dias anteriores acumulam como **atrasadas**. O Rail faz
+  check-ins e avisa desvios; ver [rail.md](rail.md).

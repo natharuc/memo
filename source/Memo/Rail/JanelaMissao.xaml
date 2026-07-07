@@ -1,7 +1,7 @@
 <Window x:Class="Memo.Rail.JanelaMissao"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Missão do dia" Width="480" SizeToContent="Height"
+        Title="Missão do dia" Width="560" SizeToContent="Height"
         WindowStartupLocation="CenterScreen" ResizeMode="NoResize"
         FontFamily="Segoe UI" Background="{DynamicResource CorFundo}">
     <Grid Margin="24">
@@ -35,21 +35,47 @@
                    TextWrapping="Wrap" />
 
         <!-- Cards das tarefas (montados no code-behind) -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" MaxHeight="320">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" MaxHeight="360">
             <StackPanel x:Name="painelItens" />
         </ScrollViewer>
 
         <!-- Adicionar tarefa -->
-        <Grid Grid.Row="3" Margin="0,10,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox x:Name="campoNova" Grid.Column="0" KeyDown="Nova_KeyDown"
-                     ToolTip="Dica: cole um link junto do texto (ex.: mandar msg https://wa.me/…) e ele vira o botão 🔗 da tarefa." />
-            <Button Grid.Column="1" Content="+ Adicionar" Margin="8,0,0,0"
-                    Style="{StaticResource BotaoPrimario}" Click="Adicionar_Click" />
-        </Grid>
+        <Border Grid.Row="3" Margin="0,12,0,0" CornerRadius="10" Padding="14,12"
+                Background="{DynamicResource CorPainel}">
+            <StackPanel>
+                <TextBlock Text="NOVA TAREFA" Foreground="{DynamicResource CorTextoFraco}"
+                           FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                <TextBox x:Name="campoNova" MinHeight="56" MaxHeight="120"
+                         TextWrapping="Wrap" AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                         PreviewKeyDown="Nova_KeyDown" />
+                <TextBlock Foreground="{DynamicResource CorTextoFraco}" FontSize="11"
+                           Margin="0,4,0,10" TextWrapping="Wrap"
+                           Text="Enter adiciona · Shift+Enter quebra linha · **negrito** · *itálico* · link no texto vira o 🔗" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                        <TextBlock Text="PARA O DIA" Foreground="{DynamicResource CorTextoFraco}"
+                                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+                        <DatePicker x:Name="campoDataNova" Width="130"
+                                    SelectedDateFormat="Short" FirstDayOfWeek="Monday" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Hoje" Click="DataHoje_Click"
+                            VerticalAlignment="Bottom" Margin="0,0,6,0" Padding="10,6" FontSize="12" />
+                    <Button Grid.Column="2" Content="Amanhã" Click="DataAmanha_Click"
+                            VerticalAlignment="Bottom" Padding="10,6" FontSize="12" />
+                    <Button Grid.Column="4" Content="+ Adicionar" VerticalAlignment="Bottom"
+                            Style="{StaticResource BotaoPrimario}" Click="Adicionar_Click" />
+                </Grid>
+            </StackPanel>
+        </Border>
 
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
             <Button x:Name="botaoLimpar" Content="Recomeçar o dia" Style="{StaticResource BotaoPerigo}"

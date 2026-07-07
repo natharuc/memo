@@ -22,12 +22,21 @@ Missão **não é segredo**: nenhum comando `rail` exige a senha-mestra.
 ## Comandos
 
 ```
-memo-cli rail                    # status: checklist no stdout
-memo-cli rail add <tarefa> [--link <url>]   # adiciona (cria a missão se não existir)
-memo-cli rail done <n>           # conclui a tarefa de número n (1-based)
-memo-cli rail clear              # apaga a missão de hoje (use com cuidado)
-memo-cli rail --json             # {"date":"yyyy-MM-dd","items":[{n,text,done,link}]}
+memo-cli rail                    # status agrupado: ATRASADAS / HOJE / PRÓXIMAS
+memo-cli rail add <tarefa> [--link <url>] [--data <d>]   # d: hoje|amanha|dd/MM|yyyy-MM-dd
+memo-cli rail done <n>           # conclui pela numeração exibida (1-based)
+memo-cli rail edit <n> [--texto <t>] [--link <url>] [--data <d>]
+memo-cli rail clear              # apaga só as tarefas de HOJE (atrasadas ficam)
+memo-cli rail --json             # {"date":"…","items":[{n,text,done,link,date,overdue}]}
 ```
+
+**Datas e atrasadas**: cada tarefa tem uma data (`--data`; padrão hoje). Pendência
+de dia anterior **acumula como atrasada** (`overdue: true` no JSON) e continua na
+missão, com prioridade, até ser concluída. A numeração segue a ordem exibida:
+atrasadas → hoje → próximas.
+
+**Formatação**: o texto aceita `**negrito**`, `*itálico*` e quebras de linha —
+renderizados na UI; na CLI aparecem literais.
 
 **Ação da tarefa (link)**: uma tarefa pode carregar um link que ajuda a executá-la
 (conversa do WhatsApp, ticket, doc). Passe `--link <url>` ou simplesmente deixe a

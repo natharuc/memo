@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,23 +9,22 @@ using Memo.Service.Rail;
 namespace Memo.Rail
 {
     /// <summary>
-    /// Checklist da missão do dia: define de manhã, marca/edita durante o dia.
-    /// Cada tarefa é um card com sua ação (🔗) e detalhes. Não exige o cofre
-    /// destrancado (missão não é segredo).
+    /// Missão do dia: atrasadas acumuladas + tarefas de hoje + próximas. Cada
+    /// tarefa é um card com formatação leve, ação (🔗), edição (✏) e remoção.
+    /// Não exige o cofre destrancado (missão não é segredo).
     /// </summary>
     public partial class JanelaMissao : Window
     {
         private readonly RailService _rail = new RailService();
-        private MissaoDia _missao;
+        private MissaoVisivel _missao;
 
         public JanelaMissao()
         {
             InitializeComponent();
             Nativo.AplicarBarraTitulo(this);
 
-            _missao = _rail.MissaoDeHoje() ?? new MissaoDia();
+            campoDataNova.SelectedDate = DateTime.Today;
             Recarregar();
-
             Loaded += (_, __) => campoNova.Focus();
         }
 
@@ -39,25 +40,62 @@ namespace Memo.Rail
             janela.Activate();
         }
 
-        // ----------------- cards -----------------
+        // ----------------- seções e cards -----------------
 
         private void Recarregar()
         {
+            _missao = _rail.MissaoAtual();
             painelItens.Children.Clear();
 
-            for (var i = 0; i < _missao.Itens.Count; i++)
-                painelItens.Children.Add(CriarCard(_missao.Itens[i], i + 1));
+            // Numeração contínua na ordem canônica (mesma da CLI).
+            var numero = 1;
+            var numeros = new Dictionary<string, int>();
+            foreach (var item in _missao.Lista) numeros[item.Id] = numero++;
 
-            textoProgresso.Text = _missao.Itens.Count == 0
+            if (_missao.Atrasadas.Count > 0)
+            {
+                painelItens.Children.Add(Secao("ATRASADAS", perigo: true));
+                foreach (var item in _missao.Atrasadas)
+                    painelItens.Children.Add(CriarCard(item, numeros[item.Id], atrasada: true));
+            }
+
+            if (_missao.Atrasadas.Count > 0 || _missao.Futuras.Count > 0)
+                painelItens.Children.Add(Secao("HOJE"));
+            foreach (var item in _missao.DeHoje)
+                painelItens.Children.Add(CriarCard(item, numeros[item.Id]));
+
+            if (_missao.Futuras.Count > 0)
+            {
+                painelItens.Children.Add(Secao("PRÓXIMAS"));
+                foreach (var item in _missao.Futuras)
+                    painelItens.Children.Add(CriarCard(item, numeros[item.Id], futura: true));
+            }
+
+            var total = _missao.Ativas.Count;
+            textoProgresso.Text = total == 0 && _missao.Futuras.Count == 0
                 ? "O que vamos fazer hoje? Liste as tarefas — o Memo te mantém no trilho."
-                : $"{_missao.Concluidos} de {_missao.Itens.Count} concluída(s)" +
-                  (_missao.Pendentes == 0 ? " — missão cumprida! 🎉" : "");
+                : $"{_missao.Concluidos} de {total} concluída(s)" +
+                  (_missao.Atrasadas.Count > 0 ? $" · {_missao.Atrasadas.Count} atrasada(s)" : "") +
+                  (total > 0 && _missao.Pendentes == 0 ? " — missão cumprida! 🎉" : "");
 
-            botaoLimpar.Visibility = _missao.Itens.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            botaoLimpar.Visibility = _missao.DeHoje.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private TextBlock Secao(string titulo, bool perigo = false)
+        {
+            var rotulo = new TextBlock
+            {
+                Text = titulo,
+                FontSize = 11,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(2, 6, 0, 6)
+            };
+            rotulo.SetResourceReference(TextBlock.ForegroundProperty, perigo ? "CorPerigo" : "CorTextoFraco");
+            return rotulo;
         }
 
         /// <summary>Monta o card de uma tarefa: check + texto/detalhes + ações.</summary>
-        private Border CriarCard(ItemMissao item, int numero)
+        private Border CriarCard(ItemMissao item, int numero, bool atrasada = false, bool futura = false)
         {
             var grade = new Grid();
             grade.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -78,22 +116,27 @@ namespace Memo.Rail
             Grid.SetColumn(check, 0);
             grade.Children.Add(check);
 
-            // Texto + linha de detalhes.
+            // Texto (com formatação leve) + linha de detalhes.
             var textos = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
 
             var titulo = new TextBlock
             {
-                Text = item.Texto,
                 FontSize = 14,
                 FontWeight = FontWeights.SemiBold,
                 TextWrapping = TextWrapping.Wrap
             };
+            FormatadorTexto.AplicarInlines(titulo, item.Texto);
             titulo.SetResourceReference(TextBlock.ForegroundProperty,
                 item.Concluido ? "CorTextoFraco" : "CorTexto");
             if (item.Concluido) titulo.TextDecorations = TextDecorations.Strikethrough;
             textos.Children.Add(titulo);
 
             var detalhes = $"#{numero}";
+            var dataItem = RailService.ParseData(item.Data);
+            if (atrasada && dataItem.HasValue)
+                detalhes += $"  ·  de {dataItem:dd/MM}";
+            if (futura && dataItem.HasValue)
+                detalhes += $"  ·  para {dataItem:dd/MM}";
             if (!string.IsNullOrWhiteSpace(item.Link))
                 detalhes += $"  ·  🔗 {HostDoLink(item.Link)}";
             if (item.Concluido && item.ConcluidoEm.HasValue)
@@ -105,7 +148,8 @@ namespace Memo.Rail
                 FontSize = 11,
                 Margin = new Thickness(0, 3, 0, 0)
             };
-            subtitulo.SetResourceReference(TextBlock.ForegroundProperty, "CorTextoFraco");
+            subtitulo.SetResourceReference(TextBlock.ForegroundProperty,
+                atrasada ? "CorPerigo" : "CorTextoFraco");
             textos.Children.Add(subtitulo);
 
             Grid.SetColumn(textos, 1);
@@ -134,6 +178,18 @@ namespace Memo.Rail
                 acoes.Children.Add(abrir);
             }
 
+            var editar = new Button
+            {
+                Content = "✏",
+                FontSize = 12,
+                Padding = new Thickness(8, 4, 8, 4),
+                Margin = new Thickness(0, 0, 6, 0),
+                ToolTip = "Editar tarefa",
+                Tag = item
+            };
+            editar.Click += Editar_Click;
+            acoes.Children.Add(editar);
+
             var remover = new Button
             {
                 Content = "✕",
@@ -154,9 +210,22 @@ namespace Memo.Rail
                 CornerRadius = new CornerRadius(10),
                 Padding = new Thickness(14, 11, 12, 11),
                 Margin = new Thickness(0, 0, 0, 8),
-                Child = grade
+                Child = grade,
+                Tag = item
             };
             card.SetResourceReference(Border.BackgroundProperty, "CorPainel");
+            if (atrasada)
+            {
+                card.BorderThickness = new Thickness(1);
+                card.SetResourceReference(Border.BorderBrushProperty, "CorPerigo");
+            }
+
+            // Duplo-clique no card também abre a edição.
+            card.MouseLeftButtonDown += (s, e) =>
+            {
+                if (e.ClickCount == 2) EditarItem(item);
+            };
+
             return card;
         }
 
@@ -171,7 +240,8 @@ namespace Memo.Rail
             var item = (ItemMissao)check.Tag;
             item.Concluido = check.IsChecked == true;
             item.ConcluidoEm = item.Concluido ? DateTime.Now : (DateTime?)null;
-            Salvar();
+            _rail.AtualizarItem(item);
+            Recarregar();
         }
 
         private void Acao_Click(object sender, RoutedEventArgs e)
@@ -180,30 +250,53 @@ namespace Memo.Rail
             RailService.AbrirLink(item.Link);
         }
 
+        private void Editar_Click(object sender, RoutedEventArgs e) =>
+            EditarItem((ItemMissao)((Button)sender).Tag);
+
+        private void EditarItem(ItemMissao item)
+        {
+            if (!JanelaEditarTarefa.Editar(this, item)) return;
+            _rail.AtualizarItem(item);
+            Recarregar();
+        }
+
         private void Remover_Click(object sender, RoutedEventArgs e)
         {
             var item = (ItemMissao)((Button)sender).Tag;
-            _missao.Itens.Remove(item);
-            Salvar();
+            _rail.RemoverItem(item.Id);
+            Recarregar();
         }
 
         private void Adicionar_Click(object sender, RoutedEventArgs e) => Adicionar();
 
         private void Nova_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter) Adicionar();
+            // Enter adiciona; Shift+Enter quebra linha (o TextBox é multiline).
+            if (e.Key == Key.Enter && (Keyboard.Modifiers & ModifierKeys.Shift) == 0)
+            {
+                Adicionar();
+                e.Handled = true;
+            }
         }
+
+        private void DataHoje_Click(object sender, RoutedEventArgs e) =>
+            campoDataNova.SelectedDate = DateTime.Today;
+
+        private void DataAmanha_Click(object sender, RoutedEventArgs e) =>
+            campoDataNova.SelectedDate = DateTime.Today.AddDays(1);
 
         private void Adicionar()
         {
-            // Uma URL no texto vira automaticamente a ação (🔗) da tarefa.
-            var item = RailService.CriarItem(campoNova.Text);
-            if (item == null) return;
+            var texto = campoNova.Text;
+            if (string.IsNullOrWhiteSpace(texto)) return;
 
-            _missao.Itens.Add(item);
+            // URL no texto vira a ação (🔗); a data vem do DatePicker (padrão hoje).
+            _rail.Adicionar(texto, link: null, data: campoDataNova.SelectedDate ?? DateTime.Today);
+
             campoNova.Clear();
+            campoDataNova.SelectedDate = DateTime.Today;
             campoNova.Focus();
-            Salvar();
+            Recarregar();
         }
 
         private void Testar_Click(object sender, RoutedEventArgs e)
@@ -211,7 +304,7 @@ namespace Memo.Rail
             // Prévia do cerebrinho: usa a tarefa atual (ou um exemplo), sem efeitos.
             var pendente = _missao.ProximaPendente();
             var popup = JanelaCerebrinho.CheckIn(
-                pendente?.Texto ?? "exemplo: revisar o relatório",
+                pendente != null ? FormatadorTexto.SemFormatacao(pendente.Texto) : "exemplo: revisar o relatório",
                 pendente?.Link);
             popup.Show();
         }
@@ -219,20 +312,14 @@ namespace Memo.Rail
         private void Limpar_Click(object sender, RoutedEventArgs e)
         {
             if (!JanelaDialogo.Confirmar(this, "Recomeçar o dia",
-                    "Apagar a missão de hoje e começar de novo?", perigo: true))
+                    "Apagar as tarefas de HOJE e começar de novo?\nAs atrasadas continuam na missão.",
+                    perigo: true))
                 return;
 
-            _missao = new MissaoDia();
             _rail.LimparHoje();
             Recarregar();
         }
 
         private void Fechar_Click(object sender, RoutedEventArgs e) => Close();
-
-        private void Salvar()
-        {
-            _rail.SalvarHoje(_missao);
-            Recarregar();
-        }
     }
 }

@@ -37,7 +37,8 @@ memo-cli list [--json]
 memo-cli del <chave>                # exclusão DEFINITIVA (sem lixeira)
 memo-cli remember <texto/quando>    # mesmas regras do "memo remember"
 memo-cli notify [canal] [-t <titulo>] <mensagem>   # telegram|email; sem canal = todos habilitados
-memo-cli rail [status|add <tarefa> [--link <url>]|done <n>|clear] # missão do dia (Memo Rail) — ver rail.md
+memo-cli rail [status|add <t> [--link <url>] [--data <d>]|done <n>|edit <n> [--texto|--link|--data]|clear]
+                                    # missão (Memo Rail): atrasadas/hoje/próximas — ver rail.md
 memo-cli pass [<chave>] [--json]
 memo-cli guid [--json]
 memo-cli unlock | lock
@@ -196,17 +197,21 @@ memo notify -t "Deploy" produção no ar      # com título/assunto
 - Os canais são configurados em **Configurações → Notificações**
   (`MemoService`/`NotificacaoService`). Sem nenhum canal habilitado, mostra aviso.
 
-### `memo rail [add <tarefa> | done <n> | status]`
-Missão do dia do **Memo Rail** (assistente de foco — ver [rail.md](rail.md)).
+### `memo rail [add <tarefa> [--data <d>] | done <n> | status]`
+Missão do **Memo Rail** (assistente de foco — ver [rail.md](rail.md)).
 Não é segredo: não pede a senha-mestra. Aliases: `missao`, `missão`.
 
 ```
 memo rail                    # abre o checklist da missão do dia
-memo rail add revisar PR 42  # adiciona tarefa
-memo rail add msg caio https://wa.me/5511…   # URL no texto vira a ação (🔗) da tarefa
-memo rail done 1             # conclui a tarefa 1 (toast mostra a próxima)
-memo rail status             # resumo: "2/5 · atual: ..."
+memo rail add revisar PR 42  # adiciona tarefa para hoje
+memo rail add planejar sprint --data amanha   # lança para outro dia
+memo rail add msg caio https://wa.me/5511…    # URL no texto vira a ação (🔗)
+memo rail done 1             # conclui pela numeração exibida (atrasadas primeiro)
+memo rail status             # resumo: "2/5 · 1 atrasada(s) · atual: ..."
 ```
+
+Pendências de dias anteriores **acumulam como atrasadas** até serem concluídas.
+Datas: `hoje`, `amanha`, `dd/MM`, `dd/MM/yyyy`, `yyyy-MM-dd`.
 
 ### `memo migrar`
 Recifra todos os documentos no formato atual e move para `falhas/` os que não

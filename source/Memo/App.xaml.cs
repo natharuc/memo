@@ -383,16 +383,28 @@ namespace Memo
 
             if (sub == "add")
             {
-                var texto = string.Join(" ", args.Skip(2)).Trim();
-                var item = rail.Adicionar(texto);
-                Toast.Mostrar(item != null ? $"Missão: \"{item.Texto}\" adicionada" : "Informe a tarefa", item != null);
+                // Aceita "--data <valor>" em qualquer posição; o resto é o texto.
+                var tokens = args.Skip(2).ToList();
+                DateTime? data = null;
+                var iData = tokens.FindIndex(t => t.Equals("--data", StringComparison.OrdinalIgnoreCase));
+                if (iData >= 0 && iData + 1 < tokens.Count)
+                {
+                    data = Memo.Service.Rail.RailService.ParseData(tokens[iData + 1]);
+                    tokens.RemoveRange(iData, 2);
+                }
+
+                var texto = string.Join(" ", tokens).Trim();
+                var item = rail.Adicionar(texto, link: null, data: data);
+                Toast.Mostrar(item != null
+                    ? $"Missão: \"{item.Texto}\" adicionada para {item.Data}"
+                    : "Informe a tarefa", item != null);
                 return;
             }
 
             if (sub == "done" && args.Length >= 3 && int.TryParse(args[2], out var numero))
             {
                 var ok = rail.Concluir(numero);
-                var proxima = rail.MissaoDeHoje()?.ProximaPendente();
+                var proxima = rail.MissaoAtual().ProximaPendente();
                 Toast.Mostrar(!ok ? $"Tarefa {numero} não encontrada"
                     : proxima == null ? "Missão do dia concluída! 🎉"
                     : $"Boa! Próxima: \"{proxima.Texto}\"", ok);
@@ -400,10 +412,12 @@ namespace Memo
             }
 
             // status (padrão)
-            var missao = rail.MissaoDeHoje();
-            Toast.Mostrar(missao == null || missao.Itens.Count == 0
+            var missao = rail.MissaoAtual();
+            Toast.Mostrar(missao.Ativas.Count == 0
                 ? "Sem missão hoje. Use \"memo rail\" para definir."
-                : $"Missão: {missao.Concluidos}/{missao.Itens.Count} · atual: \"{missao.ProximaPendente()?.Texto ?? "—"}\"",
+                : $"Missão: {missao.Concluidos}/{missao.Ativas.Count}" +
+                  (missao.Atrasadas.Count > 0 ? $" · {missao.Atrasadas.Count} atrasada(s)" : "") +
+                  $" · atual: \"{missao.ProximaPendente()?.Texto ?? "—"}\"",
                 true);
         }
 

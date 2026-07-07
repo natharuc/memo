@@ -8,39 +8,71 @@ bandeja; é **opt-in** (desligado por padrão).
 ## Como funciona
 
 1. **Missão do dia** — na primeira abertura dentro do horário de atuação (ou pelo
-   menu da bandeja → *Missão do dia…*), o Memo pergunta "o que vamos fazer hoje?".
-   Você monta um checklist. A "tarefa atual" é sempre a primeira pendente.
+   botão **🚂** da janela principal / menu da bandeja / `memo rail`), o Memo
+   pergunta "o que vamos fazer hoje?". Você monta um checklist; a "tarefa atual"
+   é sempre a primeira pendente — **atrasada tem prioridade**.
 2. **Check-in periódico** — a cada X minutos (padrão 45), o **cerebrinho** 🧠
-   aparece no canto: *"Ainda na '<tarefa>'?"* → **✔ Concluí** · **Ainda nela** ·
-   **+15 min**.
+   surge como uma bolha pulsando **na posição do mouse**; um clique expande:
+   *"Ainda na '<tarefa>'?"* → **✔ Concluí** · **Ainda nela** · **+15 min** ·
+   **🔗 Abrir**.
 3. **Detector de desvio** — a cada tick (~20s), o Rail olha a **janela em primeiro
    plano** (processo + título). Se bater com um termo da lista de **distrações**
-   (YouTube, Instagram…) por N minutos contínuos (padrão 5), o cerebrinho aparece:
-   *"Isso não parece a missão…"* → **Voltar pro trilho** · **Estou trabalhando**
-   (silencia aquele termo por 1h).
+   por N minutos contínuos (N vem do **nível de distração**), o cerebrinho aparece:
+   **Voltar pro trilho** (abre o link da tarefa, se houver) · **Estou trabalhando**
+   (silencia aquele termo por um tempo, também do nível).
+
+## Tarefas: datas, atrasadas e formatação
+
+- **Cada tarefa tem uma data** (`Data`, yyyy-MM-dd). Dá para lançar tarefas para
+  outros dias (campo de data no add, editor ✏ ou `--data` na CLI: `hoje`,
+  `amanha`, `dd/MM`, `dd/MM/yyyy`, `yyyy-MM-dd` — `RailService.ParseData`).
+- **Acúmulo**: pendência de dia anterior vira **ATRASADA** — continua na missão,
+  com prioridade no check-in (prefixo "Atrasada:"), até ser concluída. Atrasada
+  **nunca** é apagada pela poda (só concluídas com mais de 14 dias saem).
+- **Seções** na janela e na CLI: `ATRASADAS` (vermelho) → `HOJE` → `PRÓXIMAS`.
+  A numeração é contínua nessa ordem (a mesma para `done <n>`/`edit <n>`).
+  Atrasada concluída hoje aparece em HOJE (tachada), para o clique poder ser desfeito.
+- **Formatação leve** no texto: `**negrito**`, `*itálico*` e quebras de linha
+  (Enter no editor). Renderizada nos cards (`FormatadorTexto.AplicarInlines`);
+  cerebrinho e toasts mostram o texto limpo (`SemFormatacao`).
+- **Edição**: botão **✏** no card (ou duplo-clique) abre a `JanelaEditarTarefa`
+  (texto multiline, link, data com botões Hoje/Amanhã).
 
 ## Ação da tarefa (link 🔗)
 
 Cada tarefa pode ter um **link** que ajuda a executá-la — a conversa do WhatsApp
-(`https://wa.me/…`), um ticket, um documento. Como definir:
+(`https://wa.me/…`), um ticket, um documento:
 
-- **Automático**: cole a URL junto do texto ao adicionar
-  (`mandar msg pro caio https://wa.me/5511…`) — a URL sai do texto e vira a ação.
-- **Explícito (CLI)**: `memo-cli rail add "revisar ticket" --link <url>`.
+- **Automático**: cole a URL junto do texto ao adicionar — ela sai do texto e vira a ação.
+- **Explícito (CLI)**: `--link <url>`.
 
-Onde aparece: botão **🔗** na linha da tarefa (`JanelaMissao`), botão **🔗 Abrir**
-no check-in do cerebrinho, e o **Voltar pro trilho** (aviso de desvio) abre o link
-da tarefa atual — te levando direto pra ela.
+Aparece como **🔗 Abrir** no card, no check-in do cerebrinho, e o **Voltar pro
+trilho** abre o link da tarefa atual — te levando direto pra ela.
+
+## Nível de distração
+
+Configurável em **Configurações → Memo Rail** (`RailConfig.Nivel` →
+`Desvio()`): quanto maior, mais rápido e insistente o aviso.
+
+| Nível | Avisa desvio após | Repete a cada | "Estou trabalhando" silencia por |
+|---|---|---|---|
+| Baixo | 10 min | 20 min | 120 min |
+| Médio (padrão) | 5 min | 10 min | 60 min |
+| Alto | 2 min | 5 min | 30 min |
+| Muito alto | 1 min | 2 min | 15 min |
+
+O cooldown do desvio é **separado** do cooldown de check-ins (`CooldownMinutos`,
+que segue valendo só para check-ins).
 
 ## Anti-perturbação (por design)
 
-- **Cooldown**: silêncio mínimo entre aparições (padrão 10 min), aconteça o que acontecer.
+- **Cooldowns**: check-ins respeitam `CooldownMinutos`; desvios, o do nível.
 - **Ociosidade**: sem input por >3 min = usuário longe → não conta nem perturba.
-- **Horário de atuação**: só age na janela configurada (padrão 9h–18h, dias úteis).
-- **Gentil, mas visível**: o cerebrinho surge como uma **bolha redonda 🧠
-  pulsando na posição do mouse** (difícil de não ver); um clique expande para o
-  cartão com os botões. Não rouba o foco do teclado (`ShowActivated=False`),
-  some sozinho após ~30s se ignorado e só volta no próximo ciclo.
+- **Horário e dias**: só age na janela configurada (`HoraInicio`–`HoraFim`) e nos
+  **dias da semana selecionados** (`DiasAtivos`, toggles Seg…Dom; padrão seg–sex).
+- **Gentil, mas visível**: o cerebrinho surge como bolha 🧠 pulsando na posição do
+  mouse; não rouba o foco do teclado (`ShowActivated=False`), some sozinho após
+  ~30s se ignorado e só volta no próximo ciclo.
 - **Missão cumprida** (ou sem missão): silêncio total.
 
 ## Privacidade
@@ -52,46 +84,41 @@ nada sai da máquina. O que persiste:
 
 | Arquivo | Conteúdo |
 |---------|----------|
-| `%LOCALAPPDATA%\Memo\rail.json` | Missões dos últimos 14 dias (texto das tarefas, concluído/não, último check-in). |
-| `config.json` → `Rail` | Preferências (intervalos, horário, lista de distrações). |
+| `%LOCALAPPDATA%\Memo\rail.json` | **v2**: `{ Versao, UltimoCheckIn, Itens[] }` — pool de tarefas com data. O formato v1 (lista de dias) é migrado automaticamente na leitura, sem perder tarefa. |
+| `config.json` → `Rail` | Preferências (check-in, nível, horário, dias, distrações). |
 
 Missão **não é segredo**: não passa pelo cofre e os comandos `rail` não pedem a
 senha-mestra.
 
-## Configuração
-
-**Configurações → Memo Rail**: habilitar, perguntar missão ao iniciar, intervalo
-de check-in (25/45/60/90 min), limiar de desvio (3/5/10 min), cooldown (5/10/20
-min), horário (início/fim + dias úteis) e a **lista de distrações** (um termo por
-linha; a comparação é por substring, sem diferenciar maiúsculas, contra o título
-da janela e o nome do processo).
-
 ## CLI
 
 ```
-memo rail                 # abre o checklist da missão do dia
-memo rail add <tarefa>    # adiciona tarefa
-memo rail done <n>        # conclui a tarefa n
-memo rail status          # resumo em toast
+memo rail                                # abre o checklist
+memo rail add <tarefa> [--data <d>]      # adiciona (URL no texto vira o 🔗)
+memo rail done <n>                       # conclui pela numeração exibida
+memo rail status                         # resumo em toast
 
-memo-cli rail             # status (checklist no stdout)
-memo-cli rail add <tarefa> [--link <url>]   # URL no texto também vira o link
+memo-cli rail                            # status agrupado (ATRASADAS/HOJE/PRÓXIMAS)
+memo-cli rail add <t> [--link <url>] [--data <d>]
 memo-cli rail done <n>
-memo-cli rail clear       # apaga a missão de hoje
-memo-cli rail --json      # { date, items: [{n, text, done, link}] }
+memo-cli rail edit <n> [--texto <t>] [--link <url>] [--data <d>]
+memo-cli rail clear                      # apaga só as de hoje (atrasadas ficam)
+memo-cli rail --json                     # { date, items: [{n, text, done, link, date, overdue}] }
 ```
 
 ## Mapa do código
 
 | Arquivo | Papel |
 |---------|-------|
-| `Memo.Service/Rail/MissaoDia.cs` | POCOs (missão + itens). |
-| `Memo.Service/Rail/RailService.cs` | Persistência (`rail.json`), concluir/adicionar, heurística `EhDistracao`. |
-| `Memo.Service/Rail/RailConfig.cs` | Preferências + `DentroDoHorario` + distrações padrão. |
+| `Memo.Service/Rail/MissaoDia.cs` | `ItemMissao` (com `Data`), `RailDados` (v2) e `MissaoVisivel` (atrasadas/hoje/futuras + ordem canônica). |
+| `Memo.Service/Rail/RailService.cs` | Persistência v2 + migração v1, `MissaoAtual`, `ParseData`, mutações, heurística `EhDistracao`. |
+| `Memo.Service/Rail/RailConfig.cs` | Preferências, `NivelDistracao`/`Desvio()`, `DiasAtivos`/`DiasEfetivos`, `DentroDoHorario`. |
 | `Memo/Rail/MonitorFoco.cs` | Win32: janela ativa (`GetForegroundWindow`) e ociosidade (`GetLastInputInfo`). |
-| `Memo/Rail/RailCoordenador.cs` | Orquestração: decide *quando* aparecer (cooldown, silenciados, adiar). |
-| `Memo/Rail/JanelaMissao.xaml` | Checklist da missão do dia. |
-| `Memo/Rail/JanelaCerebrinho.xaml` | O widget 🧠 (modos check-in e desvio). |
+| `Memo/Rail/RailCoordenador.cs` | Orquestração: quando perguntar/checar/avisar (cooldowns, silenciados, adiar). |
+| `Memo/Rail/FormatadorTexto.cs` | Markdown-lite → Inlines; `SemFormatacao` para textos "crus". |
+| `Memo/Rail/JanelaMissao.xaml` | Checklist com seções e cards. |
+| `Memo/Rail/JanelaEditarTarefa.xaml` | Edição de texto/link/data. |
+| `Memo/Rail/JanelaCerebrinho.xaml` | O widget 🧠 (bolha no mouse → cartão). |
 
 O `RailCoordenador.Tick()` é chamado pelo mesmo `DispatcherTimer` de 20s que
 verifica lembretes (`App.IniciarAgendador`).

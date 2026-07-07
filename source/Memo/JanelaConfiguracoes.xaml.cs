@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,8 +21,8 @@ namespace Memo
         private readonly NotificacaoService _notificacoes = new NotificacaoService();
 
         private int _railCheckIn;
-        private int _railDesvio;
-        private int _railCooldown;
+        private Service.Rail.NivelDistracao _railNivel;
+        private readonly HashSet<DayOfWeek> _railDias = new HashSet<DayOfWeek>();
 
         public JanelaConfiguracoes()
         {
@@ -87,16 +88,18 @@ namespace Memo
             railPerguntar.IsChecked = r.PerguntarMissao;
             railInicio.Text = r.HoraInicio;
             railFim.Text = r.HoraFim;
-            railDiasUteis.IsChecked = r.SomenteDiasUteis;
             railDistracoes.Text = string.Join(Environment.NewLine, r.Distracoes ?? new System.Collections.Generic.List<string>());
 
             _railCheckIn = r.CheckInMinutos;
-            _railDesvio = r.DesvioMinutos;
-            _railCooldown = r.CooldownMinutos;
+            _railNivel = r.Nivel;
+
+            _railDias.Clear();
+            foreach (var dia in r.DiasEfetivos()) _railDias.Add(dia);
 
             Destacar(painelRailCheckIn, _railCheckIn.ToString(CultureInfo.InvariantCulture));
-            Destacar(painelRailDesvio, _railDesvio.ToString(CultureInfo.InvariantCulture));
-            Destacar(painelRailCooldown, _railCooldown.ToString(CultureInfo.InvariantCulture));
+            Destacar(painelRailNivel, _railNivel.ToString());
+            AtualizarNivelDescricao();
+            AtualizarDias();
         }
 
         private void SalvarRail(Configuracoes cfg)
@@ -106,11 +109,10 @@ namespace Memo
             r.Habilitado = railHabilitado.IsChecked == true;
             r.PerguntarMissao = railPerguntar.IsChecked == true;
             r.CheckInMinutos = _railCheckIn;
-            r.DesvioMinutos = _railDesvio;
-            r.CooldownMinutos = _railCooldown;
+            r.Nivel = _railNivel;
             r.HoraInicio = railInicio.Text?.Trim();
             r.HoraFim = railFim.Text?.Trim();
-            r.SomenteDiasUteis = railDiasUteis.IsChecked == true;
+            r.DiasAtivos = _railDias.OrderBy(d => d).ToList();
             r.Distracoes = railDistracoes.Text
                 .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(t => t.Trim())
@@ -124,16 +126,43 @@ namespace Memo
             Destacar(painelRailCheckIn, _railCheckIn.ToString(CultureInfo.InvariantCulture));
         }
 
-        private void RailDesvio_Click(object sender, RoutedEventArgs e)
+        private void RailNivel_Click(object sender, RoutedEventArgs e)
         {
-            _railDesvio = int.Parse((string)((Button)sender).Tag, CultureInfo.InvariantCulture);
-            Destacar(painelRailDesvio, _railDesvio.ToString(CultureInfo.InvariantCulture));
+            _railNivel = (Service.Rail.NivelDistracao)Enum.Parse(
+                typeof(Service.Rail.NivelDistracao), (string)((Button)sender).Tag);
+            Destacar(painelRailNivel, _railNivel.ToString());
+            AtualizarNivelDescricao();
         }
 
-        private void RailCooldown_Click(object sender, RoutedEventArgs e)
+        private void AtualizarNivelDescricao()
         {
-            _railCooldown = int.Parse((string)((Button)sender).Tag, CultureInfo.InvariantCulture);
-            Destacar(painelRailCooldown, _railCooldown.ToString(CultureInfo.InvariantCulture));
+            var p = new Service.Rail.RailConfig { Nivel = _railNivel }.Desvio();
+            railNivelDescricao.Text =
+                $"Avisa após {p.AvisarAposMinutos:0} min de distração · repete a cada " +
+                $"{p.CooldownMinutos:0} min · \"estou trabalhando\" silencia por {p.SilencioTrabalhandoMinutos:0} min.";
+        }
+
+        private void RailDia_Click(object sender, RoutedEventArgs e)
+        {
+            var dia = (DayOfWeek)int.Parse((string)((Button)sender).Tag, CultureInfo.InvariantCulture);
+            if (!_railDias.Add(dia)) _railDias.Remove(dia);
+            if (_railDias.Count == 0) _railDias.Add(dia); // ao menos um dia ativo
+            AtualizarDias();
+        }
+
+        /// <summary>Realça os toggles dos dias selecionados (multi-seleção).</summary>
+        private void AtualizarDias()
+        {
+            var estiloPrimario = (Style)FindResource("BotaoPrimario");
+            var estiloPadrao = (Style)FindResource(typeof(Button));
+            foreach (var filho in painelRailDias.Children)
+            {
+                if (filho is Button botao)
+                {
+                    var dia = (DayOfWeek)int.Parse((string)botao.Tag, CultureInfo.InvariantCulture);
+                    botao.Style = _railDias.Contains(dia) ? estiloPrimario : estiloPadrao;
+                }
+            }
         }
 
         // ----------------- Notificações -----------------

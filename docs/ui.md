@@ -68,22 +68,33 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
   botão **Testar** (envia fora da thread de UI via `Task.Run`). Persistido cifrado
   por DPAPI pelo `NotificacaoService` (não vai para `Configuracoes`). Reusado pelo
   comando `memo notify`.
-- **Memo Rail**: habilitar, intervalos (check-in/desvio/cooldown), horário de
-  atuação e lista de distrações do assistente de foco (→ `Configuracoes.Rail`;
-  ver [rail.md](rail.md)).
+- **Memo Rail**: habilitar, intervalo de check-in, **nível de distração**
+  (Baixo…Muito alto, com descrição do efeito), horário, **dias da semana**
+  (toggles Seg…Dom, ao menos um ativo) e lista de distrações
+  (→ `Configuracoes.Rail`; ver [rail.md](rail.md)).
 - `static bool JanelaConfiguracoes.Mostrar(owner)` → `true` se o usuário salvou
   (a `JanelaPrincipal` usa isso para re-ancorar a sessão com a nova duração).
 
 ### `JanelaMissao` (`Rail/JanelaMissao.xaml[.cs]`)
-Checklist da missão do dia (Memo Rail). Aberta pelo botão **🚂** na barra da
-`JanelaPrincipal`, pelo menu da bandeja (*Missão do dia…*), pelo comando
-`memo rail` ou automaticamente de manhã (se habilitado).
-Cada tarefa é um **card** (montado no code-behind em `CriarCard`): check de
-concluído, título (tachado quando feito), linha de detalhes (nº, host do link,
-hora de conclusão) e botões próprios — **🔗 Abrir** (ação da tarefa) e **✕**
-(remover). Botão **Testar** no cabeçalho mostra uma prévia do cerebrinho com a
-tarefa atual. Adicionar com Enter; "Recomeçar o dia" apaga a missão. Persiste
-via `RailService` a cada mudança. Não exige o cofre.
+Missão do Memo Rail. Aberta pelo botão **🚂** na barra da `JanelaPrincipal`,
+pelo menu da bandeja (*Missão do dia…*), pelo comando `memo rail` ou
+automaticamente de manhã (se habilitado). Organizada em **seções**:
+**ATRASADAS** (vermelho, borda de perigo), **HOJE** e **PRÓXIMAS** — numeração
+contínua igual à da CLI. Cada tarefa é um **card** (`CriarCard`): check de
+concluído, título com **formatação leve** (`FormatadorTexto`), linha de detalhes
+(nº, data quando atrasada/futura, host do link, hora de conclusão) e botões —
+**🔗 Abrir**, **✏ Editar** (também por duplo-clique) e **✕** remover. O painel
+**Nova tarefa** tem campo multiline (Enter adiciona, Shift+Enter quebra linha),
+**DatePicker** "para o dia" (padrão hoje, atalhos Hoje/Amanhã) e o botão
+**+ Adicionar** embaixo. Botão **Testar** mostra uma prévia do cerebrinho.
+"Recomeçar o dia" apaga só as de hoje (atrasadas ficam).
+Persiste via `RailService` a cada mudança. Não exige o cofre.
+
+### `JanelaEditarTarefa` (`Rail/JanelaEditarTarefa.xaml[.cs]`)
+Edição de uma tarefa: **texto** multiline (Enter quebra linha; `**negrito**`,
+`*itálico*`), **link** (ação 🔗) e **data** (dd/MM etc. + botões Hoje/Amanhã,
+validada por `RailService.ParseData`).
+`static bool Editar(owner, ItemMissao)` → true se salvou (item já atualizado).
 
 ### `JanelaCerebrinho` (`Rail/JanelaCerebrinho.xaml[.cs]`)
 O widget 🧠 do Rail, em **dois estágios**: primeiro uma **bolha redonda** com o

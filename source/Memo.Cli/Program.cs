@@ -199,12 +199,22 @@ namespace Memo.Cli
             {
                 var texto = string.Join(" ", pos.Skip(1)).Trim();
                 a.TemValor("--link", out var link); // URL no texto também vira link (auto)
-                var item = rail.Adicionar(texto, link);
-                if (item == null) { Erro("Uso: memo-cli rail add <tarefa> [--link <url>]"); return Codigo.Uso; }
 
-                if (a.Formato() == Formato.Json) EscreverJson(new { added = item.Texto, link = item.Link });
-                else Console.Error.WriteLine($"\"{item.Texto}\" adicionada à missão de hoje" +
-                                             (item.Link != null ? $" (🔗 {item.Link})" : ""));
+                DateTime? data = null;
+                if (a.TemValor("--data", out var dataTexto))
+                {
+                    data = Memo.Service.Rail.RailService.ParseData(dataTexto);
+                    if (data == null) { Erro("Data inválida. Use hoje, amanha, dd/MM ou yyyy-MM-dd."); return Codigo.Uso; }
+                }
+
+                var item = rail.Adicionar(texto, link, data);
+                if (item == null) { Erro("Uso: memo-cli rail add <tarefa> [--link <url>] [--data <d>]"); return Codigo.Uso; }
+
+                if (a.Formato() == Formato.Json)
+                    EscreverJson(new { added = item.Texto, link = item.Link, date = item.Data });
+                else
+                    Console.Error.WriteLine($"\"{item.Texto}\" adicionada para {item.Data}" +
+                                            (item.Link != null ? $" (🔗 {item.Link})" : ""));
                 return Codigo.Ok;
             }
 
@@ -220,39 +230,90 @@ namespace Memo.Cli
                 return Codigo.Ok;
             }
 
-            if (sub == "clear")
+            if (sub == "edit")
             {
-                rail.LimparHoje();
-                Console.Error.WriteLine("Missão de hoje apagada.");
+                if (pos.Count < 2 || !int.TryParse(pos[1], out var numero))
+                { Erro("Uso: memo-cli rail edit <numero> [--texto <t>] [--link <url>] [--data <d>]"); return Codigo.Uso; }
+
+                var lista = rail.MissaoAtual().Lista;
+                if (numero < 1 || numero > lista.Count)
+                { Erro($"Tarefa {numero} não encontrada."); return Codigo.NaoEncontrado; }
+
+                var alvo = lista[numero - 1];
+                if (a.TemValor("--texto", out var novoTexto) && !string.IsNullOrWhiteSpace(novoTexto))
+                    alvo.Texto = novoTexto.Trim();
+                if (a.TemValor("--link", out var novoLink))
+                    alvo.Link = string.IsNullOrWhiteSpace(novoLink) ? null : novoLink.Trim();
+                if (a.TemValor("--data", out var novaData))
+                {
+                    var d = Memo.Service.Rail.RailService.ParseData(novaData);
+                    if (d == null) { Erro("Data inválida. Use hoje, amanha, dd/MM ou yyyy-MM-dd."); return Codigo.Uso; }
+                    alvo.Data = d.Value.ToString("yyyy-MM-dd");
+                }
+
+                rail.AtualizarItem(alvo);
+                if (a.Formato() == Formato.Json)
+                    EscreverJson(new { edited = numero, text = alvo.Texto, link = alvo.Link, date = alvo.Data });
+                else
+                    Console.Error.WriteLine($"Tarefa {numero} atualizada");
                 return Codigo.Ok;
             }
 
-            // status (padrão) / list
-            var missao = rail.MissaoDeHoje();
+            if (sub == "clear")
+            {
+                rail.LimparHoje();
+                Console.Error.WriteLine("Tarefas de hoje apagadas (atrasadas continuam).");
+                return Codigo.Ok;
+            }
+
+            // status (padrão) / list — numeração canônica (atrasadas → hoje → futuras).
+            var missao = rail.MissaoAtual();
+            var hoje = DateTime.Now.ToString("yyyy-MM-dd");
+
             if (a.Formato() == Formato.Json)
             {
                 EscreverJson(new
                 {
-                    date = missao?.Data,
-                    items = (missao?.Itens ?? new List<Memo.Service.Rail.ItemMissao>())
-                        .Select((i, n) => new { n = n + 1, text = i.Texto, done = i.Concluido, link = i.Link })
+                    date = hoje,
+                    items = missao.Lista.Select((i, n) => new
+                    {
+                        n = n + 1,
+                        text = i.Texto,
+                        done = i.Concluido,
+                        link = i.Link,
+                        date = i.Data,
+                        overdue = i.Atrasada(hoje)
+                    })
                 });
                 return Codigo.Ok;
             }
 
-            if (missao == null || missao.Itens.Count == 0)
+            if (missao.Lista.Count == 0)
             {
-                Console.Out.WriteLine("(sem missão hoje — use: memo-cli rail add <tarefa>)");
+                Console.Out.WriteLine("(sem missão — use: memo-cli rail add <tarefa>)");
                 return Codigo.Ok;
             }
 
-            for (var i = 0; i < missao.Itens.Count; i++)
+            var numeroLinha = 1;
+            void Imprimir(IEnumerable<Memo.Service.Rail.ItemMissao> itens, string secao)
             {
-                var item = missao.Itens[i];
-                Console.Out.WriteLine($"[{(item.Concluido ? "x" : " ")}] {i + 1}. {item.Texto}" +
-                                      (item.Link != null ? $"  → {item.Link}" : ""));
+                var lista = itens.ToList();
+                if (lista.Count == 0) return;
+                Console.Out.WriteLine($"-- {secao} --");
+                foreach (var item in lista)
+                {
+                    var extra = item.Link != null ? $"  → {item.Link}" : "";
+                    if (secao != "HOJE") extra += $"  ({item.Data})";
+                    Console.Out.WriteLine($"[{(item.Concluido ? "x" : " ")}] {numeroLinha++}. {item.Texto}{extra}");
+                }
             }
-            Console.Error.WriteLine($"{missao.Concluidos}/{missao.Itens.Count} concluída(s)");
+
+            Imprimir(missao.Atrasadas, "ATRASADAS");
+            Imprimir(missao.DeHoje, "HOJE");
+            Imprimir(missao.Futuras, "PRÓXIMAS");
+
+            Console.Error.WriteLine($"{missao.Concluidos}/{missao.Ativas.Count} concluída(s)" +
+                                    (missao.Atrasadas.Count > 0 ? $" · {missao.Atrasadas.Count} atrasada(s)" : ""));
             return Codigo.Ok;
         }
 
@@ -459,7 +520,7 @@ Comandos:
   del <chave>             Exclui um segredo
   remember <texto/quando> Cria um lembrete (ex.: ""ver tarefa 10:00 tomorrow"")
   notify [canal] <msg>    Notifica nos canais (telegram/email); -t <titulo> opcional
-  rail [status|add <tarefa>|done <n>|clear]   Missão do dia (Memo Rail)
+  rail [status|add <t> [--data <d>]|done <n>|edit <n>|clear]   Missão do dia (Memo Rail)
   pass [chave]            Gera uma senha (e salva, se der uma chave)
   guid                    Gera um GUID
   unlock / lock           Destranca (pede senha) / tranca o cofre
@@ -498,7 +559,8 @@ Exit codes: 0 ok · 1 erro · 2 trancado · 3 não encontrado · 64 uso");
                     if (eq > 0) { _valores[t.Substring(0, eq)] = t.Substring(eq + 1); continue; }
 
                     // flags que consomem o próximo token
-                    if ((t == "--password" || t == "--value" || t == "--dir" || t == "--titulo" || t == "--link") && i + 1 < argv.Length)
+                    if ((t == "--password" || t == "--value" || t == "--dir" || t == "--titulo" ||
+                         t == "--link" || t == "--data" || t == "--texto") && i + 1 < argv.Length)
                     {
                         _valores[t] = argv[++i];
                         continue;

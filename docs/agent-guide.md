@@ -21,6 +21,7 @@ chamam `MemoService`. Plataforma: Windows, .NET 8.
 | Adicionar uma operação de negócio | `Memo.Service/MemoService.cs` |
 | Adicionar/alterar um comando da CLI | `Memo.Cli/Program.cs` (console) **e** `Memo/App.xaml.cs` (GUI) |
 | Mexer nos lembretes (parser/persistência) | `Memo.Service/Lembretes/*` |
+| Mexer no Memo Rail (missão/foco) | `Memo.Service/Rail/*` (dados/config) e `Memo/Rail/*` (coordenador/UI); ver [rail.md](rail.md) |
 | Mudar o roteamento de inicialização / bandeja | `Memo/App.xaml.cs` (`OnStartup`) |
 | Mexer na tela principal | `Memo/JanelaPrincipal.xaml[.cs]` |
 | Telas de senha / edição / toast | `Memo/JanelaSenha.*`, `JanelaEditar.*`, `Toast.*` |
@@ -147,3 +148,8 @@ adulteração / legado. Ver [development.md](development.md) → Testes.
   (`Memo.exe <args>`) não — ela só mostra um `Toast`.
 - A subpasta `deletados/` **não é mais criada** (exclusão virou definitiva); pode
   haver pastas `deletados/` antigas em cofres já existentes, sem uso pelo app.
+- ⚠️ **`rail.json` e `lembretes.json` NÃO respeitam `MEMO_DIR`** — ficam fixos em
+  `%LOCALAPPDATA%\Memo`. Testes com `memo-cli rail`/`remember` atingem os dados
+  REAIS do usuário (já causou perda de missão em teste; recuperada de um snapshot).
+  Antes de testar, faça backup do arquivo — e é uma melhoria pendente suportar um
+  diretório alternativo (ex.: `MEMO_LOCAL_DIR`) para esses arquivos.

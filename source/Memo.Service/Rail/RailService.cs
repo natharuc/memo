@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,13 +10,13 @@ using Newtonsoft.Json;
 namespace Memo.Service.Rail
 {
     /// <summary>
-    /// Persistência da missão do dia em <c>%LOCALAPPDATA%\Memo\rail.json</c>
-    /// (mesmo padrão do LembreteService). Não é segredo: não passa pelo cofre.
-    /// Guarda os últimos dias para permitir um resumo/histórico curto.
+    /// Persistência da missão em <c>%LOCALAPPDATA%\Memo\rail.json</c> (formato v2:
+    /// pool de tarefas com data). Não é segredo: não passa pelo cofre.
+    /// Pendências acumulam como atrasadas; só concluídas antigas são podadas.
     /// </summary>
     public class RailService
     {
-        private const int DiasHistorico = 14;
+        private const int DiasHistoricoConcluidas = 14;
 
         private static readonly string Caminho = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -27,63 +28,222 @@ namespace Memo.Service.Rail
 
         // ----------------- persistência -----------------
 
-        private List<MissaoDia> CarregarTodas()
+        private RailDados CarregarDados()
         {
             try
             {
-                if (File.Exists(Caminho))
-                    return JsonConvert.DeserializeObject<List<MissaoDia>>(File.ReadAllText(Caminho))
-                           ?? new List<MissaoDia>();
+                if (!File.Exists(Caminho)) return new RailDados();
+                var json = File.ReadAllText(Caminho);
+
+                // v1 era uma lista de dias; v2 é um objeto.
+                if (json.TrimStart().StartsWith("["))
+                    return MigrarV1(json);
+
+                return JsonConvert.DeserializeObject<RailDados>(json) ?? new RailDados();
             }
             catch
             {
                 // arquivo corrompido: recomeça em vez de quebrar.
+                return new RailDados();
             }
-            return new List<MissaoDia>();
         }
 
-        private void Gravar(List<MissaoDia> lista)
+        /// <summary>Formato antigo (List&lt;MissaoDia&gt;): achata sem perder tarefa.</summary>
+        private static RailDados MigrarV1(string json)
         {
-            // Poda o histórico antigo.
-            var corte = DateTime.Now.AddDays(-DiasHistorico).ToString("yyyy-MM-dd");
-            lista.RemoveAll(m => string.Compare(m.Data, corte, StringComparison.Ordinal) < 0);
+            var dados = new RailDados();
+            var dias = JsonConvert.DeserializeObject<List<DiaLegado>>(json) ?? new List<DiaLegado>();
+
+            foreach (var dia in dias.OrderBy(d => d.Data, StringComparer.Ordinal))
+            {
+                foreach (var item in dia.Itens ?? new List<ItemMissao>())
+                {
+                    item.Data = item.Data ?? dia.Data;
+                    dados.Itens.Add(item);
+                }
+                if (dia.UltimoCheckIn > (dados.UltimoCheckIn ?? DateTime.MinValue))
+                    dados.UltimoCheckIn = dia.UltimoCheckIn;
+            }
+            return dados;
+        }
+
+        private class DiaLegado
+        {
+            public string Data { get; set; }
+            public List<ItemMissao> Itens { get; set; }
+            public DateTime? UltimoCheckIn { get; set; }
+        }
+
+        private void Gravar(RailDados dados)
+        {
+            // Poda só concluídas antigas. Pendente NUNCA é podada (acumula como atrasada).
+            var corte = DateTime.Now.AddDays(-DiasHistoricoConcluidas);
+            dados.Itens.RemoveAll(i => i.Concluido && (i.ConcluidoEm ?? DateTime.Now) < corte);
 
             Directory.CreateDirectory(Path.GetDirectoryName(Caminho));
-            File.WriteAllText(Caminho, JsonConvert.SerializeObject(lista, Formatting.Indented));
+            File.WriteAllText(Caminho, JsonConvert.SerializeObject(dados, Formatting.Indented));
         }
 
-        // ----------------- missão do dia -----------------
+        // ----------------- consulta -----------------
 
-        /// <summary>Missão de hoje, ou null se ainda não foi definida.</summary>
-        public MissaoDia MissaoDeHoje()
+        /// <summary>Missão visível (atrasadas + hoje + futuras), na ordem canônica.</summary>
+        public MissaoVisivel MissaoAtual()
         {
             lock (Trava)
-                return CarregarTodas().FirstOrDefault(m => m.Data == Hoje());
+            {
+                var hoje = Hoje();
+                var itens = CarregarDados().Itens;
+
+                return new MissaoVisivel
+                {
+                    Atrasadas = itens.Where(i => i.Atrasada(hoje))
+                                     .OrderBy(i => i.Data, StringComparer.Ordinal).ToList(),
+                    // "Hoje" inclui atrasadas concluídas hoje (ficam visíveis,
+                    // tachadas, e um clique errado pode ser desfeito).
+                    DeHoje = itens.Where(i => i.Data == hoje ||
+                                 (i.Concluido && i.ConcluidoEm?.Date == DateTime.Today &&
+                                  string.Compare(i.Data, hoje, StringComparison.Ordinal) < 0)).ToList(),
+                    Futuras = itens.Where(i => string.Compare(i.Data, hoje, StringComparison.Ordinal) > 0)
+                                   .OrderBy(i => i.Data, StringComparer.Ordinal).ToList()
+                };
+            }
         }
 
+        /// <summary>Há missão definida para hoje (itens de hoje, mesmo concluídos, ou atrasadas)?</summary>
+        public bool ExisteMissaoParaHoje()
+        {
+            var m = MissaoAtual();
+            return m.DeHoje.Count > 0 || m.Atrasadas.Count > 0;
+        }
+
+        public DateTime? UltimoCheckIn()
+        {
+            lock (Trava) return CarregarDados().UltimoCheckIn;
+        }
+
+        // ----------------- mutações -----------------
+
         /// <summary>
-        /// Adiciona uma tarefa à missão de hoje (cria a missão se não existir).
-        /// Sem <paramref name="link"/> explícito, uma URL no texto vira o link da tarefa.
+        /// Adiciona uma tarefa (data null = hoje). Sem <paramref name="link"/>
+        /// explícito, uma URL no texto vira o link da tarefa.
         /// </summary>
-        public ItemMissao Adicionar(string texto, string link = null)
+        public ItemMissao Adicionar(string texto, string link = null, DateTime? data = null)
         {
             var item = CriarItem(texto, link);
             if (item == null) return null;
+            item.Data = (data ?? DateTime.Now).ToString("yyyy-MM-dd");
 
             lock (Trava)
             {
-                var todas = CarregarTodas();
-                var hoje = todas.FirstOrDefault(m => m.Data == Hoje());
-                if (hoje == null)
-                {
-                    hoje = new MissaoDia { Data = Hoje() };
-                    todas.Add(hoje);
-                }
-
-                hoje.Itens.Add(item);
-                Gravar(todas);
+                var dados = CarregarDados();
+                dados.Itens.Add(item);
+                Gravar(dados);
                 return item;
             }
+        }
+
+        /// <summary>Conclui pelo número exibido (1-based sobre a missão visível).</summary>
+        public bool Concluir(int numero)
+        {
+            lock (Trava)
+            {
+                var lista = MissaoAtual().Lista;
+                if (numero < 1 || numero > lista.Count) return false;
+                return ConcluirPorId(lista[numero - 1].Id);
+            }
+        }
+
+        /// <summary>Marca a tarefa pelo Id como concluída.</summary>
+        public bool ConcluirPorId(string id)
+        {
+            lock (Trava)
+            {
+                var dados = CarregarDados();
+                var item = dados.Itens.FirstOrDefault(i => i.Id == id);
+                if (item == null) return false;
+
+                item.Concluido = true;
+                item.ConcluidoEm = DateTime.Now;
+                Gravar(dados);
+                return true;
+            }
+        }
+
+        /// <summary>Regrava uma tarefa existente (edição de texto/link/data/estado).</summary>
+        public bool AtualizarItem(ItemMissao item)
+        {
+            if (item == null) return false;
+
+            lock (Trava)
+            {
+                var dados = CarregarDados();
+                var indice = dados.Itens.FindIndex(i => i.Id == item.Id);
+                if (indice < 0) return false;
+
+                dados.Itens[indice] = item;
+                Gravar(dados);
+                return true;
+            }
+        }
+
+        public void RemoverItem(string id)
+        {
+            lock (Trava)
+            {
+                var dados = CarregarDados();
+                dados.Itens.RemoveAll(i => i.Id == id);
+                Gravar(dados);
+            }
+        }
+
+        /// <summary>Registra que um check-in aconteceu agora (controla o intervalo).</summary>
+        public void RegistrarCheckIn()
+        {
+            lock (Trava)
+            {
+                var dados = CarregarDados();
+                dados.UltimoCheckIn = DateTime.Now;
+                Gravar(dados);
+            }
+        }
+
+        /// <summary>Apaga só os itens de hoje ("recomeçar o dia"); atrasadas ficam.</summary>
+        public void LimparHoje()
+        {
+            lock (Trava)
+            {
+                var dados = CarregarDados();
+                dados.Itens.RemoveAll(i => i.Data == Hoje());
+                Gravar(dados);
+            }
+        }
+
+        // ----------------- helpers -----------------
+
+        /// <summary>
+        /// Interpreta uma data digitada: <c>hoje</c>, <c>amanha/amanhã</c>,
+        /// <c>dd/MM</c>, <c>dd/MM/yyyy</c> ou <c>yyyy-MM-dd</c>. Null se não entender.
+        /// </summary>
+        public static DateTime? ParseData(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto)) return null;
+            texto = texto.Trim().ToLowerInvariant();
+
+            if (texto == "hoje") return DateTime.Today;
+            if (texto == "amanha" || texto == "amanhã") return DateTime.Today.AddDays(1);
+
+            var formatos = new[] { "dd/MM", "dd/MM/yyyy", "yyyy-MM-dd" };
+            foreach (var f in formatos)
+            {
+                if (DateTime.TryParseExact(texto, f, CultureInfo.GetCultureInfo("pt-BR"),
+                        DateTimeStyles.None, out var data))
+                {
+                    // "dd/MM" assume o ano corrente.
+                    if (f == "dd/MM") data = new DateTime(DateTime.Today.Year, data.Month, data.Day);
+                    return data.Date;
+                }
+            }
+            return null;
         }
 
         private static readonly Regex RegexLink =
@@ -105,7 +265,7 @@ namespace Memo.Service.Rail
                 {
                     link = m.Value;
                     texto = RegexLink.Replace(texto, "").Trim();
-                    texto = Regex.Replace(texto, @"\s{2,}", " ");
+                    texto = Regex.Replace(texto, @"[ \t]{2,}", " ");
                     if (texto.Length == 0) texto = link; // tarefa que é só o link
                 }
             }
@@ -124,82 +284,6 @@ namespace Memo.Service.Rail
             catch
             {
                 // Link inválido/sem app associado: ignora.
-            }
-        }
-
-        /// <summary>Marca a tarefa pelo número (1-based) como concluída. False se não achou.</summary>
-        public bool Concluir(int numero)
-        {
-            lock (Trava)
-            {
-                var todas = CarregarTodas();
-                var hoje = todas.FirstOrDefault(m => m.Data == Hoje());
-                if (hoje == null || numero < 1 || numero > hoje.Itens.Count) return false;
-
-                var item = hoje.Itens[numero - 1];
-                if (!item.Concluido)
-                {
-                    item.Concluido = true;
-                    item.ConcluidoEm = DateTime.Now;
-                    Gravar(todas);
-                }
-                return true;
-            }
-        }
-
-        /// <summary>Marca a tarefa pelo Id como concluída (usado pela UI).</summary>
-        public bool ConcluirPorId(string id)
-        {
-            lock (Trava)
-            {
-                var todas = CarregarTodas();
-                var hoje = todas.FirstOrDefault(m => m.Data == Hoje());
-                var item = hoje?.Itens.FirstOrDefault(i => i.Id == id);
-                if (item == null) return false;
-
-                item.Concluido = true;
-                item.ConcluidoEm = DateTime.Now;
-                Gravar(todas);
-                return true;
-            }
-        }
-
-        /// <summary>Desmarca/remarca ou remove itens: regrava a missão de hoje inteira.</summary>
-        public void SalvarHoje(MissaoDia missao)
-        {
-            if (missao == null) return;
-            missao.Data = Hoje();
-
-            lock (Trava)
-            {
-                var todas = CarregarTodas();
-                todas.RemoveAll(m => m.Data == missao.Data);
-                todas.Add(missao);
-                Gravar(todas);
-            }
-        }
-
-        /// <summary>Registra que um check-in aconteceu agora (controla o intervalo).</summary>
-        public void RegistrarCheckIn()
-        {
-            lock (Trava)
-            {
-                var todas = CarregarTodas();
-                var hoje = todas.FirstOrDefault(m => m.Data == Hoje());
-                if (hoje == null) return;
-                hoje.UltimoCheckIn = DateTime.Now;
-                Gravar(todas);
-            }
-        }
-
-        /// <summary>Apaga a missão de hoje (recomeçar o dia).</summary>
-        public void LimparHoje()
-        {
-            lock (Trava)
-            {
-                var todas = CarregarTodas();
-                todas.RemoveAll(m => m.Data == Hoje());
-                Gravar(todas);
             }
         }
 

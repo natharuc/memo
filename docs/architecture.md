@@ -88,6 +88,14 @@ Persistência dos lembretes em `%LOCALAPPDATA%\Memo\lembretes.json` (**não é
 segredo** — não passa pelo cofre). `ParserLembrete` interpreta a linguagem
 natural. Ver [Lembretes](#lembretes-bandeja) e [cli.md](cli.md).
 
+### `RailService` — `source/Memo.Service/Rail/RailService.cs`
+Memo Rail (assistente de foco): pool de tarefas com data em
+`%LOCALAPPDATA%\Memo\rail.json` (**não é segredo**; formato v2 com migração do
+v1). Pendências acumulam como atrasadas. `RailConfig` (nível de distração, dias,
+horário) vive em `Configuracoes.Rail`. A orquestração (check-ins, detector de
+desvio via janela ativa) fica no WPF: `Memo/Rail/RailCoordenador.cs`, dirigido
+pelo timer da bandeja. Ver [rail.md](rail.md).
+
 ### `HistoricoExecutar` — `source/Memo.Service/Seguranca/HistoricoExecutar.cs`
 Higiene de segurança: apaga os comandos `memo set ...` do histórico do "Executar"
 (Win+R / RunMRU), onde o segredo apareceria em texto puro. Best-effort, nunca

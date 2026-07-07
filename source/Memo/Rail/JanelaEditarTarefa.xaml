@@ -1,0 +1,49 @@
+<Window x:Class="Memo.Rail.JanelaEditarTarefa"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Editar tarefa" Width="440" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        FontFamily="Segoe UI" Background="{DynamicResource CorFundo}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="TAREFA" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <TextBox x:Name="campoTexto" Grid.Row="1" MinHeight="70" MaxHeight="160"
+                 TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+        <TextBlock Grid.Row="2" Foreground="{DynamicResource CorTextoFraco}" FontSize="11"
+                   Margin="0,4,0,0" TextWrapping="Wrap"
+                   Text="Enter quebra linha · **negrito** · *itálico*" />
+
+        <TextBlock Grid.Row="3" Text="LINK (AÇÃO DA TAREFA)" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,14,0,4" />
+        <TextBox x:Name="campoLink" Grid.Row="4" />
+
+        <StackPanel Grid.Row="5" Margin="0,14,0,0">
+            <TextBlock Text="PARA QUANDO" Foreground="{DynamicResource CorTextoFraco}"
+                       FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+            <StackPanel Orientation="Horizontal">
+                <DatePicker x:Name="campoData" Width="130" SelectedDateFormat="Short"
+                            FirstDayOfWeek="Monday" />
+                <Button Content="Hoje" Click="Hoje_Click" Margin="8,0,0,0" Padding="10,5" FontSize="12" />
+                <Button Content="Amanhã" Click="Amanha_Click" Margin="8,0,0,0" Padding="10,5" FontSize="12" />
+            </StackPanel>
+            <TextBlock x:Name="textoErro" Foreground="{DynamicResource CorPerigo}" FontSize="12"
+                       Margin="0,8,0,0" TextWrapping="Wrap" Visibility="Collapsed" />
+        </StackPanel>
+
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+            <Button Content="Cancelar" Click="Cancelar_Click" IsCancel="True" Margin="0,0,8,0" />
+            <Button Content="Salvar" Style="{StaticResource BotaoPrimario}"
+                    Click="Salvar_Click" IsDefault="True" />
+        </StackPanel>
+    </Grid>
+</Window>
