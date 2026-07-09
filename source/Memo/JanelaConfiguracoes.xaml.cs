@@ -141,7 +141,7 @@ namespace Memo
         {
             var p = new Service.Rail.RailConfig { Nivel = _railNivel }.Desvio();
             var quando = p.AvisarAposMinutos < 1
-                ? "assim que a distração abre (~1s)"
+                ? $"~{Math.Round(p.AvisarAposMinutos * 60)}s após abrir a distração"
                 : $"após {p.AvisarAposMinutos:0} min de distração";
             railNivelDescricao.Text =
                 $"Avisa {quando} · repete a cada {p.CooldownMinutos:0} min · " +

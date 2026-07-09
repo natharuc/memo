@@ -82,8 +82,9 @@ namespace Memo.Service.Rail
                 case NivelDistracao.MuitoAlto:
                     return new ParametrosDesvio { AvisarAposMinutos = 1, CooldownMinutos = 2, SilencioTrabalhandoMinutos = 15 };
                 case NivelDistracao.TDAH:
-                    // Avisa quase na hora (~1s) que a distração abre e insiste bastante.
-                    return new ParametrosDesvio { AvisarAposMinutos = 0, CooldownMinutos = 1, SilencioTrabalhandoMinutos = 10 };
+                    // Avisa ~3s depois que a distração abre (rápido, mas dá tempo do
+                    // cerebrinho aparecer perto do mouse) e insiste bastante.
+                    return new ParametrosDesvio { AvisarAposMinutos = 3.0 / 60, CooldownMinutos = 1, SilencioTrabalhandoMinutos = 10 };
                 default: // Medio
                     return new ParametrosDesvio { AvisarAposMinutos = 5, CooldownMinutos = 10, SilencioTrabalhandoMinutos = 60 };
             }

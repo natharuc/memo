@@ -29,13 +29,17 @@ min). Durante esse tempo, **toda vez que a janela ativa for uma distração**, o
 cobre a tela dela com um **backdrop** de tela cheia (`JanelaBloqueio`) — você não
 consegue mais ver a distração. O backdrop:
 
-- Aparece **só sobre a distração**, no monitor dela; ir para uma janela de trabalho
-  o esconde na hora (ele nunca cobre o que não é distração).
-- Mostra a tarefa atual e a contagem regressiva; tem um discreto **"encerrar modo
-  foco"** como válvula de escape.
-- É gerenciado por `Memo/Rail/BloqueioFoco.cs`, avaliado a cada tick do Rail
-  (independe do horário/nível). Enquanto ativo, o cerebrinho **não** abre aviso de
-  desvio — o backdrop já cuida.
+- Aparece **só sobre a distração**, no monitor dela; **sair dela (Alt+Tab) esconde
+  o backdrop na hora** — a reação é imediata (hook `EVENT_SYSTEM_FOREGROUND`, além
+  do tick de 1s). Ele nunca cobre o que não é distração.
+- **Fechar distração**: em **navegador** (chrome, edge, firefox, brave…) fecha só a
+  **aba ativa** (foca a janela + `Ctrl+W`); em outros apps, fecha a janela
+  (`WM_CLOSE`). O **modo foco continua ativo** pelo tempo escolhido — se você abrir
+  outra distração, ela é bloqueada de novo. Para desligar de vez, use **"encerrar
+  modo foco"** (ou espere o tempo acabar).
+- Mostra a tarefa atual e a contagem regressiva.
+- É gerenciado por `Memo/Rail/BloqueioFoco.cs`. Enquanto ativo, o cerebrinho
+  **não** abre aviso de desvio — o backdrop já cuida.
 
 ## Tarefas: datas, atrasadas e formatação
 
@@ -76,7 +80,7 @@ Configurável em **Configurações → Memo Rail** (`RailConfig.Nivel` →
 | Médio (padrão) | 5 min | 10 min | 60 min |
 | Alto | 2 min | 5 min | 30 min |
 | Muito alto | 1 min | 2 min | 15 min |
-| **TDAH** 🧠 | **~1 s** (assim que abre) | 1 min | 10 min |
+| **TDAH** 🧠 | **~3 s** (logo que abre) | 1 min | 10 min |
 
 O cooldown do desvio é **separado** do cooldown de check-ins (`CooldownMinutos`,
 que segue valendo só para check-ins). Para o **TDAH** reagir em ~1s, o Rail roda

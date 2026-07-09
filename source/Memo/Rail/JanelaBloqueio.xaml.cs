@@ -14,6 +14,9 @@ namespace Memo.Rail
         /// <summary>Usuário pediu para encerrar o modo foco (válvula de escape).</summary>
         public event Action EncerrarSolicitado;
 
+        /// <summary>Usuário pediu para fechar a janela/aba que está distraindo.</summary>
+        public event Action FecharDistracaoSolicitado;
+
         public JanelaBloqueio()
         {
             InitializeComponent();
@@ -33,6 +36,8 @@ namespace Memo.Rail
                 ? $"{(int)restante.TotalMinutes} min {restante.Seconds:00}s restantes"
                 : $"{restante.Seconds}s restantes";
         }
+
+        private void Fechar_Click(object sender, RoutedEventArgs e) => FecharDistracaoSolicitado?.Invoke();
 
         private void Encerrar_Click(object sender, RoutedEventArgs e) => EncerrarSolicitado?.Invoke();
     }
