@@ -69,9 +69,9 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
   por DPAPI pelo `NotificacaoService` (não vai para `Configuracoes`). Reusado pelo
   comando `memo notify`.
 - **Memo Rail**: habilitar, intervalo de check-in, **nível de distração**
-  (Baixo…Muito alto, com descrição do efeito), horário, **dias da semana**
-  (toggles Seg…Dom, ao menos um ativo) e lista de distrações
-  (→ `Configuracoes.Rail`; ver [rail.md](rail.md)).
+  (Baixo…Muito alto e **TDAH**, com descrição do efeito), **horário** (campos com
+  máscara HH:mm via `MascaraHora`), **dias da semana** (toggles Seg…Dom, ao menos
+  um ativo) e lista de distrações (→ `Configuracoes.Rail`; ver [rail.md](rail.md)).
 - `static bool JanelaConfiguracoes.Mostrar(owner)` → `true` se o usuário salvou
   (a `JanelaPrincipal` usa isso para re-ancorar a sessão com a nova duração).
 
@@ -101,10 +101,19 @@ O widget 🧠 do Rail, em **dois estágios**: primeiro uma **bolha redonda** com
 cerebrinho roxo **pulsando, centrada na posição do mouse** (`PosicionarNoMouse`,
 com conversão de DPI e limite à área útil); clicar expande para o **cartão** com
 a pergunta e os botões. `Topmost`, **`ShowActivated=False`** (não rouba o foco do
-teclado), auto-fecha em ~30s se ignorada. Dois modos (fábricas estáticas):
-`CheckIn(tarefa, link)` — **✔ Concluí / Ainda nela / +15 min / 🔗 Abrir** — e
-`Desvio(distracao, tarefa, link)` — **Voltar pro trilho / Estou trabalhando**.
-Quem decide quando abrir é o `RailCoordenador` (ver [rail.md](rail.md)).
+teclado). **Nunca fecha sozinho**: se ignorado por `RealocarMinutos`, `Realocar()`
+faz um fade e o reposiciona no mouse atual (para de mover ao expandir). Dois modos
+(fábricas estáticas): `CheckIn(tarefa, link, realocarApos)` — **✔ Concluí / Ainda
+nela / +15 min / 🔗 Abrir** — e `Desvio(distracao, tarefa, link, realocarApos)` —
+**Voltar pro trilho / Preciso focar / Estou trabalhando** (Preciso focar abre uma
+faixa de durações que ligam o modo foco). Quem decide quando abrir é o
+`RailCoordenador` (ver [rail.md](rail.md)).
+
+### `JanelaBloqueio` (`Rail/JanelaBloqueio.xaml[.cs]`)
+Backdrop de tela cheia do **modo foco**: `WindowStyle=None`, `AllowsTransparency`,
+`Topmost`, `ShowActivated=False`. Cobre a janela de distração (quase opaco, para
+não deixar ver) com a tarefa atual, contagem regressiva e um "encerrar modo foco".
+Mostrado/escondido e reposicionado por monitor pelo `BloqueioFoco` a cada tick.
 
 ### `JanelaGerarSenha` (`JanelaGerarSenha.xaml[.cs]`)
 Gerador de senha: comprimento e tipos de caractere (maiúsculas, minúsculas,

@@ -28,9 +28,11 @@ namespace Memo
         private readonly LembreteService _lembretes = new LembreteService();
         private readonly HashSet<string> _popupsAbertos = new HashSet<string>();
 
-        // Memo Rail (assistente de foco), dirigido pelo mesmo agendador.
-        private readonly Rail.RailCoordenador _railCoordenador =
-            new Rail.RailCoordenador(TimeSpan.FromSeconds(20));
+        // Memo Rail (assistente de foco), com timer próprio de 1s para reagir
+        // rápido à distração (nível TDAH avisa ~1s após abrir a distração).
+        private DispatcherTimer _agendadorRail;
+        private static readonly TimeSpan TickRail = TimeSpan.FromSeconds(1);
+        private readonly Rail.RailCoordenador _railCoordenador = new Rail.RailCoordenador(TickRail);
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -172,6 +174,7 @@ namespace Memo
         {
             _encerrando = true;
             _agendador?.Stop();
+            _agendadorRail?.Stop();
             if (_bandeja != null) { _bandeja.Visible = false; _bandeja.Dispose(); }
             _instancia?.Dispose();
             Shutdown();
@@ -257,13 +260,15 @@ namespace Memo
         private void IniciarAgendador()
         {
             _agendador = new DispatcherTimer { Interval = TimeSpan.FromSeconds(20) };
-            _agendador.Tick += (_, __) =>
-            {
-                VerificarLembretes();
-                _railCoordenador.Tick();
-            };
+            _agendador.Tick += (_, __) => VerificarLembretes();
             _agendador.Start();
             VerificarLembretes(); // pega atrasados logo ao iniciar
+
+            // Rail num timer curto próprio: reação rápida à distração sem acelerar
+            // a verificação de lembretes.
+            _agendadorRail = new DispatcherTimer { Interval = TickRail };
+            _agendadorRail.Tick += (_, __) => _railCoordenador.Tick();
+            _agendadorRail.Start();
         }
 
         private void VerificarLembretes()

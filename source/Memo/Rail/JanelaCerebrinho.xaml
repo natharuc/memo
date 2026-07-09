@@ -61,8 +61,23 @@
                     <WrapPanel x:Name="painelDesvio" Visibility="Collapsed">
                         <Button Content="Voltar pro trilho" Style="{StaticResource BotaoPrimario}"
                                 Click="VoltarTrilho_Click" Margin="0,0,8,6" />
+                        <Button Content="Preciso focar" Click="PrecisoFocar_Click" Margin="0,0,8,6" />
                         <Button Content="Estou trabalhando" Click="Trabalhando_Click" Margin="0,0,0,6" />
                     </WrapPanel>
+
+                    <!-- Escolha de tempo do modo foco (bloqueia distrações) -->
+                    <StackPanel x:Name="painelFoco" Visibility="Collapsed">
+                        <TextBlock Text="Bloquear distrações por:" Foreground="{DynamicResource CorTextoFraco}"
+                                   FontSize="12" Margin="0,0,0,8" />
+                        <WrapPanel>
+                            <Button Content="1 min" Tag="1" Click="Foco_Click" Margin="0,0,6,6" Padding="12,6" />
+                            <Button Content="5 min" Tag="5" Click="Foco_Click" Margin="0,0,6,6" Padding="12,6" />
+                            <Button Content="10 min" Tag="10" Click="Foco_Click" Margin="0,0,6,6" Padding="12,6" />
+                            <Button Content="25 min" Tag="25" Click="Foco_Click" Margin="0,0,6,6" Padding="12,6" />
+                            <Button Content="30 min" Tag="30" Click="Foco_Click" Margin="0,0,6,6" Padding="12,6" />
+                            <Button Content="60 min" Tag="60" Click="Foco_Click" Margin="0,0,0,6" Padding="12,6" />
+                        </WrapPanel>
+                    </StackPanel>
                 </StackPanel>
             </Grid>
         </Border>

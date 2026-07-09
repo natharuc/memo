@@ -37,6 +37,9 @@ namespace Memo
             Destacar(painelTema, _temaSelecionado);
             Destacar(painelDuracao, _minutosSelecionado.ToString(CultureInfo.InvariantCulture));
 
+            MascaraHora.Aplicar(railInicio);
+            MascaraHora.Aplicar(railFim);
+
             CarregarNotificacoes();
             CarregarRail();
         }
@@ -137,9 +140,12 @@ namespace Memo
         private void AtualizarNivelDescricao()
         {
             var p = new Service.Rail.RailConfig { Nivel = _railNivel }.Desvio();
+            var quando = p.AvisarAposMinutos < 1
+                ? "assim que a distração abre (~1s)"
+                : $"após {p.AvisarAposMinutos:0} min de distração";
             railNivelDescricao.Text =
-                $"Avisa após {p.AvisarAposMinutos:0} min de distração · repete a cada " +
-                $"{p.CooldownMinutos:0} min · \"estou trabalhando\" silencia por {p.SilencioTrabalhandoMinutos:0} min.";
+                $"Avisa {quando} · repete a cada {p.CooldownMinutos:0} min · " +
+                $"\"estou trabalhando\" silencia por {p.SilencioTrabalhandoMinutos:0} min.";
         }
 
         private void RailDia_Click(object sender, RoutedEventArgs e)

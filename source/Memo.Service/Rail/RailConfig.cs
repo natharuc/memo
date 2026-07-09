@@ -5,7 +5,7 @@ using System.Linq;
 namespace Memo.Service.Rail
 {
     /// <summary>Quão rápido/insistente é o aviso de desvio de foco.</summary>
-    public enum NivelDistracao { Baixo, Medio, Alto, MuitoAlto }
+    public enum NivelDistracao { Baixo, Medio, Alto, MuitoAlto, TDAH }
 
     /// <summary>Efeitos do nível: limiar, cooldown e silêncio do "estou trabalhando".</summary>
     public class ParametrosDesvio
@@ -35,6 +35,12 @@ namespace Memo.Service.Rail
 
         /// <summary>Nível do detector de desvio (quanto maior, mais rápido e insistente).</summary>
         public NivelDistracao Nivel { get; set; } = NivelDistracao.Medio;
+
+        /// <summary>
+        /// Minutos que o cerebrinho fica parado (sem interação) antes de se
+        /// reposicionar na posição atual do mouse — ele nunca some sozinho.
+        /// </summary>
+        public int RealocarMinutos { get; set; } = 2;
 
         /// <summary>Obsoleto (v1): substituído pelo Nivel. Mantido só para o JSON antigo.</summary>
         public int DesvioMinutos { get; set; } = 5;
@@ -75,6 +81,9 @@ namespace Memo.Service.Rail
                     return new ParametrosDesvio { AvisarAposMinutos = 2, CooldownMinutos = 5, SilencioTrabalhandoMinutos = 30 };
                 case NivelDistracao.MuitoAlto:
                     return new ParametrosDesvio { AvisarAposMinutos = 1, CooldownMinutos = 2, SilencioTrabalhandoMinutos = 15 };
+                case NivelDistracao.TDAH:
+                    // Avisa quase na hora (~1s) que a distração abre e insiste bastante.
+                    return new ParametrosDesvio { AvisarAposMinutos = 0, CooldownMinutos = 1, SilencioTrabalhandoMinutos = 10 };
                 default: // Medio
                     return new ParametrosDesvio { AvisarAposMinutos = 5, CooldownMinutos = 10, SilencioTrabalhandoMinutos = 60 };
             }

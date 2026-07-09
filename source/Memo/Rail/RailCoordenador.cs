@@ -18,6 +18,7 @@ namespace Memo.Rail
         private static readonly TimeSpan OciosidadeMaxima = TimeSpan.FromMinutes(3);
 
         private readonly RailService _rail = new RailService();
+        private readonly BloqueioFoco _bloqueio = new BloqueioFoco();
         private readonly TimeSpan _tick;
 
         // Estado em memória (privacidade: nada disso vai para disco).
@@ -38,6 +39,10 @@ namespace Memo.Rail
         /// <summary>Chamado a cada tick do agendador da bandeja (thread de UI).</summary>
         public void Tick()
         {
+            // Modo foco funciona independentemente dos gates abaixo (horário etc.)
+            // e mostra/esconde o backdrop conforme a janela ativa.
+            _bloqueio.Avaliar();
+
             var cfg = Configuracoes.Atual.Rail;
             if (cfg == null || !cfg.Habilitado) return;
 
@@ -52,8 +57,11 @@ namespace Memo.Rail
                 return;
             }
 
+            // Uma única leitura do rail.json por tick (o timer roda em intervalo curto).
+            var (missao, ultimoCheckIn) = _rail.Estado();
+
             // 1) Sem missão para hoje (nem atrasadas): pergunta uma vez por dia.
-            if (!_rail.ExisteMissaoParaHoje())
+            if (missao.DeHoje.Count == 0 && missao.Atrasadas.Count == 0)
             {
                 var hoje = agora.ToString("yyyy-MM-dd");
                 if (cfg.PerguntarMissao && _dataMissaoPerguntada != hoje)
@@ -65,7 +73,6 @@ namespace Memo.Rail
                 return;
             }
 
-            var missao = _rail.MissaoAtual();
             var pendente = missao.ProximaPendente();
             if (pendente == null)
             {
@@ -78,7 +85,10 @@ namespace Memo.Rail
             var termo = TermoDistracaoAtiva(cfg);
             _minutosEmDistracao = termo != null ? _minutosEmDistracao + _tick.TotalMinutes : 0;
 
-            if (termo != null && _minutosEmDistracao >= desvio.AvisarAposMinutos &&
+            // Se o modo foco está ativo, o backdrop já cuida da distração — não
+            // precisa também abrir o cerebrinho.
+            if (termo != null && !_bloqueio.Ativo &&
+                _minutosEmDistracao >= desvio.AvisarAposMinutos &&
                 agora - _ultimoDesvio >= TimeSpan.FromMinutes(desvio.CooldownMinutos))
             {
                 MostrarDesvio(termo, pendente, desvio);
@@ -86,15 +96,14 @@ namespace Memo.Rail
             }
 
             // 3) Check-in por tempo (cooldown próprio, independente do desvio).
-            var ultimo = _rail.UltimoCheckIn();
-            if (ultimo == null || ultimo.Value.Date != agora.Date)
+            if (ultimoCheckIn == null || ultimoCheckIn.Value.Date != agora.Date)
             {
                 // Primeiro tick do dia: ancora agora para contar o intervalo.
                 _rail.RegistrarCheckIn();
                 return;
             }
 
-            var proximo = _checkInAdiadoPara ?? ultimo.Value.AddMinutes(cfg.CheckInMinutos);
+            var proximo = _checkInAdiadoPara ?? ultimoCheckIn.Value.AddMinutes(cfg.CheckInMinutos);
             var cooldownOk = agora - _ultimaAparicao >= TimeSpan.FromMinutes(cfg.CooldownMinutos);
             if (agora >= proximo && cooldownOk)
                 MostrarCheckIn(pendente);
@@ -131,9 +140,15 @@ namespace Memo.Rail
                 : texto;
         }
 
+        private static TimeSpan Realocar()
+        {
+            var min = Math.Max(1, Configuracoes.Atual.Rail?.RealocarMinutos ?? 2);
+            return TimeSpan.FromMinutes(min);
+        }
+
         private void MostrarCheckIn(ItemMissao tarefa)
         {
-            var popup = JanelaCerebrinho.CheckIn(TextoTarefa(tarefa), tarefa.Link);
+            var popup = JanelaCerebrinho.CheckIn(TextoTarefa(tarefa), tarefa.Link, Realocar());
 
             popup.Concluiu += () =>
             {
@@ -155,10 +170,16 @@ namespace Memo.Rail
 
         private void MostrarDesvio(string termo, ItemMissao tarefa, ParametrosDesvio desvio)
         {
-            var popup = JanelaCerebrinho.Desvio(termo, TextoTarefa(tarefa), tarefa.Link);
+            var popup = JanelaCerebrinho.Desvio(termo, TextoTarefa(tarefa), tarefa.Link, Realocar());
 
             popup.Trabalhando += () =>
                 _silenciados[termo] = DateTime.Now.AddMinutes(desvio.SilencioTrabalhandoMinutos);
+
+            popup.PrecisoFocar += duracao =>
+            {
+                _bloqueio.Iniciar(duracao, FormatadorTexto.SemFormatacao(tarefa.Texto));
+                Toast.Mostrar($"Modo foco por {duracao.TotalMinutes:0} min — distrações bloqueadas 🧠", true);
+            };
 
             _ultimoDesvio = DateTime.Now;
             Abrir(popup, aoFechar: () => _minutosEmDistracao = 0);

@@ -8,8 +8,9 @@ namespace Memo.Rail
     /// <summary>Snapshot da janela em primeiro plano.</summary>
     internal sealed class JanelaAtiva
     {
-        public string Processo { get; set; }  // ex.: "chrome"
-        public string Titulo { get; set; }    // ex.: "YouTube - Google Chrome"
+        public IntPtr Hwnd { get; set; }       // handle da janela (monitor / comparação)
+        public string Processo { get; set; }   // ex.: "chrome"
+        public string Titulo { get; set; }     // ex.: "YouTube - Google Chrome"
     }
 
     /// <summary>
@@ -57,7 +58,7 @@ namespace Memo.Rail
                     catch { /* processo já saiu */ }
                 }
 
-                return new JanelaAtiva { Processo = processo, Titulo = sb.ToString() };
+                return new JanelaAtiva { Hwnd = hwnd, Processo = processo, Titulo = sb.ToString() };
             }
             catch
             {

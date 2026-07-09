@@ -15,11 +15,27 @@ bandeja; é **opt-in** (desligado por padrão).
    surge como uma bolha pulsando **na posição do mouse**; um clique expande:
    *"Ainda na '<tarefa>'?"* → **✔ Concluí** · **Ainda nela** · **+15 min** ·
    **🔗 Abrir**.
-3. **Detector de desvio** — a cada tick (~20s), o Rail olha a **janela em primeiro
+3. **Detector de desvio** — a cada tick (1s), o Rail olha a **janela em primeiro
    plano** (processo + título). Se bater com um termo da lista de **distrações**
    por N minutos contínuos (N vem do **nível de distração**), o cerebrinho aparece:
-   **Voltar pro trilho** (abre o link da tarefa, se houver) · **Estou trabalhando**
-   (silencia aquele termo por um tempo, também do nível).
+   **Voltar pro trilho** (abre o link da tarefa, se houver) · **Preciso focar**
+   (liga o modo foco — abaixo) · **Estou trabalhando** (silencia aquele termo por
+   um tempo, também do nível).
+
+## Modo foco ("Preciso focar")
+
+No aviso de desvio, **Preciso focar** oferece durações (1 · 5 · 10 · 25 · 30 · 60
+min). Durante esse tempo, **toda vez que a janela ativa for uma distração**, o Rail
+cobre a tela dela com um **backdrop** de tela cheia (`JanelaBloqueio`) — você não
+consegue mais ver a distração. O backdrop:
+
+- Aparece **só sobre a distração**, no monitor dela; ir para uma janela de trabalho
+  o esconde na hora (ele nunca cobre o que não é distração).
+- Mostra a tarefa atual e a contagem regressiva; tem um discreto **"encerrar modo
+  foco"** como válvula de escape.
+- É gerenciado por `Memo/Rail/BloqueioFoco.cs`, avaliado a cada tick do Rail
+  (independe do horário/nível). Enquanto ativo, o cerebrinho **não** abre aviso de
+  desvio — o backdrop já cuida.
 
 ## Tarefas: datas, atrasadas e formatação
 
@@ -60,9 +76,13 @@ Configurável em **Configurações → Memo Rail** (`RailConfig.Nivel` →
 | Médio (padrão) | 5 min | 10 min | 60 min |
 | Alto | 2 min | 5 min | 30 min |
 | Muito alto | 1 min | 2 min | 15 min |
+| **TDAH** 🧠 | **~1 s** (assim que abre) | 1 min | 10 min |
 
 O cooldown do desvio é **separado** do cooldown de check-ins (`CooldownMinutos`,
-que segue valendo só para check-ins).
+que segue valendo só para check-ins). Para o **TDAH** reagir em ~1s, o Rail roda
+num timer próprio de **1 segundo** (`App._agendadorRail`), separado do agendador
+de lembretes (20s); cada tick faz uma única leitura do `rail.json`
+(`RailService.Estado`).
 
 ## Anti-perturbação (por design)
 
@@ -70,9 +90,11 @@ que segue valendo só para check-ins).
 - **Ociosidade**: sem input por >3 min = usuário longe → não conta nem perturba.
 - **Horário e dias**: só age na janela configurada (`HoraInicio`–`HoraFim`) e nos
   **dias da semana selecionados** (`DiasAtivos`, toggles Seg…Dom; padrão seg–sex).
-- **Gentil, mas visível**: o cerebrinho surge como bolha 🧠 pulsando na posição do
-  mouse; não rouba o foco do teclado (`ShowActivated=False`), some sozinho após
-  ~30s se ignorado e só volta no próximo ciclo.
+- **Insistente por design**: o cerebrinho surge como bolha 🧠 pulsando na posição
+  do mouse; não rouba o foco do teclado (`ShowActivated=False`) e **nunca some
+  sozinho** — se você o ignorar por `RealocarMinutos` (padrão 2 min), ele some de
+  onde estava e **reaparece na posição atual do mouse**, até você clicar. Ao
+  expandir para o cartão, ele para de se mover (você já está interagindo).
 - **Missão cumprida** (ou sem missão): silêncio total.
 
 ## Privacidade
@@ -119,6 +141,7 @@ memo-cli rail --json                     # { date, items: [{n, text, done, link,
 | `Memo/Rail/JanelaMissao.xaml` | Checklist com seções e cards. |
 | `Memo/Rail/JanelaEditarTarefa.xaml` | Edição de texto/link/data. |
 | `Memo/Rail/JanelaCerebrinho.xaml` | O widget 🧠 (bolha no mouse → cartão). |
+| `Memo/Rail/BloqueioFoco.cs` + `JanelaBloqueio.xaml` | Modo foco: backdrop de tela cheia sobre a distração. |
 
 O `RailCoordenador.Tick()` é chamado pelo mesmo `DispatcherTimer` de 20s que
 verifica lembretes (`App.IniciarAgendador`).

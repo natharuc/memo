@@ -89,24 +89,37 @@ namespace Memo.Service.Rail
         /// <summary>Missão visível (atrasadas + hoje + futuras), na ordem canônica.</summary>
         public MissaoVisivel MissaoAtual()
         {
+            lock (Trava) return MontarVisivel(CarregarDados().Itens);
+        }
+
+        /// <summary>
+        /// Missão + último check-in numa única leitura do arquivo — usado pelo
+        /// coordenador, que roda em intervalo curto (evita ler o disco 3x por tick).
+        /// </summary>
+        public (MissaoVisivel Missao, DateTime? UltimoCheckIn) Estado()
+        {
             lock (Trava)
             {
-                var hoje = Hoje();
-                var itens = CarregarDados().Itens;
-
-                return new MissaoVisivel
-                {
-                    Atrasadas = itens.Where(i => i.Atrasada(hoje))
-                                     .OrderBy(i => i.Data, StringComparer.Ordinal).ToList(),
-                    // "Hoje" inclui atrasadas concluídas hoje (ficam visíveis,
-                    // tachadas, e um clique errado pode ser desfeito).
-                    DeHoje = itens.Where(i => i.Data == hoje ||
-                                 (i.Concluido && i.ConcluidoEm?.Date == DateTime.Today &&
-                                  string.Compare(i.Data, hoje, StringComparison.Ordinal) < 0)).ToList(),
-                    Futuras = itens.Where(i => string.Compare(i.Data, hoje, StringComparison.Ordinal) > 0)
-                                   .OrderBy(i => i.Data, StringComparer.Ordinal).ToList()
-                };
+                var dados = CarregarDados();
+                return (MontarVisivel(dados.Itens), dados.UltimoCheckIn);
             }
+        }
+
+        private static MissaoVisivel MontarVisivel(List<ItemMissao> itens)
+        {
+            var hoje = DateTime.Now.ToString("yyyy-MM-dd");
+            return new MissaoVisivel
+            {
+                Atrasadas = itens.Where(i => i.Atrasada(hoje))
+                                 .OrderBy(i => i.Data, StringComparer.Ordinal).ToList(),
+                // "Hoje" inclui atrasadas concluídas hoje (ficam visíveis,
+                // tachadas, e um clique errado pode ser desfeito).
+                DeHoje = itens.Where(i => i.Data == hoje ||
+                             (i.Concluido && i.ConcluidoEm?.Date == DateTime.Today &&
+                              string.Compare(i.Data, hoje, StringComparison.Ordinal) < 0)).ToList(),
+                Futuras = itens.Where(i => string.Compare(i.Data, hoje, StringComparison.Ordinal) > 0)
+                               .OrderBy(i => i.Data, StringComparer.Ordinal).ToList()
+            };
         }
 
         /// <summary>Há missão definida para hoje (itens de hoje, mesmo concluídos, ou atrasadas)?</summary>

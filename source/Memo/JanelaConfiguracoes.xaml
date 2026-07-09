@@ -241,18 +241,24 @@
                             <Button Content="Médio" Tag="Medio" Click="RailNivel_Click" Margin="0,0,8,8" />
                             <Button Content="Alto" Tag="Alto" Click="RailNivel_Click" Margin="0,0,8,8" />
                             <Button Content="Muito alto" Tag="MuitoAlto" Click="RailNivel_Click" Margin="0,0,8,8" />
+                            <Button Content="TDAH 🧠" Tag="TDAH" Click="RailNivel_Click" Margin="0,0,8,8" />
                         </WrapPanel>
                         <TextBlock x:Name="railNivelDescricao" TextWrapping="Wrap" FontSize="12"
                                    Foreground="{DynamicResource CorTextoFraco}" Margin="0,0,0,12" />
 
                         <TextBlock Text="HORÁRIO DE ATUAÇÃO" Foreground="{DynamicResource CorTextoFraco}"
                                    FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <TextBox x:Name="railInicio" Width="70" />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBox x:Name="railInicio" Width="92" FontSize="15"
+                                     HorizontalContentAlignment="Center" MaxLength="5" />
                             <TextBlock Text="até" Foreground="{DynamicResource CorTextoFraco}"
-                                       VerticalAlignment="Center" Margin="10,0" />
-                            <TextBox x:Name="railFim" Width="70" />
+                                       VerticalAlignment="Center" Margin="12,0" />
+                            <TextBox x:Name="railFim" Width="92" FontSize="15"
+                                     HorizontalContentAlignment="Center" MaxLength="5" />
                         </StackPanel>
+                        <TextBlock Text="Formato 24h — ex.: 09:00 às 18:00 (é só digitar os números)."
+                                   Foreground="{DynamicResource CorTextoFraco}" FontSize="11"
+                                   Margin="0,0,0,12" TextWrapping="Wrap" />
 
                         <TextBlock Text="DIAS DA SEMANA" Foreground="{DynamicResource CorTextoFraco}"
                                    FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
