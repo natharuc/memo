@@ -316,6 +316,24 @@ code {
 }
 .rodape a:hover { color: var(--texto); }
 
+/* Subtítulo de seção */
+.secao-sub {
+  text-align: center;
+  color: var(--texto-fraco);
+  font-size: 16px;
+  max-width: 640px;
+  margin: -24px auto 40px;
+}
+.secao-sub code { font-size: .92em; }
+
+/* Linha de comando */
+.cli-titulo { font-size: 15px; margin-bottom: 12px; }
+.lista-cli { list-style: none; margin-bottom: 20px; }
+.lista-cli li { margin-bottom: 9px; font-size: 14px; color: var(--texto-fraco); }
+.lista-seg-cli { border-top: 1px solid var(--borda); padding-top: 16px; }
+.lista-seg-cli li { color: var(--texto-fraco); }
+.lista-seg-cli code { color: var(--destaque); }
+
 /* ---------- Responsivo ---------- */
 @media (max-width: 860px) {
   .hero-grid,

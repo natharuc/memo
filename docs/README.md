@@ -7,6 +7,7 @@ que vão dar manutenção no código.
 
 | Documento | Conteúdo |
 |-----------|----------|
+| [features.md](features.md) | **Catálogo de funcionalidades.** Tudo que o Memo faz, por capacidade, com exemplos e links. |
 | [agent-guide.md](agent-guide.md) | **Comece aqui se você é um agente de IA.** Mapa do código, como fazer mudanças comuns, invariantes que não podem ser quebradas e lições do incidente de perda de dados. |
 | [architecture.md](architecture.md) | Visão geral, componentes, fluxo de dados e camadas. |
 | [security.md](security.md) | Criptografia, formatos de arquivo (vault.json, documentos, sessão), modelo de ameaças e o formato legado. |

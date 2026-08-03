@@ -76,7 +76,8 @@ Detalhes de build, execução e publicação em [docs/development.md](docs/devel
 
 ## Documentação
 
-Comece por **[docs/README.md](docs/README.md)**. Para um agente de IA que vai
+Comece por **[docs/README.md](docs/README.md)**. Para ver tudo que o Memo faz,
+o **[catálogo de funcionalidades](docs/features.md)**. Para um agente de IA que vai
 trabalhar no código, o ponto de partida é **[docs/agent-guide.md](docs/agent-guide.md)**.
 
 > ⚠️ **Atenção a quem mexe na criptografia ou na migração:** leia

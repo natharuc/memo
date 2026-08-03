@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Memo — seu cofre de segredos</title>
-  <meta name="description" content="Memo é um cofre de segredos para Windows: criptografia AES-256-GCM, busca instantânea, GUI e linha de comando. Seus dados nunca saem da sua máquina." />
+  <meta name="description" content="Memo é um cofre de segredos para Windows: um arquivo cifrado por segredo (AES-256-GCM), busca instantânea, gerador de senha, lembretes em linguagem natural, GUI e uma CLI scriptável. Seus dados nunca saem da sua máquina." />
   <link rel="icon" type="image/png" href="assets/favicon.png" />
   <link rel="apple-touch-icon" href="assets/memo-symbol.png" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Memo — cofre de segredos para Windows" />
-  <meta property="og:description" content="Cofre local com criptografia AES-256-GCM, GUI e CLI. Seus dados nunca saem da sua máquina." />
+  <meta property="og:description" content="Cofre local, file-based, com AES-256-GCM, gerador de senha, lembretes e CLI. Seus dados nunca saem da sua máquina." />
   <meta property="og:image" content="assets/memo-symbol.png" />
   <meta name="twitter:card" content="summary" />
   <link rel="stylesheet" href="style.css" />
@@ -22,7 +22,8 @@
       </a>
       <nav class="nav">
         <a href="#recursos">Recursos</a>
-        <a href="#como-funciona">Como funciona</a>
+        <a href="#lembretes">Lembretes</a>
+        <a href="#comandos">Comandos</a>
         <a href="#seguranca">Segurança</a>
         <a class="nav-gh" href="https://github.com/natharuc/memo" target="_blank" rel="noopener">GitHub</a>
       </nav>
@@ -38,14 +39,14 @@
           <h1>Seus segredos, trancados de verdade.</h1>
           <p class="subtitulo">
             O <strong>Memo</strong> é um cofre local para senhas, tokens e anotações sensíveis.
-            Tudo criptografado com AES-256-GCM e protegido por uma senha-mestra que só você conhece —
-            nada vai para a nuvem.
+            Cada segredo é <strong>um arquivo cifrado</strong> (AES-256-GCM) numa pasta sua — dá para
+            sincronizar no OneDrive, usar pela interface ou por uma <strong>CLI scriptável</strong>. Nada vai para a nuvem de terceiros.
           </p>
           <div class="acoes">
             <a class="botao botao-primario" href="https://github.com/natharuc/memo/releases/latest" target="_blank" rel="noopener">
               Baixar para Windows
             </a>
-            <a class="botao botao-secundario" href="#como-funciona">Ver como funciona</a>
+            <a class="botao botao-secundario" href="#recursos">Ver recursos</a>
           </div>
           <p class="nota-download">Download único, sem instalador. Atualizações automáticas dentro do app.</p>
         </div>
@@ -86,27 +87,18 @@
     <!-- RECURSOS -->
     <section id="recursos" class="secao">
       <div class="container">
-        <h2>Por que usar o Memo</h2>
+        <h2>Tudo que o Memo faz</h2>
+        <p class="secao-sub">Um cofre completo, mas sem nada rodando na nuvem.</p>
         <div class="cards">
           <article class="card">
             <div class="card-icone">🔒</div>
             <h3>Criptografia forte</h3>
-            <p>AES-256-GCM com chave derivada via PBKDF2-SHA256 (200.000 iterações). Cada segredo é um arquivo cifrado.</p>
+            <p>AES-256-GCM (cifra autenticada) com chave derivada por PBKDF2-SHA256, 200.000 iterações. Cada segredo é um arquivo cifrado.</p>
           </article>
           <article class="card">
-            <div class="card-icone">💻</div>
-            <h3>GUI + linha de comando</h3>
-            <p>Interface gráfica para o dia a dia e comandos <code>memo get</code> / <code>memo set</code> para automação.</p>
-          </article>
-          <article class="card">
-            <div class="card-icone">⚡</div>
-            <h3>Busca instantânea</h3>
-            <p>Encontre qualquer segredo digitando. Enter copia o valor direto para a área de transferência.</p>
-          </article>
-          <article class="card">
-            <div class="card-icone">🔁</div>
-            <h3>Atualização automática</h3>
-            <p>O app verifica novas versões no GitHub e avisa você. Um clique para atualizar e reiniciar.</p>
+            <div class="card-icone">🗂️</div>
+            <h3>Um arquivo por segredo</h3>
+            <p>Modelo file-based: guarde o cofre numa pasta sincronizada (ex.: OneDrive) e tenha seus segredos em qualquer PC. Sem banco central.</p>
           </article>
           <article class="card">
             <div class="card-icone">🏠</div>
@@ -114,10 +106,101 @@
             <p>Sem servidores, sem telemetria, sem cadastro. Seus dados ficam só na sua máquina (e no seu backup).</p>
           </article>
           <article class="card">
-            <div class="card-icone">⏱️</div>
-            <h3>Sessão temporária</h3>
-            <p>Depois de destrancado, o cofre fica acessível por uma janela curta — sem redigitar a senha toda hora.</p>
+            <div class="card-icone">⚡</div>
+            <h3>Busca instantânea</h3>
+            <p>Encontre qualquer segredo digitando. Enter copia o valor direto para a área de transferência.</p>
           </article>
+          <article class="card">
+            <div class="card-icone">🧰</div>
+            <h3>GUI + CLI scriptável</h3>
+            <p>Interface para o dia a dia e o <code>memo-cli</code> para automação: saída no stdout, <code>--json</code>, <code>--bytes</code> e exit codes.</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">🎲</div>
+            <h3>Gerador de senha &amp; GUID</h3>
+            <p>Gere senhas fortes pelas suas regras (tamanho e tipos de caractere) e UUIDs — copiados na hora, ou salvos direto no cofre.</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">⏰</div>
+            <h3>Lembretes</h3>
+            <p>Em linguagem natural (<code>9h tomorrow</code>, <code>every 30 minutes</code>). O app avisa pela bandeja, com opção de adiar.</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">⏱️</div>
+            <h3>Sessão &amp; bloqueio</h3>
+            <p>Depois de destrancado, o cofre fica acessível por uma janela curta e configurável. Um clique no cadeado tranca na hora.</p>
+          </article>
+          <article class="card">
+            <div class="card-icone">🎨</div>
+            <h3>Temas &amp; auto-update</h3>
+            <p>Tema claro ou escuro trocado em runtime. E o app verifica novas versões no GitHub, valida por SHA256 e atualiza com um clique.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEMBRETES -->
+    <section id="lembretes" class="secao secao-alt">
+      <div class="container seguranca-grid">
+        <div>
+          <h2>Lembretes em linguagem natural</h2>
+          <p>
+            Diga o que lembrar e quando, do seu jeito — em português ou inglês. O Memo interpreta a
+            data/hora, guarda o lembrete e avisa pela bandeja no momento certo, com som e um popup.
+            Lembrete não é segredo: não pede a senha-mestra.
+          </p>
+          <ul class="lista-seg">
+            <li>Hora do dia: <code>10:00</code>, <code>22h</code>, <code>amanhã 9:30</code>.</li>
+            <li>Relativo: <code>in 15 minutes</code>, <code>daqui a 2 horas</code>.</li>
+            <li>Recorrente: <code>every 30 minutes</code>, <code>a cada 2 horas</code>.</li>
+            <li>No aviso, dá para <strong>concluir</strong> ou <strong>adiar</strong> (soneca).</li>
+          </ul>
+        </div>
+        <div class="codigo">
+          <div class="codigo-barra">Lembretes</div>
+          <pre><code>memo remember pagar boleto 9h tomorrow
+memo remember ligar joão in 15 minutes
+memo remember beber agua every 30 minutes
+memo remember ver tarefa 477987 22h</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMANDOS / CLI -->
+    <section id="comandos" class="secao">
+      <div class="container">
+        <h2>Feito para automação</h2>
+        <p class="secao-sub">O <code>memo-cli</code> cospe o resultado no stdout — pipes, scripts e exit codes.</p>
+        <div class="seguranca-grid">
+          <div class="codigo">
+            <div class="codigo-barra">PowerShell / bash</div>
+            <pre><code><span class="c-com"># destranca uma vez; a sessão vale para os próximos</span>
+memo-cli unlock --password "$MEMO_PW"
+
+<span class="c-com"># lê um segredo (stdout) e usa em outro comando</span>
+$token = memo-cli get "github token" --text
+
+<span class="c-com"># grava a partir de um pipe, sem deixar rastro</span>
+echo -n $senha | memo-cli set "api key" --stdin
+
+<span class="c-com"># lista em JSON para processar</span>
+memo-cli list --json</code></pre>
+          </div>
+          <div>
+            <h3 class="cli-titulo">Comandos</h3>
+            <ul class="lista-cli">
+              <li><code>get</code> · <code>set</code> · <code>list</code> · <code>del</code></li>
+              <li><code>pass</code> · <code>guid</code> · <code>remember</code></li>
+              <li><code>unlock</code> · <code>lock</code> · <code>migrar</code></li>
+              <li><code>config --dir</code> · <code>version</code> · <code>help</code></li>
+            </ul>
+            <ul class="lista-seg lista-seg-cli">
+              <li>Saída <code>--text</code> · <code>--json</code> · <code>--bytes</code> · <code>--copy</code>.</li>
+              <li>Senha via <code>--password</code> ou <code>MEMO_PASSWORD</code>.</li>
+              <li>Pasta do cofre via <code>MEMO_DIR</code> ou <code>config --dir</code>.</li>
+              <li>Exit codes: <code>0</code> ok · <code>2</code> trancado · <code>3</code> não encontrado.</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -130,7 +213,7 @@
           <div class="passo">
             <span class="passo-num">1</span>
             <h3>Crie seu cofre</h3>
-            <p>No primeiro uso, defina uma senha-mestra. Ela protege todos os documentos e não pode ser recuperada se esquecida.</p>
+            <p>No primeiro uso, escolha a pasta e defina uma senha-mestra. Ela protege todos os documentos e não pode ser recuperada se esquecida.</p>
           </div>
           <div class="passo">
             <span class="passo-num">2</span>
@@ -140,7 +223,7 @@
           <div class="passo">
             <span class="passo-num">3</span>
             <h3>Acesse quando precisar</h3>
-            <p>Busque, copie e edite com um clique. Pela CLI: <code>memo get "github token"</code> já copia o valor.</p>
+            <p>Busque, copie e edite com um clique. Pela CLI: <code>memo-cli get "github token"</code> já devolve o valor.</p>
           </div>
         </div>
       </div>
@@ -159,8 +242,10 @@
           <ul class="lista-seg">
             <li>Cifragem autenticada AES-256-GCM (detecta adulteração).</li>
             <li>Derivação de chave PBKDF2-SHA256 com 200.000 iterações.</li>
-            <li>Sessão isolada por cofre e validada contra o arquivo de configuração.</li>
-            <li>Executável assinado e verificado por SHA256 antes de cada atualização.</li>
+            <li>Sessão isolada por cofre e validada contra o cofre atual.</li>
+            <li>Chaves sanitizadas contra path traversal (<code>/</code>, <code>\</code>, <code>..</code>).</li>
+            <li>Comandos <code>memo set</code> apagados do histórico do Win+R.</li>
+            <li>Atualização verificada por SHA256 antes de trocar o executável.</li>
           </ul>
         </div>
         <div class="codigo">
@@ -170,6 +255,9 @@ memo get "github token"
 
 <span class="c-com"># cria ou atualiza um segredo</span>
 memo set "chave pix" = a1b2c3d4
+
+<span class="c-com"># gera uma senha e salva no cofre</span>
+memo pass "wifi casa"
 
 <span class="c-com"># abre a interface gráfica</span>
 memo</code></pre>
