@@ -29,6 +29,9 @@ namespace Memo.Rail
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
+        [DllImport("user32.dll")]
+        private static extern bool IsWindow(IntPtr hWnd);
+
         [StructLayout(LayoutKind.Sequential)]
         private struct LASTINPUTINFO
         {
@@ -42,9 +45,22 @@ namespace Memo.Rail
         /// <summary>Janela em primeiro plano, ou null se não der para ler.</summary>
         public static JanelaAtiva ObterJanelaAtiva()
         {
+            var hwnd = GetForegroundWindow();
+            return hwnd == IntPtr.Zero ? null : Descrever(hwnd);
+        }
+
+        /// <summary>True se o handle ainda aponta para uma janela existente.</summary>
+        public static bool JanelaViva(IntPtr hwnd)
+        {
+            try { return hwnd != IntPtr.Zero && IsWindow(hwnd); }
+            catch { return false; }
+        }
+
+        /// <summary>Lê processo + título de uma janela específica (ou null se não der).</summary>
+        public static JanelaAtiva Descrever(IntPtr hwnd)
+        {
             try
             {
-                var hwnd = GetForegroundWindow();
                 if (hwnd == IntPtr.Zero) return null;
 
                 var sb = new StringBuilder(512);

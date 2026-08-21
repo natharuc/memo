@@ -69,9 +69,17 @@ namespace Memo.Rail
                 var janela = MonitorFoco.ObterJanelaAtiva();
                 if (janela == null) return;
 
-                // A própria overlay em primeiro plano não conta como "saiu da distração".
+                // A própria overlay ficou em primeiro plano (clique nos botões dela,
+                // ou a distração foi FECHADA e o Windows ativou a overlay topmost).
+                // Não dá para decidir pela overlay — decide pelo ALVO: se a janela da
+                // distração sumiu ou deixou de ser distração, o backdrop fecha.
                 if (_overlay != null && _overlay.IsVisible && janela.Hwnd == _overlay.Handle)
                 {
+                    if (!MonitorFoco.JanelaViva(_alvoHwnd) || !AlvoEhDistracao())
+                    {
+                        Esconder();
+                        return;
+                    }
                     _overlay.AtualizarContagem(_ativoAte - DateTime.Now);
                     return;
                 }
@@ -91,6 +99,14 @@ namespace Memo.Rail
             {
                 // Bloqueio nunca pode derrubar o app.
             }
+        }
+
+        /// <summary>A janela-alvo (coberta pelo backdrop) ainda é uma distração agora?</summary>
+        private bool AlvoEhDistracao()
+        {
+            var alvo = MonitorFoco.Descrever(_alvoHwnd);
+            if (alvo == null) return false;
+            return RailService.EhDistracao(alvo.Processo, alvo.Titulo, Configuracoes.Atual.Rail?.Distracoes);
         }
 
         private void MostrarSobre(IntPtr hwnd)
