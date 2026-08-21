@@ -106,8 +106,13 @@
             </Border>
         </Grid>
 
-        <TextBlock x:Name="textoStatus" Grid.Row="2" Margin="2,10,0,0"
-                   Foreground="{DynamicResource CorTextoFraco}" FontSize="12" Grid.ColumnSpan="2" />
+        <TextBlock x:Name="textoStatus" Grid.Row="2" Margin="2,10,60,0"
+                   Foreground="{DynamicResource CorTextoFraco}" FontSize="12" Grid.ColumnSpan="2"
+                   TextTrimming="CharacterEllipsis" />
+        <TextBlock x:Name="textoVersao" Grid.Row="2" Grid.ColumnSpan="2" Margin="0,10,4,0"
+                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                   Foreground="{DynamicResource CorTextoFraco}" FontSize="11"
+                   ToolTip="Versão do Memo" />
 
         <!-- Overlay de bloqueio: cobre tudo e esconde os segredos quando trancado. -->
         <Border x:Name="overlayBloqueio" Grid.Row="0" Grid.RowSpan="3"

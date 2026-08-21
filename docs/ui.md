@@ -45,7 +45,8 @@ Tela principal.
   segredos). Acontece ao clicar no badge **ou** quando a contagem zera. O botão
   **Destrancar** do overlay (`Destrancar_Click`) pede a senha
   (`JanelaSenha.Solicitar`) e, se ok, recarrega e religa o timer.
-- A barra de status (rodapé) mostra o último resultado.
+- A barra de status (rodapé) mostra o último resultado; à direita, um rótulo
+  discreto mostra a **versão** do app (`v<Major.Minor.Build>`, lida do assembly).
 
 ### `JanelaEditar` (`JanelaEditar.xaml[.cs]`)
 Criar/editar um documento.

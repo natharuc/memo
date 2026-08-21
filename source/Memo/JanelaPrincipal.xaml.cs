@@ -29,6 +29,7 @@ namespace Memo
 
             _service = service;
             Title = $"Memo — {_visiveis.Count}";
+            textoVersao.Text = "v" + VersaoApp();
             listaDocumentos.ItemsSource = _visiveis;
 
             Recarregar();
@@ -254,6 +255,13 @@ namespace Memo
         }
 
         private void Status(string mensagem) => textoStatus.Text = mensagem;
+
+        /// <summary>Versão do app (Major.Minor.Build) lida do assembly em execução.</summary>
+        private static string VersaoApp()
+        {
+            var v = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Version;
+            return v == null ? "" : $"{v.Major}.{v.Minor}.{v.Build}";
+        }
 
         // ---------------- sessão / badge ----------------
 
