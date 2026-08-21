@@ -146,9 +146,11 @@ namespace Memo.Service.Atualizacao
         }
 
         /// <summary>
-        /// Aplica o pacote extraído (pasta de <paramref name="novoExe"/>): sobrescreve
-        /// os arquivos auxiliares, troca o .exe em execução (renomeia o atual para
-        /// .old) e reinicia. O chamador deve encerrar o app logo em seguida.
+        /// Aplica o pacote extraído (a pasta de <paramref name="novoExe"/>) por cima
+        /// da instalação atual e reinicia o Memo. Como o deploy é em pasta (DLLs ficam
+        /// travadas enquanto o app roda), a troca é feita por um script que espera este
+        /// processo sair, copia os arquivos novos (robocopy) e reinicia. O chamador
+        /// deve encerrar o app logo em seguida.
         /// </summary>
         public void AplicarEReiniciar(string novoExe)
         {
@@ -156,32 +158,30 @@ namespace Memo.Service.Atualizacao
             if (string.IsNullOrEmpty(atual))
                 throw new InvalidOperationException("Não foi possível localizar o executável atual.");
 
-            var dirAtual = Path.GetDirectoryName(atual);
-            var dirNovo = Path.GetDirectoryName(novoExe);
-            var nomeExe = Path.GetFileName(atual);
+            var installDir = Path.GetDirectoryName(atual);
+            var stagedDir = Path.GetDirectoryName(novoExe);
+            var exePath = Path.Combine(installDir, Path.GetFileName(atual));
+            var pid = Environment.ProcessId;
 
-            // 1) Arquivos auxiliares do pacote (ex.: memo-cli.exe) — não estão em uso.
-            //    Best-effort: um que esteja travado fica para a próxima atualização.
-            foreach (var origem in Directory.GetFiles(dirNovo))
+            var script = Path.Combine(Path.GetTempPath(), $"memo-update-{Guid.NewGuid():N}.cmd");
+            var conteudo =
+$@"@echo off
+:wait
+tasklist /FI ""PID eq {pid}"" 2>nul | find ""{pid}"" >nul
+if not errorlevel 1 (
+  ping 127.0.0.1 -n 2 >nul
+  goto wait
+)
+robocopy ""{stagedDir}"" ""{installDir}"" /E /IS /IT /R:20 /W:1 >nul
+start """" ""{exePath}""
+del ""%~f0""
+";
+            File.WriteAllText(script, conteudo);
+
+            Process.Start(new ProcessStartInfo("cmd.exe", $"/c \"{script}\"")
             {
-                var nome = Path.GetFileName(origem);
-                if (string.Equals(nome, nomeExe, StringComparison.OrdinalIgnoreCase)) continue;
-                try { File.Copy(origem, Path.Combine(dirAtual, nome), overwrite: true); }
-                catch { /* opcional/em uso */ }
-            }
-
-            // 2) O .exe em execução não pode ser sobrescrito: renomeia para .old e põe o novo.
-            var antigo = atual + ".old";
-            if (File.Exists(antigo)) File.Delete(antigo);
-            File.Move(atual, antigo);
-            File.Copy(novoExe, atual, overwrite: false);
-
-            // Passa o PID atual para o novo processo esperar este sair antes de
-            // assumir a instância única (senão ele se acha "2ª instância" e fecha).
-            Process.Start(new ProcessStartInfo(atual)
-            {
-                UseShellExecute = true,
-                Arguments = $"--apos-atualizacao {Environment.ProcessId}"
+                UseShellExecute = false,
+                CreateNoWindow = true
             });
         }
 

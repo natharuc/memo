@@ -21,9 +21,10 @@ memo                             # abre a interface gráfica
 
 ## Download
 
-Baixe a última versão (executável único para Windows, sem instalador) em
-**[Releases](https://github.com/natharuc/memo/releases/latest)**. O próprio app
-avisa e instala novas versões automaticamente.
+Baixe a última versão em
+**[Releases](https://github.com/natharuc/memo/releases/latest)**: um **ZIP** para
+Windows (sem instalador) — extraia e rode `Memo.exe`. O próprio app avisa e instala
+novas versões automaticamente.
 
 ## Por que existe
 
