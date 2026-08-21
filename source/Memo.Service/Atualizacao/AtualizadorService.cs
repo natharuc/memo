@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -15,14 +16,16 @@ namespace Memo.Service.Atualizacao
     {
         public Version Versao { get; set; }
         public string Tag { get; set; }
-        public string UrlExe { get; set; }
+        /// <summary>URL do pacote .zip da release.</summary>
+        public string UrlPacote { get; set; }
+        /// <summary>SHA256 do pacote .zip (para validar o download).</summary>
         public string Sha256 { get; set; }
         public string Notas { get; set; }
     }
 
     /// <summary>
-    /// Consulta as releases do GitHub, baixa o novo executável (validando o SHA256) e
-    /// faz a troca do .exe em execução. Não toca no vault nem na sessão.
+    /// Consulta as releases do GitHub, baixa o pacote .zip (validando o SHA256),
+    /// extrai e troca o .exe em execução. Não toca no vault nem na sessão.
     /// </summary>
     public class AtualizadorService
     {
@@ -63,14 +66,14 @@ namespace Memo.Service.Atualizacao
                 if (versao <= VersaoAtual) return null;
 
                 var assets = release["assets"] as JArray ?? new JArray();
-                var urlExe = UrlDoAsset(assets, "Memo.exe");
-                if (urlExe == null) return null;
+                var urlZip = UrlDoPacote(assets);
+                if (urlZip == null) return null;
 
                 return new InfoAtualizacao
                 {
                     Versao = versao,
                     Tag = tag,
-                    UrlExe = urlExe,
+                    UrlPacote = urlZip,
                     Sha256 = await LerSha256Async(assets, ct).ConfigureAwait(false),
                     Notas = (string)release["body"]
                 };
@@ -82,24 +85,31 @@ namespace Memo.Service.Atualizacao
             }
         }
 
-        /// <summary>Baixa o novo .exe para a pasta temporária e valida o SHA256. Retorna o caminho.</summary>
+        /// <summary>
+        /// Baixa o pacote .zip para a pasta temporária, valida o SHA256 e o extrai.
+        /// Retorna o caminho do <c>Memo.exe</c> extraído.
+        /// </summary>
         public async Task<string> BaixarAsync(InfoAtualizacao info, IProgress<double> progresso = null,
             CancellationToken ct = default)
         {
             var dir = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "Memo", "update");
-            Directory.CreateDirectory(dir);
-            var destino = Path.Combine(dir, "Memo-new.exe");
 
-            using (var resposta = await Http.GetAsync(info.UrlExe,
+            // Começa limpo (restos de uma atualização anterior podem estar travados).
+            try { if (Directory.Exists(dir)) Directory.Delete(dir, recursive: true); } catch { }
+            Directory.CreateDirectory(dir);
+
+            var zip = Path.Combine(dir, "Memo-update.zip");
+
+            using (var resposta = await Http.GetAsync(info.UrlPacote,
                        HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false))
             {
                 resposta.EnsureSuccessStatusCode();
                 var total = resposta.Content.Headers.ContentLength ?? -1L;
 
                 using (var origem = await resposta.Content.ReadAsStreamAsync(ct).ConfigureAwait(false))
-                using (var arquivo = File.Create(destino))
+                using (var arquivo = File.Create(zip))
                 {
                     var buffer = new byte[81920];
                     long lido = 0;
@@ -115,21 +125,30 @@ namespace Memo.Service.Atualizacao
 
             if (!string.IsNullOrEmpty(info.Sha256))
             {
-                var hash = CalcularSha256(destino);
+                var hash = CalcularSha256(zip);
                 if (!string.Equals(hash, info.Sha256, StringComparison.OrdinalIgnoreCase))
                 {
-                    File.Delete(destino);
+                    File.Delete(zip);
                     throw new InvalidOperationException(
-                        "A verificação de integridade (SHA256) do arquivo baixado falhou.");
+                        "A verificação de integridade (SHA256) do pacote baixado falhou.");
                 }
             }
 
-            return destino;
+            var extraido = Path.Combine(dir, "extraido");
+            Directory.CreateDirectory(extraido);
+            ZipFile.ExtractToDirectory(zip, extraido, overwriteFiles: true);
+
+            var exe = Directory.GetFiles(extraido, "Memo.exe", SearchOption.AllDirectories).FirstOrDefault();
+            if (exe == null)
+                throw new InvalidOperationException("O pacote de atualização não contém Memo.exe.");
+
+            return exe;
         }
 
         /// <summary>
-        /// Renomeia o .exe atual para .old, coloca o novo no lugar e inicia o novo processo.
-        /// O chamador deve encerrar o app logo em seguida.
+        /// Aplica o pacote extraído (pasta de <paramref name="novoExe"/>): sobrescreve
+        /// os arquivos auxiliares, troca o .exe em execução (renomeia o atual para
+        /// .old) e reinicia. O chamador deve encerrar o app logo em seguida.
         /// </summary>
         public void AplicarEReiniciar(string novoExe)
         {
@@ -137,12 +156,25 @@ namespace Memo.Service.Atualizacao
             if (string.IsNullOrEmpty(atual))
                 throw new InvalidOperationException("Não foi possível localizar o executável atual.");
 
+            var dirAtual = Path.GetDirectoryName(atual);
+            var dirNovo = Path.GetDirectoryName(novoExe);
+            var nomeExe = Path.GetFileName(atual);
+
+            // 1) Arquivos auxiliares do pacote (ex.: memo-cli.exe) — não estão em uso.
+            //    Best-effort: um que esteja travado fica para a próxima atualização.
+            foreach (var origem in Directory.GetFiles(dirNovo))
+            {
+                var nome = Path.GetFileName(origem);
+                if (string.Equals(nome, nomeExe, StringComparison.OrdinalIgnoreCase)) continue;
+                try { File.Copy(origem, Path.Combine(dirAtual, nome), overwrite: true); }
+                catch { /* opcional/em uso */ }
+            }
+
+            // 2) O .exe em execução não pode ser sobrescrito: renomeia para .old e põe o novo.
             var antigo = atual + ".old";
             if (File.Exists(antigo)) File.Delete(antigo);
-
-            // O Windows permite renomear um .exe em uso (mas não sobrescrevê-lo).
             File.Move(atual, antigo);
-            File.Move(novoExe, atual);
+            File.Copy(novoExe, atual, overwrite: false);
 
             // Passa o PID atual para o novo processo esperar este sair antes de
             // assumir a instância única (senão ele se acha "2ª instância" e fecha).
@@ -171,21 +203,32 @@ namespace Memo.Service.Atualizacao
             }
         }
 
-        private static string UrlDoAsset(JArray assets, string nome)
+        /// <summary>URL do primeiro asset <c>.zip</c> da release (ignora os .sha256).</summary>
+        private static string UrlDoPacote(JArray assets)
         {
             var asset = assets.FirstOrDefault(a =>
-                string.Equals((string)a["name"], nome, StringComparison.OrdinalIgnoreCase));
+            {
+                var nome = (string)a["name"];
+                return nome != null && nome.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
+            });
             return (string)asset?["browser_download_url"];
         }
 
         private async Task<string> LerSha256Async(JArray assets, CancellationToken ct)
         {
-            var url = UrlDoAsset(assets, "Memo.exe.sha256");
+            string Url(Func<string, bool> ok) => (string)assets.FirstOrDefault(a =>
+            {
+                var nome = (string)a["name"];
+                return nome != null && ok(nome);
+            })?["browser_download_url"];
+
+            var url = Url(n => n.EndsWith(".zip.sha256", StringComparison.OrdinalIgnoreCase))
+                      ?? Url(n => n.EndsWith(".sha256", StringComparison.OrdinalIgnoreCase));
             if (url == null) return null;
             try
             {
                 var texto = await Http.GetStringAsync(url, ct).ConfigureAwait(false);
-                // Formato "<hash>  Memo.exe" — pega o primeiro token.
+                // Formato "<hash>  <arquivo>" — pega o primeiro token.
                 return texto.Trim().Split(new[] { ' ', '\t', '\r', '\n' },
                     StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
             }

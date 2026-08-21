@@ -64,9 +64,16 @@ Para usar como comando `memo`, coloque o `.exe` no `PATH` ou crie um atalho/alia
 
 ## Releases (GitHub Actions)
 
-A esteira `.github/workflows/release.yml` roda ao empurrar uma tag `v*` e cria a
-GitHub Release com o `Memo.exe` (single-file, self-contained, win-x64), o
-`Memo.exe.sha256` e um `latest.json` (manifesto consumido pelo auto-update).
+A esteira `.github/workflows/release.yml` roda ao empurrar uma tag `v*`. Publica o
+`Memo.exe` e o `memo-cli.exe` (single-file, self-contained, win-x64), assina (se
+houver certificado) e cria a GitHub Release com:
+
+- **`Memo-win-x64.zip`** — o **artefato de distribuição** (os dois exes) +
+  `Memo-win-x64.zip.sha256`;
+- **`Memo.exe`** avulso (conveniência) + `Memo.exe.sha256`;
+- **`latest.json`** — manifesto `{ version, url (do zip), sha256 (do zip) }`.
+
+O **auto-update baixa o zip** (ver abaixo).
 
 ```powershell
 # a versão sai da tag; o CI passa -p:Version=<tag sem o "v"> ao publish
@@ -98,11 +105,18 @@ Depois cadastre em **Settings → Secrets and variables → Actions**:
 ## Auto-update
 
 `Memo.Service/Atualizacao/AtualizadorService.cs` consulta a release mais recente
-(`releases/latest` da API do GitHub) no startup, em background. Se houver versão
-maior, abre a `JanelaAtualizacao` perguntando se quer atualizar; ao confirmar,
-baixa o `Memo.exe`, **valida o SHA256**, renomeia o exe atual para `.old`, põe o
-novo no lugar e reinicia. Resíduos `.old` são removidos no próximo start. Falha de
-rede é silenciosa. O updater **não** toca no vault nem no cache de sessão.
+(`releases/latest` da API do GitHub) no startup, em background. Se a tag for maior
+que a versão atual, abre a `JanelaAtualizacao`; ao confirmar:
+
+1. baixa o **pacote `.zip`** da release (o primeiro asset `.zip`) e **valida o
+   SHA256** (asset `*.zip.sha256`);
+2. extrai; sobrescreve os arquivos auxiliares (ex.: `memo-cli.exe`) na pasta do app;
+3. renomeia o `Memo.exe` em execução para `.old`, põe o novo no lugar e reinicia
+   (passando `--apos-atualizacao <pid>` para o novo processo esperar o antigo sair).
+
+Resíduos `.old` são removidos no próximo start. Falha de rede é silenciosa. O
+updater **não** toca no vault nem no cache de sessão. Como os exes são
+**self-contained single-file**, a troca não esbarra em DLLs travadas.
 
 ## Site (GitHub Pages)
 
