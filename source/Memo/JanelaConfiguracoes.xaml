@@ -160,6 +160,11 @@
                                     <TextBlock Text="CHAT ID" Foreground="{DynamicResource CorTextoFraco}"
                                                FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
                                     <TextBox x:Name="tgChatId" Margin="0,0,0,14" />
+                                    <CheckBox x:Name="tgOuvir" Content="Ouvir comandos (bot do Rail)"
+                                              FontWeight="SemiBold" Margin="0,0,0,2" />
+                                    <TextBlock Foreground="{DynamicResource CorTextoFraco}" FontSize="11"
+                                               TextWrapping="Wrap" Margin="0,0,0,14"
+                                               Text="Enquanto o Memo estiver aberto, você controla a Missão do dia pelo Telegram (ver, adicionar, concluir, reordenar). Só o Chat ID acima é obedecido; não dá acesso aos documentos do cofre." />
                                     <Button Content="Testar Telegram" HorizontalAlignment="Left"
                                             Click="TestarTelegram_Click" />
                                 </StackPanel>

@@ -67,7 +67,9 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
   **e-mail/SMTP** (servidor, porta, SSL, usuário, senha, de, para), cada um com um
   botão **Testar** (envia fora da thread de UI via `Task.Run`). Persistido cifrado
   por DPAPI pelo `NotificacaoService` (não vai para `Configuracoes`). Reusado pelo
-  comando `memo notify`.
+  comando `memo notify`. O Telegram tem ainda **"Ouvir comandos (bot do Rail)"**:
+  liga o `TelegramBotListener` para controlar a Missão do dia pelo Telegram (só o
+  chat configurado; não dá acesso a documentos) — ver [rail.md](rail.md).
 - **Memo Rail**: habilitar, intervalo de check-in, **nível de distração**
   (Baixo…Muito alto e **TDAH**, com descrição do efeito), **horário** (campos com
   máscara HH:mm via `MascaraHora`), **dias da semana** (toggles Seg…Dom, ao menos

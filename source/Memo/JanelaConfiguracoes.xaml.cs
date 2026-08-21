@@ -180,6 +180,7 @@ namespace Memo
             tgHabilitado.IsChecked = n.Telegram.Habilitado;
             tgToken.Text = n.Telegram.BotToken;
             tgChatId.Text = n.Telegram.ChatId;
+            tgOuvir.IsChecked = n.Telegram.OuvirComandos;
 
             emHabilitado.IsChecked = n.Email.Habilitado;
             emServidor.Text = n.Email.Servidor;
@@ -197,7 +198,8 @@ namespace Memo
             {
                 Habilitado = tgHabilitado.IsChecked == true,
                 BotToken = tgToken.Text?.Trim(),
-                ChatId = tgChatId.Text?.Trim()
+                ChatId = tgChatId.Text?.Trim(),
+                OuvirComandos = tgOuvir.IsChecked == true
             },
             Email = new CanalEmail
             {

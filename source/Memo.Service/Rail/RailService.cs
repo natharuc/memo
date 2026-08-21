@@ -182,6 +182,22 @@ namespace Memo.Service.Rail
             }
         }
 
+        /// <summary>Alterna concluída/pendente pelo Id. Retorna o novo estado (true = concluída).</summary>
+        public bool AlternarConcluido(string id)
+        {
+            lock (Trava)
+            {
+                var dados = CarregarDados();
+                var item = dados.Itens.FirstOrDefault(i => i.Id == id);
+                if (item == null) return false;
+
+                item.Concluido = !item.Concluido;
+                item.ConcluidoEm = item.Concluido ? DateTime.Now : (DateTime?)null;
+                Gravar(dados);
+                return item.Concluido;
+            }
+        }
+
         /// <summary>Regrava uma tarefa existente (edição de texto/link/data/estado).</summary>
         public bool AtualizarItem(ItemMissao item)
         {
@@ -206,6 +222,53 @@ namespace Memo.Service.Rail
                 var dados = CarregarDados();
                 dados.Itens.RemoveAll(i => i.Id == id);
                 Gravar(dados);
+            }
+        }
+
+        /// <summary>
+        /// Reordena uma tarefa dentro do seu grupo (mesma <see cref="ItemMissao.Data"/>),
+        /// trocando de lugar com a vizinha de mesma data na direção pedida. Muda a ordem
+        /// exibida (a numeração e a "próxima pendente" seguem essa ordem). Retorna false
+        /// se não há vizinha de mesma data naquela direção.
+        /// </summary>
+        public bool Mover(string id, bool subir)
+        {
+            lock (Trava)
+            {
+                var dados = CarregarDados();
+                var indice = dados.Itens.FindIndex(i => i.Id == id);
+                if (indice < 0) return false;
+
+                var data = dados.Itens[indice].Data;
+                var vizinho = -1;
+                if (subir)
+                {
+                    for (var j = indice - 1; j >= 0; j--)
+                        if (dados.Itens[j].Data == data) { vizinho = j; break; }
+                }
+                else
+                {
+                    for (var j = indice + 1; j < dados.Itens.Count; j++)
+                        if (dados.Itens[j].Data == data) { vizinho = j; break; }
+                }
+                if (vizinho < 0) return false;
+
+                var tmp = dados.Itens[indice];
+                dados.Itens[indice] = dados.Itens[vizinho];
+                dados.Itens[vizinho] = tmp;
+                Gravar(dados);
+                return true;
+            }
+        }
+
+        /// <summary>Reordena pelo número exibido (1-based sobre a missão visível).</summary>
+        public bool MoverPorNumero(int numero, bool subir)
+        {
+            lock (Trava)
+            {
+                var lista = MissaoAtual().Lista;
+                if (numero < 1 || numero > lista.Count) return false;
+                return Mover(lista[numero - 1].Id, subir);
             }
         }
 

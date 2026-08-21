@@ -34,9 +34,11 @@ consegue mais ver a distração. O backdrop:
   do tick de 1s). Ele nunca cobre o que não é distração.
 - **Fechar distração**: em **navegador** (chrome, edge, firefox, brave…) fecha só a
   **aba ativa** (foca a janela + `Ctrl+W`); em outros apps, fecha a janela
-  (`WM_CLOSE`). O **modo foco continua ativo** pelo tempo escolhido — se você abrir
-  outra distração, ela é bloqueada de novo. Para desligar de vez, use **"encerrar
-  modo foco"** (ou espere o tempo acabar).
+  (`WM_CLOSE`). Ao fechar, o **backdrop some** — o `Avaliar` decide pela
+  **janela-alvo** (`_alvoHwnd`): se ela sumiu ou deixou de ser distração, esconde,
+  mesmo que o foco tenha caído na própria overlay. O **modo foco continua ativo**
+  pelo tempo escolhido — se você abrir outra distração, ela é bloqueada de novo.
+  Para desligar de vez, use **"encerrar modo foco"** (ou espere o tempo acabar).
 - Mostra a tarefa atual e a contagem regressiva.
 - É gerenciado por `Memo/Rail/BloqueioFoco.cs`. Enquanto ativo, o cerebrinho
   **não** abre aviso de desvio — o backdrop já cuida.
@@ -128,16 +130,56 @@ memo-cli rail                            # status agrupado (ATRASADAS/HOJE/PRÓX
 memo-cli rail add <t> [--link <url>] [--data <d>]
 memo-cli rail done <n>
 memo-cli rail edit <n> [--texto <t>] [--link <url>] [--data <d>]
+memo-cli rail move <n> up|down           # reordena dentro do mesmo dia
 memo-cli rail clear                      # apaga só as de hoje (atrasadas ficam)
 memo-cli rail --json                     # { date, items: [{n, text, done, link, date, overdue}] }
 ```
+
+## Controle pelo Telegram
+
+Com o Memo na bandeja, dá para comandar a missão **pelo Telegram** — ver,
+adicionar, concluir e **reordenar** tarefas de onde estiver. É **opt-in** e reusa
+o canal de notificação já configurado.
+
+**Ligar**: Configurações → Notificações → Telegram → preencher **bot token** e
+**chat id** e marcar **"Ouvir comandos (bot do Rail)"**. O `TelegramBotListener`
+faz *long-polling* (`getUpdates`) numa thread de fundo enquanto a bandeja está ativa.
+
+**Segurança**: o bot só obedece mensagens do **chat id configurado** — qualquer
+outro remetente é ignorado. Ele mexe **apenas no Rail** (que não é segredo):
+**não** acessa o cofre nem documentos, e nenhum segredo trafega pelo Telegram.
+
+**Uso** — conversa em **linguagem natural** (PT), sem comandos decorados e **sem
+emojis**. Se não entender, responde "não entendi". Exemplos:
+
+| Você diz | O bot faz |
+|----------|-----------|
+| "minhas missões", "o que tenho pra hoje" | lista |
+| "nova missão: revisar PR amanhã" | cria (data e link saem do texto) |
+| "concluir 2", "terminei a 3" | conclui |
+| "reabrir 2" | reabre uma concluída |
+| "priorizar 2" | manda pro topo do dia |
+| "sobe a 3" / "desce a 1" | reordena um passo |
+| "adiar 2 para amanhã" | reagenda |
+| "renomear 2 para novo texto" | edita o texto |
+| "remover 1", "apaga a 4" | exclui |
+| "limpar hoje" | apaga as de hoje (atrasadas ficam) |
+
+As respostas são texto simples (a lista usa `[ ]`/`[x]`). A interpretação é uma
+matriz de intenções em `TelegramBotListener.Interpretar` — ordenada, com fallback
+"não entendi", e fácil de estender com novos sinônimos.
+
+> O bot escreve no `rail.json`; uma `JanelaMissao` já aberta não atualiza sozinha
+> (reabra para ver). Ao (re)ativar o bot, os updates pendentes são descartados —
+> comandos que chegaram com o Memo fechado não são reexecutados.
 
 ## Mapa do código
 
 | Arquivo | Papel |
 |---------|-------|
 | `Memo.Service/Rail/MissaoDia.cs` | `ItemMissao` (com `Data`), `RailDados` (v2) e `MissaoVisivel` (atrasadas/hoje/futuras + ordem canônica). |
-| `Memo.Service/Rail/RailService.cs` | Persistência v2 + migração v1, `MissaoAtual`, `ParseData`, mutações, heurística `EhDistracao`. |
+| `Memo.Service/Rail/RailService.cs` | Persistência v2 + migração v1, `MissaoAtual`, `ParseData`, mutações (add/`Concluir`/`AlternarConcluido`/`Mover`/…), heurística `EhDistracao`. |
+| `Memo.Service/Notificacoes/TelegramBotListener.cs` | Listener do bot do Telegram (long-polling) que controla o Rail; autoriza só o chat configurado, não toca no cofre. |
 | `Memo.Service/Rail/RailConfig.cs` | Preferências, `NivelDistracao`/`Desvio()`, `DiasAtivos`/`DiasEfetivos`, `DentroDoHorario`. |
 | `Memo/Rail/MonitorFoco.cs` | Win32: janela ativa (`GetForegroundWindow`) e ociosidade (`GetLastInputInfo`). |
 | `Memo/Rail/RailCoordenador.cs` | Orquestração: quando perguntar/checar/avisar (cooldowns, silenciados, adiar). |

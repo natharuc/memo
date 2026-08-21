@@ -6,6 +6,14 @@ namespace Memo.Service.Notificacoes
         public bool Habilitado { get; set; }
         public string BotToken { get; set; }
         public string ChatId { get; set; }
+
+        /// <summary>
+        /// Liga o listener do bot (long-polling) enquanto o Memo está na bandeja:
+        /// permite controlar o Memo Rail pelo Telegram (ver/adicionar/concluir/
+        /// reordenar tarefas). Só obedece mensagens do <see cref="ChatId"/> acima.
+        /// Não dá acesso a documentos/segredos — apenas ao Rail. Opt-in.
+        /// </summary>
+        public bool OuvirComandos { get; set; }
     }
 
     /// <summary>Canal de e-mail via SMTP.</summary>

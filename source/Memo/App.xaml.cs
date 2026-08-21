@@ -34,6 +34,11 @@ namespace Memo
         private static readonly TimeSpan TickRail = TimeSpan.FromSeconds(1);
         private readonly Rail.RailCoordenador _railCoordenador = new Rail.RailCoordenador(TickRail);
 
+        // Listener do bot do Telegram (opt-in): controla o Rail por mensagens/botões
+        // enquanto a bandeja está ativa. Não toca no cofre. Ele mesmo checa se está
+        // habilitado a cada ciclo (basta ligar/desligar em Configurações).
+        private readonly TelegramBotListener _botTelegram = new TelegramBotListener();
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -175,6 +180,7 @@ namespace Memo
             _encerrando = true;
             _agendador?.Stop();
             _agendadorRail?.Stop();
+            _botTelegram?.Parar();
             if (_bandeja != null) { _bandeja.Visible = false; _bandeja.Dispose(); }
             _instancia?.Dispose();
             Shutdown();
@@ -269,6 +275,9 @@ namespace Memo
             _agendadorRail = new DispatcherTimer { Interval = TickRail };
             _agendadorRail.Tick += (_, __) => _railCoordenador.Tick();
             _agendadorRail.Start();
+
+            // Bot do Telegram: ouve comandos do Rail enquanto o Memo está na bandeja.
+            _botTelegram.Iniciar();
         }
 
         private void VerificarLembretes()

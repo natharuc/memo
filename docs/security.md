@@ -101,6 +101,19 @@ canais de notificação — incluindo **segredos** (bot token do Telegram, senha
   senha-mestra (o cofre pode estar trancado).
 - Nunca logar `NotificacaoConfig` nem os argumentos de envio.
 
+### Bot do Telegram (entrada)
+
+Com **"Ouvir comandos"** ligado, o `TelegramBotListener` faz *long-polling* e
+aceita comandos pelo Telegram (ver [rail.md](rail.md) → Controle pelo Telegram).
+Salvaguardas:
+
+- **Autorização por chat**: só obedece mensagens cujo `chat.id` é **exatamente** o
+  `ChatId` configurado. Qualquer outro remetente é ignorado (o bot é público — o
+  filtro é a única barreira).
+- **Escopo mínimo**: mexe **apenas no Rail** (`rail.json`, que não é segredo).
+  **Não** acessa o cofre, documentos nem qualquer segredo — nada sensível trafega
+  pelo Telegram. É opt-in e só roda enquanto a bandeja está ativa.
+
 ## Formato legado (somente leitura)
 
 Esquema antigo, mantido só para migrar documentos antigos:

@@ -26,6 +26,7 @@ memo-cli rail                    # status agrupado: ATRASADAS / HOJE / PRÓXIMAS
 memo-cli rail add <tarefa> [--link <url>] [--data <d>]   # d: hoje|amanha|dd/MM|yyyy-MM-dd
 memo-cli rail done <n>           # conclui pela numeração exibida (1-based)
 memo-cli rail edit <n> [--texto <t>] [--link <url>] [--data <d>]
+memo-cli rail move <n> up|down   # reordena dentro do mesmo dia
 memo-cli rail clear              # apaga só as tarefas de HOJE (atrasadas ficam)
 memo-cli rail --json             # {"date":"…","items":[{n,text,done,link,date,overdue}]}
 ```

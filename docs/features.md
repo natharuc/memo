@@ -18,6 +18,9 @@ de referência ([architecture.md](architecture.md), [security.md](security.md),
 | **Gerar senha** | Senha aleatória pelas suas preferências | GUI (**Gerar senha**) · `pass` |
 | **Gerar GUID** | UUID novo | `guid` |
 | **Lembrete** | Aviso em linguagem natural, na bandeja | GUI (**⏰**) · `remember` |
+| **Missão do dia (Rail)** | Foco: checklist, check-ins, detector de distração | GUI (**🚂**) · `rail` |
+| **Notificar** | Envia para Telegram/e-mail | `notify` |
+| **Bot do Telegram** | Controla o Rail pelo Telegram (opt-in) | Config. → Notificações |
 | **Trancar / destrancar** | Encerra/reabre a sessão | badge da tela · `lock`/`unlock` |
 | **Trocar tema** | Claro ou escuro, em runtime | GUI (**⚙**) |
 | **Migrar** | Recifra documentos antigos no formato atual | automática · `migrar` |
@@ -98,6 +101,29 @@ memo remember ver tarefa 477987 22h         # hoje 22:00 (ou amanhã, se já pas
   lembrete só aparece quando o Memo abrir.
 
 Regras do parser: [cli.md](cli.md) → `remember`. Agendador: [architecture.md](architecture.md) → Lembretes.
+
+## Memo Rail (foco)
+
+Assistente de foco TDAH-friendly (**opt-in**): você declara a **missão do dia** e o
+Memo te puxa de volta com check-ins e um detector de distração (que bloqueia a
+janela da distração no "modo foco"). Tarefas têm data, acumulam como **atrasadas**,
+aceitam link (🔗) e formatação leve.
+
+- Abrir: botão **🚂** / menu da bandeja / `memo rail`.
+- CLI: `rail add|done|edit|move|clear|status`.
+- **Reordenar**: `rail move <n> up|down`.
+
+Detalhes (nível de distração, modo foco, privacidade): [rail.md](rail.md).
+
+## Notificações e bot do Telegram
+
+- **Saída** (`notify`): envia mensagens para **Telegram** e/ou **e-mail** (canais
+  configurados em Configurações → Notificações, cifrados por DPAPI).
+- **Entrada** (bot): com **"Ouvir comandos"** ligado, você controla o **Rail pelo
+  Telegram** por **linguagem natural** (ex.: "priorizar 2", "nova missão: X
+  amanhã", "remover 1"). Só o chat configurado é obedecido e **nenhum segredo
+  trafega pelo Telegram** (mexe só no Rail). Ver [rail.md](rail.md) → Controle pelo
+  Telegram.
 
 ## Sessão e bloqueio
 

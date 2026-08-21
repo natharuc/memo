@@ -96,6 +96,18 @@ horário) vive em `Configuracoes.Rail`. A orquestração (check-ins, detector de
 desvio via janela ativa) fica no WPF: `Memo/Rail/RailCoordenador.cs`, dirigido
 pelo timer da bandeja. Ver [rail.md](rail.md).
 
+### `NotificacaoService` — `source/Memo.Service/Notificacoes/NotificacaoService.cs`
+Canais de notificação de **saída** (Telegram e e-mail/SMTP), com credenciais
+cifradas por DPAPI em `notificacoes.bin`. Usado por `memo notify`. Ver
+[security.md](security.md).
+
+### `TelegramBotListener` — `source/Memo.Service/Notificacoes/TelegramBotListener.cs`
+Notificação de **entrada**: long-polling (`getUpdates`) numa thread de fundo,
+iniciado com a bandeja (`App.IniciarAgendador`) e parado no `Encerrar`. Controla o
+`RailService` por mensagens em **linguagem natural** (matriz de intenções em
+`Interpretar`, sem emojis/botões), **só** do chat autorizado, **sem** tocar no
+cofre. Opt-in (`CanalTelegram.OuvirComandos`). Ver [rail.md](rail.md).
+
 ### `HistoricoExecutar` — `source/Memo.Service/Seguranca/HistoricoExecutar.cs`
 Higiene de segurança: apaga os comandos `memo set ...` do histórico do "Executar"
 (Win+R / RunMRU), onde o segredo apareceria em texto puro. Best-effort, nunca

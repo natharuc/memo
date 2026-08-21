@@ -259,6 +259,24 @@ namespace Memo.Cli
                 return Codigo.Ok;
             }
 
+            if (sub == "move")
+            {
+                if (pos.Count < 3 || !int.TryParse(pos[1], out var numero))
+                { Erro("Uso: memo-cli rail move <numero> <up|down>"); return Codigo.Uso; }
+
+                var dir = pos[2].ToLowerInvariant();
+                var subir = dir == "up" || dir == "cima";
+                var descer = dir == "down" || dir == "baixo";
+                if (!subir && !descer) { Erro("Direção inválida. Use up|down (ou cima|baixo)."); return Codigo.Uso; }
+
+                if (!rail.MoverPorNumero(numero, subir))
+                { Erro($"Não foi possível mover a tarefa {numero} (sem vizinha de mesma data)."); return Codigo.NaoEncontrado; }
+
+                if (a.Formato() == Formato.Json) EscreverJson(new { moved = numero, up = subir });
+                else Console.Error.WriteLine($"Tarefa {numero} movida para {(subir ? "cima" : "baixo")}");
+                return Codigo.Ok;
+            }
+
             if (sub == "clear")
             {
                 rail.LimparHoje();
@@ -520,7 +538,7 @@ Comandos:
   del <chave>             Exclui um segredo
   remember <texto/quando> Cria um lembrete (ex.: ""ver tarefa 10:00 tomorrow"")
   notify [canal] <msg>    Notifica nos canais (telegram/email); -t <titulo> opcional
-  rail [status|add <t> [--data <d>]|done <n>|edit <n>|clear]   Missão do dia (Memo Rail)
+  rail [status|add <t> [--data <d>]|done <n>|edit <n>|move <n> up|down|clear]  Missão do dia (Rail)
   pass [chave]            Gera uma senha (e salva, se der uma chave)
   guid                    Gera um GUID
   unlock / lock           Destranca (pede senha) / tranca o cofre
