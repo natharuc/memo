@@ -71,10 +71,14 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
   comando `memo notify`. O Telegram tem ainda **"Ouvir comandos (bot do Rail)"**:
   liga o `TelegramBotListener` para controlar a Missão do dia pelo Telegram (só o
   chat configurado; não dá acesso a documentos) — ver [rail.md](rail.md).
-- **Memo Rail**: habilitar, intervalo de check-in, **nível de distração**
-  (Baixo…Muito alto e **TDAH**, com descrição do efeito), **horário** (campos com
-  máscara HH:mm via `MascaraHora`), **dias da semana** (toggles Seg…Dom, ao menos
-  um ativo) e lista de distrações (→ `Configuracoes.Rail`; ver [rail.md](rail.md)).
+- **Memo Rail**: a aba usa o componente reutilizável **`PainelRail`**
+  (`Rail/PainelRail.xaml[.cs]`) — habilitar, intervalo de check-in, **nível de
+  distração** (Baixo…Muito alto e **TDAH**, com descrição do efeito), **horário**
+  (máscara HH:mm via `MascaraHora`), **dias da semana** (toggles Seg…Dom, ao menos
+  um ativo) e lista de distrações. `PainelRail` se carrega sozinho de
+  `Configuracoes.Rail`; o host chama `painelRail.AplicarEm(cfg.Rail)` ao salvar. O
+  **mesmo componente** também é aberto direto da janela da missão (ver
+  `JanelaConfigRail` abaixo). Ver [rail.md](rail.md).
 - `static bool JanelaConfiguracoes.Mostrar(owner)` → `true` se o usuário salvou
   (a `JanelaPrincipal` usa isso para re-ancorar a sessão com a nova duração).
 
@@ -89,9 +93,16 @@ concluído, título com **formatação leve** (`FormatadorTexto`), linha de deta
 **🔗 Abrir**, **✏ Editar** (também por duplo-clique) e **✕** remover. O painel
 **Nova tarefa** tem campo multiline (Enter adiciona, Shift+Enter quebra linha),
 **DatePicker** "para o dia" (padrão hoje, atalhos Hoje/Amanhã) e o botão
-**+ Adicionar** embaixo. Botão **Testar** mostra uma prévia do cerebrinho.
+**+ Adicionar** embaixo. Botão **Testar** mostra uma prévia do cerebrinho; botão
+**⚙** abre a `JanelaConfigRail` (configurar o Rail sem sair da janela da missão).
 "Recomeçar o dia" apaga só as de hoje (atrasadas ficam).
 Persiste via `RailService` a cada mudança. Não exige o cofre.
+
+### `JanelaConfigRail` (`Rail/JanelaConfigRail.xaml[.cs]`)
+Configurações do Memo Rail numa janela própria, aberta pelo **⚙** da
+`JanelaMissao`. Hospeda o mesmo componente **`PainelRail`** da aba de Configurações;
+ao salvar, aplica em `Configuracoes.Rail` e persiste.
+`static bool JanelaConfigRail.Mostrar(owner)` → `true` se salvou.
 
 ### `JanelaEditarTarefa` (`Rail/JanelaEditarTarefa.xaml[.cs]`)
 Edição de uma tarefa: **texto** multiline (Enter quebra linha; `**negrito**`,

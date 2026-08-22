@@ -1,0 +1,71 @@
+<UserControl x:Class="Memo.Rail.PainelRail"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             FontFamily="Segoe UI">
+    <StackPanel Margin="0,4,8,0">
+        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                   Margin="0,0,0,12"
+                   Text="Assistente de foco: pergunta a missão do dia, faz check-ins periódicos e avisa quando detecta distração. Tudo é analisado localmente e nada é gravado — só o título da janela ativa é lido, em memória." />
+
+        <CheckBox x:Name="railHabilitado" Content="Habilitar Memo Rail"
+                  FontWeight="SemiBold" Margin="0,0,0,10" />
+        <CheckBox x:Name="railPerguntar" Content="Perguntar a missão do dia ao iniciar"
+                  Margin="0,0,0,16" />
+
+        <TextBlock Text="CHECK-IN A CADA" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+        <WrapPanel x:Name="painelRailCheckIn" Margin="0,0,0,12">
+            <Button Content="25 min" Tag="25" Click="RailCheckIn_Click" Margin="0,0,8,8" />
+            <Button Content="45 min" Tag="45" Click="RailCheckIn_Click" Margin="0,0,8,8" />
+            <Button Content="1 hora" Tag="60" Click="RailCheckIn_Click" Margin="0,0,8,8" />
+            <Button Content="1h30" Tag="90" Click="RailCheckIn_Click" Margin="0,0,8,8" />
+        </WrapPanel>
+
+        <TextBlock Text="NÍVEL DE DISTRAÇÃO" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+        <WrapPanel x:Name="painelRailNivel" Margin="0,0,0,4">
+            <Button Content="Baixo" Tag="Baixo" Click="RailNivel_Click" Margin="0,0,8,8" />
+            <Button Content="Médio" Tag="Medio" Click="RailNivel_Click" Margin="0,0,8,8" />
+            <Button Content="Alto" Tag="Alto" Click="RailNivel_Click" Margin="0,0,8,8" />
+            <Button Content="Muito alto" Tag="MuitoAlto" Click="RailNivel_Click" Margin="0,0,8,8" />
+            <Button Content="TDAH 🧠" Tag="TDAH" Click="RailNivel_Click" Margin="0,0,8,8" />
+        </WrapPanel>
+        <TextBlock x:Name="railNivelDescricao" TextWrapping="Wrap" FontSize="12"
+                   Foreground="{DynamicResource CorTextoFraco}" Margin="0,0,0,12" />
+
+        <TextBlock Text="HORÁRIO DE ATUAÇÃO" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+            <TextBox x:Name="railInicio" Width="92" FontSize="15"
+                     HorizontalContentAlignment="Center" MaxLength="5" />
+            <TextBlock Text="até" Foreground="{DynamicResource CorTextoFraco}"
+                       VerticalAlignment="Center" Margin="12,0" />
+            <TextBox x:Name="railFim" Width="92" FontSize="15"
+                     HorizontalContentAlignment="Center" MaxLength="5" />
+        </StackPanel>
+        <TextBlock Text="Formato 24h — ex.: 09:00 às 18:00 (é só digitar os números)."
+                   Foreground="{DynamicResource CorTextoFraco}" FontSize="11"
+                   Margin="0,0,0,12" TextWrapping="Wrap" />
+
+        <TextBlock Text="DIAS DA SEMANA" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+        <WrapPanel x:Name="painelRailDias" Margin="0,0,0,16">
+            <Button Content="Seg" Tag="1" Click="RailDia_Click" Margin="0,0,6,8" Padding="10,5" FontSize="12" />
+            <Button Content="Ter" Tag="2" Click="RailDia_Click" Margin="0,0,6,8" Padding="10,5" FontSize="12" />
+            <Button Content="Qua" Tag="3" Click="RailDia_Click" Margin="0,0,6,8" Padding="10,5" FontSize="12" />
+            <Button Content="Qui" Tag="4" Click="RailDia_Click" Margin="0,0,6,8" Padding="10,5" FontSize="12" />
+            <Button Content="Sex" Tag="5" Click="RailDia_Click" Margin="0,0,6,8" Padding="10,5" FontSize="12" />
+            <Button Content="Sáb" Tag="6" Click="RailDia_Click" Margin="0,0,6,8" Padding="10,5" FontSize="12" />
+            <Button Content="Dom" Tag="0" Click="RailDia_Click" Margin="0,0,6,8" Padding="10,5" FontSize="12" />
+        </WrapPanel>
+
+        <TextBlock Text="DISTRAÇÕES (UMA POR LINHA)" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                   Margin="0,0,0,8"
+                   Text="Se o título da janela ativa (ou o nome do programa) contiver um destes termos, conta como distração." />
+        <TextBox x:Name="railDistracoes" MinHeight="90" MaxHeight="140"
+                 AcceptsReturn="True" TextWrapping="NoWrap"
+                 VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="13" />
+    </StackPanel>
+</UserControl>

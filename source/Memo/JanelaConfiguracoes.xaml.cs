@@ -20,10 +20,6 @@ namespace Memo
 
         private readonly NotificacaoService _notificacoes = new NotificacaoService();
 
-        private int _railCheckIn;
-        private Service.Rail.NivelDistracao _railNivel;
-        private readonly HashSet<DayOfWeek> _railDias = new HashSet<DayOfWeek>();
-
         public JanelaConfiguracoes()
         {
             InitializeComponent();
@@ -37,11 +33,8 @@ namespace Memo
             Destacar(painelTema, _temaSelecionado);
             Destacar(painelDuracao, _minutosSelecionado.ToString(CultureInfo.InvariantCulture));
 
-            MascaraHora.Aplicar(railInicio);
-            MascaraHora.Aplicar(railFim);
-
             CarregarNotificacoes();
-            CarregarRail();
+            // A aba "Memo Rail" é o componente PainelRail — ele se carrega sozinho.
         }
 
         /// <summary>Mostra as configurações. Retorna true se o usuário salvou.</summary>
@@ -71,7 +64,7 @@ namespace Memo
             var cfg = Configuracoes.Atual;
             cfg.Tema = _temaSelecionado;
             cfg.DuracaoSessaoMinutos = _minutosSelecionado;
-            SalvarRail(cfg);
+            painelRail.AplicarEm(cfg.Rail ?? (cfg.Rail = new Service.Rail.RailConfig()));
             cfg.Salvar();
 
             _notificacoes.Salvar(LerNotificacoes());
@@ -79,96 +72,6 @@ namespace Memo
             Tema.Aplicar(_temaSelecionado);
             _salvou = true;
             Close();
-        }
-
-        // ----------------- Memo Rail -----------------
-
-        private void CarregarRail()
-        {
-            var r = Configuracoes.Atual.Rail ?? new Service.Rail.RailConfig();
-
-            railHabilitado.IsChecked = r.Habilitado;
-            railPerguntar.IsChecked = r.PerguntarMissao;
-            railInicio.Text = r.HoraInicio;
-            railFim.Text = r.HoraFim;
-            railDistracoes.Text = string.Join(Environment.NewLine, r.Distracoes ?? new System.Collections.Generic.List<string>());
-
-            _railCheckIn = r.CheckInMinutos;
-            _railNivel = r.Nivel;
-
-            _railDias.Clear();
-            foreach (var dia in r.DiasEfetivos()) _railDias.Add(dia);
-
-            Destacar(painelRailCheckIn, _railCheckIn.ToString(CultureInfo.InvariantCulture));
-            Destacar(painelRailNivel, _railNivel.ToString());
-            AtualizarNivelDescricao();
-            AtualizarDias();
-        }
-
-        private void SalvarRail(Configuracoes cfg)
-        {
-            var r = cfg.Rail ?? (cfg.Rail = new Service.Rail.RailConfig());
-
-            r.Habilitado = railHabilitado.IsChecked == true;
-            r.PerguntarMissao = railPerguntar.IsChecked == true;
-            r.CheckInMinutos = _railCheckIn;
-            r.Nivel = _railNivel;
-            r.HoraInicio = railInicio.Text?.Trim();
-            r.HoraFim = railFim.Text?.Trim();
-            r.DiasAtivos = _railDias.OrderBy(d => d).ToList();
-            r.Distracoes = railDistracoes.Text
-                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(t => t.Trim())
-                .Where(t => t.Length > 0)
-                .ToList();
-        }
-
-        private void RailCheckIn_Click(object sender, RoutedEventArgs e)
-        {
-            _railCheckIn = int.Parse((string)((Button)sender).Tag, CultureInfo.InvariantCulture);
-            Destacar(painelRailCheckIn, _railCheckIn.ToString(CultureInfo.InvariantCulture));
-        }
-
-        private void RailNivel_Click(object sender, RoutedEventArgs e)
-        {
-            _railNivel = (Service.Rail.NivelDistracao)Enum.Parse(
-                typeof(Service.Rail.NivelDistracao), (string)((Button)sender).Tag);
-            Destacar(painelRailNivel, _railNivel.ToString());
-            AtualizarNivelDescricao();
-        }
-
-        private void AtualizarNivelDescricao()
-        {
-            var p = new Service.Rail.RailConfig { Nivel = _railNivel }.Desvio();
-            var quando = p.AvisarAposMinutos < 1
-                ? $"~{Math.Round(p.AvisarAposMinutos * 60)}s após abrir a distração"
-                : $"após {p.AvisarAposMinutos:0} min de distração";
-            railNivelDescricao.Text =
-                $"Avisa {quando} · repete a cada {p.CooldownMinutos:0} min · " +
-                $"\"estou trabalhando\" silencia por {p.SilencioTrabalhandoMinutos:0} min.";
-        }
-
-        private void RailDia_Click(object sender, RoutedEventArgs e)
-        {
-            var dia = (DayOfWeek)int.Parse((string)((Button)sender).Tag, CultureInfo.InvariantCulture);
-            if (!_railDias.Add(dia)) _railDias.Remove(dia);
-            if (_railDias.Count == 0) _railDias.Add(dia); // ao menos um dia ativo
-            AtualizarDias();
-        }
-
-        /// <summary>Realça os toggles dos dias selecionados (multi-seleção).</summary>
-        private void AtualizarDias()
-        {
-            var estiloPrimario = (Style)FindResource("BotaoPrimario");
-            var estiloPadrao = (Style)FindResource(typeof(Button));
-            foreach (var filho in painelRailDias.Children)
-            {
-                if (filho is Button botao)
-                {
-                    var dia = (DayOfWeek)int.Parse((string)botao.Tag, CultureInfo.InvariantCulture);
-                    botao.Style = _railDias.Contains(dia) ? estiloPrimario : estiloPadrao;
-                }
-            }
         }
 
         // ----------------- Notificações -----------------

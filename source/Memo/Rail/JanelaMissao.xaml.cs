@@ -299,6 +299,8 @@ namespace Memo.Rail
             Recarregar();
         }
 
+        private void Config_Click(object sender, RoutedEventArgs e) => JanelaConfigRail.Mostrar(this);
+
         private void Testar_Click(object sender, RoutedEventArgs e)
         {
             // Prévia do cerebrinho: usa a tarefa atual (ou um exemplo), sem efeitos.

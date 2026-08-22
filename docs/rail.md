@@ -73,7 +73,8 @@ trilho** abre o link da tarefa atual — te levando direto pra ela.
 
 ## Nível de distração
 
-Configurável em **Configurações → Memo Rail** (`RailConfig.Nivel` →
+Configurável em **Configurações → Memo Rail** — ou pelo **⚙** na própria janela da
+missão (`JanelaConfigRail`), que reusa o mesmo componente (`RailConfig.Nivel` →
 `Desvio()`): quanto maior, mais rápido e insistente o aviso.
 
 | Nível | Avisa desvio após | Repete a cada | "Estou trabalhando" silencia por |
@@ -184,7 +185,9 @@ matriz de intenções em `TelegramBotListener.Interpretar` — ordenada, com fal
 | `Memo/Rail/MonitorFoco.cs` | Win32: janela ativa (`GetForegroundWindow`) e ociosidade (`GetLastInputInfo`). |
 | `Memo/Rail/RailCoordenador.cs` | Orquestração: quando perguntar/checar/avisar (cooldowns, silenciados, adiar). |
 | `Memo/Rail/FormatadorTexto.cs` | Markdown-lite → Inlines; `SemFormatacao` para textos "crus". |
-| `Memo/Rail/JanelaMissao.xaml` | Checklist com seções e cards. |
+| `Memo/Rail/JanelaMissao.xaml` | Checklist com seções e cards; botão ⚙ abre a config. |
+| `Memo/Rail/PainelRail.xaml` | **Componente reutilizável** com as preferências do Rail (`Carregar`/`AplicarEm`). |
+| `Memo/Rail/JanelaConfigRail.xaml` | Config do Rail em janela própria (⚙ da missão); hospeda o `PainelRail`. |
 | `Memo/Rail/JanelaEditarTarefa.xaml` | Edição de texto/link/data. |
 | `Memo/Rail/JanelaCerebrinho.xaml` | O widget 🧠 (bolha no mouse → cartão). |
 | `Memo/Rail/BloqueioFoco.cs` + `JanelaBloqueio.xaml` | Modo foco: backdrop de tela cheia sobre a distração. |

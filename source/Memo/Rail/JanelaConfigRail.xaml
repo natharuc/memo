@@ -1,0 +1,28 @@
+<Window x:Class="Memo.Rail.JanelaConfigRail"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:rail="clr-namespace:Memo.Rail"
+        Title="Memo Rail — configurações" Width="560" MinHeight="480" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        FontFamily="Segoe UI" Background="{DynamicResource CorFundo}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Memo Rail" Foreground="{DynamicResource CorTexto}"
+                   FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" MaxHeight="440">
+            <rail:PainelRail x:Name="painelRail" />
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+            <Button Content="Cancelar" Click="Cancelar_Click" IsCancel="True" Margin="0,0,8,0" />
+            <Button Content="Salvar" Style="{StaticResource BotaoPrimario}"
+                    Click="Salvar_Click" IsDefault="True" />
+        </StackPanel>
+    </Grid>
+</Window>
