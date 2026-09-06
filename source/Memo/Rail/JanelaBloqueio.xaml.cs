@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Interop;
+using Memo.Service;
 
 namespace Memo.Rail
 {
@@ -20,6 +21,10 @@ namespace Memo.Rail
         public JanelaBloqueio()
         {
             InitializeComponent();
+
+            // Não perturbe: fora de capturas/compartilhamentos, se configurado.
+            if (Configuracoes.Atual.Rail?.OcultarDeCapturas == true)
+                Nativo.ExcluirDeCapturas(this);
         }
 
         public IntPtr Handle => new WindowInteropHelper(this).Handle;

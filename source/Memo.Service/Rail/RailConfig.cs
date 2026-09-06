@@ -70,6 +70,27 @@ namespace Memo.Service.Rail
             "Netflix", "Twitch", "Facebook", "Prime Video", "Disney+", "9GAG", "Steam"
         };
 
+        // ----------------- Não perturbe (momentos de silêncio) -----------------
+
+        /// <summary>
+        /// Pausa o Rail quando há um app em **tela cheia** (jogo) ou o Windows está
+        /// em **modo apresentação** (projetando/duplicando a tela).
+        /// </summary>
+        public bool PausarEmTelaCheia { get; set; } = true;
+
+        /// <summary>
+        /// Apps que, enquanto **abertos** (processo rodando), pausam o Rail. Termos
+        /// comparados por substring, sem diferenciar maiúsculas, contra o nome do
+        /// processo (ex.: <c>valorant</c>, <c>teams</c>, <c>zoom</c>).
+        /// </summary>
+        public List<string> AppsQuePausam { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Marca os avisos automáticos do Rail (cerebrinho e backdrop) como
+        /// invisíveis em capturas de tela e compartilhamentos (WDA_EXCLUDEFROMCAPTURE).
+        /// </summary>
+        public bool OcultarDeCapturas { get; set; } = true;
+
         /// <summary>Efeitos do nível de distração configurado.</summary>
         public ParametrosDesvio Desvio()
         {

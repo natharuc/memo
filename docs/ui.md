@@ -75,7 +75,9 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
   (`Rail/PainelRail.xaml[.cs]`) — habilitar, intervalo de check-in, **nível de
   distração** (Baixo…Muito alto e **TDAH**, com descrição do efeito), **horário**
   (máscara HH:mm via `MascaraHora`), **dias da semana** (toggles Seg…Dom, ao menos
-  um ativo) e lista de distrações. `PainelRail` se carrega sozinho de
+  um ativo), lista de distrações e o bloco **"Não perturbe"** (pausar em tela
+  cheia/apresentação, apps que pausam, ocultar avisos de capturas — ver
+  [rail.md](rail.md)). `PainelRail` se carrega sozinho de
   `Configuracoes.Rail`; o host chama `painelRail.AplicarEm(cfg.Rail)` ao salvar. O
   **mesmo componente** também é aberto direto da janela da missão (ver
   `JanelaConfigRail` abaixo). Ver [rail.md](rail.md).

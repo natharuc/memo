@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using Memo.Service;
 
 namespace Memo.Rail
 {
@@ -32,6 +33,10 @@ namespace Memo.Rail
             TimeSpan realocarApos)
         {
             InitializeComponent();
+
+            // Não perturbe: fora de capturas/compartilhamentos, se configurado.
+            if (Configuracoes.Atual.Rail?.OcultarDeCapturas == true)
+                Nativo.ExcluirDeCapturas(this);
 
             textoTitulo.Text = titulo;
             textoMensagem.Text = mensagem;

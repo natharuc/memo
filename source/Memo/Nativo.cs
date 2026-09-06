@@ -34,6 +34,12 @@ namespace Memo
         [DllImport("kernel32.dll")]
         private static extern uint GetCurrentThreadId();
 
+        private const uint WDA_EXCLUDEFROMCAPTURE = 0x11;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetWindowDisplayAffinity(IntPtr hWnd, uint dwAffinity);
+
         /// <summary>
         /// Traz a janela para o primeiro plano de forma confiável, contornando a
         /// proteção do Windows contra "roubo de foco" (AttachThreadInput). Útil ao
@@ -99,6 +105,30 @@ namespace Memo
                 catch
                 {
                     // Sem suporte em Windows mais antigo — ignora.
+                }
+            }
+
+            if (janela.IsLoaded) Aplicar();
+            else janela.SourceInitialized += (_, __) => Aplicar();
+        }
+
+        /// <summary>
+        /// Marca a janela como **invisível em capturas de tela e compartilhamentos**
+        /// (WDA_EXCLUDEFROMCAPTURE — Windows 10 2004+). Ela continua visível na tela
+        /// real. Best-effort: ignora se o Windows não suportar.
+        /// </summary>
+        public static void ExcluirDeCapturas(Window janela)
+        {
+            void Aplicar()
+            {
+                try
+                {
+                    var hwnd = new WindowInteropHelper(janela).Handle;
+                    if (hwnd != IntPtr.Zero) SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
+                }
+                catch
+                {
+                    // Sem suporte (Windows antigo) — ignora.
                 }
             }
 

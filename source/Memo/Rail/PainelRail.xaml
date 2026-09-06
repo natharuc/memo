@@ -67,5 +67,27 @@
         <TextBox x:Name="railDistracoes" MinHeight="90" MaxHeight="140"
                  AcceptsReturn="True" TextWrapping="NoWrap"
                  VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="13" />
+
+        <TextBlock Text="NÃO PERTURBE" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,20,0,8" />
+        <CheckBox x:Name="railPausarTelaCheia"
+                  Content="Pausar em tela cheia / apresentação (jogos, projeção)"
+                  Margin="0,0,0,12" />
+
+        <TextBlock Text="APPS QUE PAUSAM O RAIL (UM POR LINHA)" Foreground="{DynamicResource CorTextoFraco}"
+                   FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                   Margin="0,0,0,8"
+                   Text="Enquanto um destes apps estiver aberto, o Rail fica em silêncio. Combina pelo nome do processo (ex.: valorant, teams, zoom)." />
+        <TextBox x:Name="railAppsPausam" MinHeight="70" MaxHeight="120"
+                 AcceptsReturn="True" TextWrapping="NoWrap"
+                 VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="13"
+                 Margin="0,0,0,12" />
+
+        <CheckBox x:Name="railOcultarCapturas"
+                  Content="Ocultar avisos do Rail em compartilhamentos/capturas"
+                  Margin="0,0,0,2" />
+        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource CorTextoFraco}" FontSize="11"
+                   Text="Os avisos continuam visíveis na sua tela, mas não aparecem para quem vê o seu compartilhamento (Windows 10 2004+)." />
     </StackPanel>
 </UserControl>

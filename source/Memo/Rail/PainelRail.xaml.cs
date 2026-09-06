@@ -43,6 +43,11 @@ namespace Memo.Rail
             railDistracoes.Text = string.Join(Environment.NewLine,
                 r.Distracoes ?? new System.Collections.Generic.List<string>());
 
+            railPausarTelaCheia.IsChecked = r.PausarEmTelaCheia;
+            railOcultarCapturas.IsChecked = r.OcultarDeCapturas;
+            railAppsPausam.Text = string.Join(Environment.NewLine,
+                r.AppsQuePausam ?? new System.Collections.Generic.List<string>());
+
             _checkIn = r.CheckInMinutos;
             _nivel = r.Nivel;
 
@@ -68,6 +73,14 @@ namespace Memo.Rail
             r.HoraFim = railFim.Text?.Trim();
             r.DiasAtivos = _dias.OrderBy(d => d).ToList();
             r.Distracoes = railDistracoes.Text
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(t => t.Trim())
+                .Where(t => t.Length > 0)
+                .ToList();
+
+            r.PausarEmTelaCheia = railPausarTelaCheia.IsChecked == true;
+            r.OcultarDeCapturas = railOcultarCapturas.IsChecked == true;
+            r.AppsQuePausam = railAppsPausam.Text
                 .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(t => t.Trim())
                 .Where(t => t.Length > 0)

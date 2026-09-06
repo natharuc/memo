@@ -102,7 +102,32 @@ de lembretes (20s); cada tick faz uma única leitura do `rail.json`
   sozinho** — se você o ignorar por `RealocarMinutos` (padrão 2 min), ele some de
   onde estava e **reaparece na posição atual do mouse**, até você clicar. Ao
   expandir para o cartão, ele para de se mover (você já está interagindo).
+- **Não perturbe**: silêncio em tela cheia/apresentação ou com um app configurado
+  aberto (ver abaixo).
 - **Missão cumprida** (ou sem missão): silêncio total.
+
+## Não perturbe (momentos de silêncio)
+
+Gate central em `RailCoordenador.Tick` (via `DetectorSilencio.EmSilencio`) que
+suprime **missão-do-dia, check-ins e desvios**. Configurável em Configurações →
+Memo Rail (ou pelo ⚙ da missão):
+
+- **Tela cheia / apresentação** (`PausarEmTelaCheia`, padrão ligado): pausa quando
+  há um jogo em tela cheia ou o Windows está em modo apresentação/projeção
+  (`SHQueryUserNotificationState`).
+- **Apps que pausam** (`AppsQuePausam`): enquanto um processo cujo nome casa com um
+  termo da lista estiver **aberto** (ex.: `valorant`, `teams`, `zoom`), o Rail fica
+  em silêncio (`RailService.AlgumAppAberto`, checado no máximo a cada ~2s).
+- **Ocultar de capturas** (`OcultarDeCapturas`, padrão ligado): marca o cerebrinho
+  e o backdrop como **invisíveis em capturas/compartilhamentos**
+  (`WDA_EXCLUDEFROMCAPTURE`, via `Nativo.ExcluirDeCapturas`) — continuam visíveis na
+  sua tela. Windows 10 2004+.
+
+> **Limitação:** o Windows não expõe de forma confiável "minha tela está sendo
+> capturada" para um app comum (share windowed de Zoom/Teams/OBS é invisível para
+> quem é capturado). Por isso a cobertura do compartilhamento é combinar: detectar
+> tela cheia/apresentação, adicionar o app de reunião à lista **e** ocultar os
+> avisos das capturas — assim, mesmo sem detectar, nada do Rail aparece no share.
 
 ## Privacidade
 
@@ -114,7 +139,7 @@ nada sai da máquina. O que persiste:
 | Arquivo | Conteúdo |
 |---------|----------|
 | `%LOCALAPPDATA%\Memo\rail.json` | **v2**: `{ Versao, UltimoCheckIn, Itens[] }` — pool de tarefas com data. O formato v1 (lista de dias) é migrado automaticamente na leitura, sem perder tarefa. |
-| `config.json` → `Rail` | Preferências (check-in, nível, horário, dias, distrações). |
+| `config.json` → `Rail` | Preferências (check-in, nível, horário, dias, distrações, não perturbe). |
 
 Missão **não é segredo**: não passa pelo cofre e os comandos `rail` não pedem a
 senha-mestra.
@@ -179,7 +204,8 @@ matriz de intenções em `TelegramBotListener.Interpretar` — ordenada, com fal
 | Arquivo | Papel |
 |---------|-------|
 | `Memo.Service/Rail/MissaoDia.cs` | `ItemMissao` (com `Data`), `RailDados` (v2) e `MissaoVisivel` (atrasadas/hoje/futuras + ordem canônica). |
-| `Memo.Service/Rail/RailService.cs` | Persistência v2 + migração v1, `MissaoAtual`, `ParseData`, mutações (add/`Concluir`/`AlternarConcluido`/`Mover`/…), heurística `EhDistracao`. |
+| `Memo.Service/Rail/RailService.cs` | Persistência v2 + migração v1, `MissaoAtual`, `ParseData`, mutações (add/`Concluir`/`AlternarConcluido`/`Mover`/…), heurísticas `EhDistracao` e `AlgumAppAberto`. |
+| `Memo/Rail/DetectorSilencio.cs` | "Não perturbe": tela cheia/apresentação (`SHQueryUserNotificationState`) + apps abertos. |
 | `Memo.Service/Notificacoes/TelegramBotListener.cs` | Listener do bot do Telegram (long-polling) que controla o Rail; autoriza só o chat configurado, não toca no cofre. |
 | `Memo.Service/Rail/RailConfig.cs` | Preferências, `NivelDistracao`/`Desvio()`, `DiasAtivos`/`DiasEfetivos`, `DentroDoHorario`. |
 | `Memo/Rail/MonitorFoco.cs` | Win32: janela ativa (`GetForegroundWindow`) e ociosidade (`GetLastInputInfo`). |

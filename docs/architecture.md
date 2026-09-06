@@ -134,9 +134,11 @@ quebra o app. Ver [security.md](security.md).
 - **`Tema.cs` + `Tema.xaml` + `PaletaEscura.xaml`/`PaletaClara.xaml`** — estilos
   em `Tema.xaml`, cores nas paletas; `Tema.Aplicar(...)` troca a paleta em runtime
   (tema claro/escuro). Ver [ui.md](ui.md).
-- **`Nativo.cs`** — P/Invoke: `DwmSetWindowAttribute` (barra de título escura) e
+- **`Nativo.cs`** — P/Invoke: `DwmSetWindowAttribute` (barra de título escura),
   `TrazerParaFrente` (foreground confiável via `AttachThreadInput` +
-  `SetForegroundWindow`, p/ a janela abrir focada mesmo vinda da bandeja).
+  `SetForegroundWindow`, p/ a janela abrir focada mesmo vinda da bandeja) e
+  `ExcluirDeCapturas` (`WDA_EXCLUDEFROMCAPTURE` — esconde os avisos do Rail de
+  capturas/compartilhamentos).
 - **`Som.cs`** — toca o som de notificação dos lembretes.
 
 Detalhes de comportamento em [ui.md](ui.md).

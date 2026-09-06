@@ -388,5 +388,40 @@ namespace Memo.Service.Rail
             }
             return false;
         }
+
+        /// <summary>
+        /// True se **algum processo em execução** casa (substring, case-insensitive)
+        /// com um dos termos — usado pelo "não perturbe" para pausar o Rail enquanto
+        /// um app configurado (ex.: um jogo ou app de reunião) estiver aberto.
+        /// </summary>
+        public static bool AlgumAppAberto(IEnumerable<string> termos)
+        {
+            if (termos == null) return false;
+
+            var lista = termos.Where(t => !string.IsNullOrWhiteSpace(t))
+                              .Select(t => t.Trim()).ToList();
+            if (lista.Count == 0) return false;
+
+            try
+            {
+                foreach (var p in Process.GetProcesses())
+                {
+                    using (p)
+                    {
+                        string nome;
+                        try { nome = p.ProcessName; } catch { continue; }
+                        if (string.IsNullOrEmpty(nome)) continue;
+
+                        if (lista.Any(t => nome.IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0))
+                            return true;
+                    }
+                }
+            }
+            catch
+            {
+                // Enumerar processos nunca pode derrubar o Rail.
+            }
+            return false;
+        }
     }
 }

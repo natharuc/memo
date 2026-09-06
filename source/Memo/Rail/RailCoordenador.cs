@@ -46,6 +46,9 @@ namespace Memo.Rail
             var cfg = Configuracoes.Atual.Rail;
             if (cfg == null || !cfg.Habilitado) return;
 
+            // "Não perturbe": tela cheia/apresentação ou app configurado aberto.
+            if (DetectorSilencio.EmSilencio(cfg)) { _minutosEmDistracao = 0; return; }
+
             var agora = DateTime.Now;
             if (!cfg.DentroDoHorario(agora)) return;
             if (_popupAberto) return;
