@@ -101,6 +101,19 @@ canais de notificação — incluindo **segredos** (bot token do Telegram, senha
   senha-mestra (o cofre pode estar trancado).
 - Nunca logar `NotificacaoConfig` nem os argumentos de envio.
 
+## Cache TOTP (Ente Auth)
+
+Arquivo: `%LOCALAPPDATA%\Memo\ente-auth.bin` (`CacheAuth`). Guarda os parâmetros
+TOTP (incluindo o **secret** Base32) para gerar o código sem chamar a Ente CLI
+a cada `memo auth`.
+
+- JSON cifrado com **DPAPI** (`CurrentUser`) — só o mesmo usuário Windows lê.
+- Validade ~6 h; `memo auth sync` força refresh.
+- O export plaintext (`ente_auth.txt`) só existe num diretório temporário e é
+  **apagado** depois do ingest.
+- Independente do cofre: `auth` não pede a senha-mestra.
+- Nunca logar `EntradaAuth.Secret` nem o conteúdo do cache.
+
 ### Bot do Telegram (entrada)
 
 Com **"Ouvir comandos"** ligado, o `TelegramBotListener` faz *long-polling* e

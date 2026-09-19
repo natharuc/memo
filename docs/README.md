@@ -36,6 +36,8 @@ biblioteca `Memo.Service`.
 - **Canal de notificação**: destino externo (Telegram ou e-mail/SMTP) para onde o
   `memo notify` envia mensagens. Configurado na aba Notificações; credenciais
   cifradas por DPAPI em `notificacoes.bin`.
+- **TOTP (Ente Auth)**: código de 6 dígitos via Ente CLI + cache DPAPI
+  (`ente-auth.bin`). Comando `auth`. **Não é o cofre.**
 - **Missão do dia (Memo Rail)**: checklist do assistente de foco (**não é
   segredo**), guardado em `rail.json` como um pool de tarefas com data —
   pendências de dias anteriores acumulam como **atrasadas**. O Rail faz

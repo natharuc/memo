@@ -20,6 +20,7 @@ de referência ([architecture.md](architecture.md), [security.md](security.md),
 | **Lembrete** | Aviso em linguagem natural, na bandeja | GUI (**⏰**) · `remember` |
 | **Missão do dia (Rail)** | Foco: checklist, check-ins, detector de distração | GUI (**🚂**) · `rail` |
 | **Notificar** | Envia para Telegram/e-mail | `notify` |
+| **TOTP (Ente Auth)** | Copia o código de 6 dígitos | `auth` |
 | **Bot do Telegram** | Controla o Rail pelo Telegram (opt-in) | Config. → Notificações |
 | **Trancar / destrancar** | Encerra/reabre a sessão | badge da tela · `lock`/`unlock` |
 | **Trocar tema** | Claro ou escuro, em runtime | GUI (**⚙**) |
@@ -158,11 +159,14 @@ Referência completa em [cli.md](cli.md). Resumo dos comandos do **`memo-cli`**:
 | `list` | Lista as chaves |
 | `del <chave>` | Exclui **definitivamente** |
 | `remember <texto/quando>` | Cria um lembrete |
+| `notify [canal] <msg>` | Telegram / e-mail |
+| `rail …` | Missão do dia |
+| `auth <issuer> [conta]` | TOTP do Ente Auth (clipboard com `--copy`) |
 | `pass [chave]` | Gera uma senha (e salva, se der uma chave) |
 | `guid` | Gera um GUID |
 | `unlock` / `lock` | Destranca (pede senha) / tranca o cofre |
 | `migrar` | Recifra documentos antigos |
-| `config [--dir <pasta>]` | Mostra/define a pasta do cofre |
+| `config [--dir] [--ente]` | Pasta do cofre e caminho do `ente.exe` |
 | `version` / `help` | Versão / ajuda |
 
 - **Formatos de saída**: `--text` (padrão), `--json`, `--bytes`, `--copy`.
@@ -171,9 +175,17 @@ Referência completa em [cli.md](cli.md). Resumo dos comandos do **`memo-cli`**:
 - **Pasta do cofre**: variável `MEMO_DIR` ou `config --dir`.
 - **Exit codes**: `0` ok · `1` erro · `2` trancado · `3` não encontrado · `64` uso.
 
-A GUI (`Memo.exe <args>`) aceita `get`/`set`/`new`/`pass`/`guid`/`migrar`/
-`lock`/`unlock`/`remember`, mas **não** captura stdout — use o `memo-cli` para
-automação.
+A GUI (`Memo.exe <args>`) aceita os mesmos comandos (copia + Toast), mas **não**
+captura stdout — use o `memo-cli` para automação. `remember`, `notify`, `rail` e
+`auth` não exigem o cofre destrancado.
+
+## TOTP (Ente Auth)
+
+`auth` gera o código de 6 dígitos a partir da **mesma conta Ente** usada no
+app Ente Auth. A GUI do Auth **não** tem API local; o Memo usa a
+[Ente CLI](https://github.com/ente/ente/releases?q=tag%3Acli-v0). Setup:
+**Configurações → Ente → Instalar Ente CLI** (baixa, instala, PATH) e
+**Conectar conta Auth**. Ver [cli.md](cli.md) e [skills/memo-auth](../skills/memo-auth/SKILL.md).
 
 ## Segurança
 

@@ -5,6 +5,8 @@
 - **.NET SDK 8+** (o repo foi construído com SDK 8/9/10 instalados; o alvo é
   `net8.0-windows`).
 - **Windows** — o app usa WPF, DPAPI e a API DWM. Não é multiplataforma.
+- Restauração de pacotes: `nuget.config` na raiz aponta só para **nuget.org**
+  (ignora feeds privados da máquina).
 
 ## Projetos
 
@@ -13,9 +15,11 @@
 | `source/Memo` | `net8.0-windows`, `UseWPF` | WinExe (GUI; também aceita args, mas não captura stdout) |
 | `source/Memo.Cli` | `net8.0-windows` | Exe console (`memo-cli.exe`) — CLI scriptável, saída em stdout |
 | `source/Memo.Service` | `net8.0-windows` | biblioteca (núcleo compartilhado por GUI e CLI) |
+| `source/Memo.Service.Tests` | `net8.0` | xUnit (parser/match/TOTP do `auth`) |
 
 ### Dependências (`Memo.Service`)
 - `Newtonsoft.Json` — serialização do `Documento` e do `vault.json`.
+- `Otp.NET` — geração TOTP (`memo auth`).
 - `System.Security.Cryptography.ProtectedData` — DPAPI para o cache de sessão.
 - `TextCopy` — clipboard.
 
@@ -25,6 +29,7 @@
 
 ```powershell
 dotnet build source/Memo.slnx -c Release
+dotnet test source/Memo.slnx -c Release
 ```
 
 (O SDK do .NET 10 criou a solution no formato novo `.slnx`. Funciona com
@@ -147,9 +152,11 @@ caso um cofre (ou um `MEMO_DIR` de teste) acabe dentro do repo.
 
 ## Testes
 
-Não há projeto de teste versionado. Durante o desenvolvimento, valida-se com
-consoles descartáveis que referenciam `Memo.Service` e usam um **diretório
-temporário** (jamais a pasta real do usuário; use `MEMO_DIR`). Um bom teste cobre: round-trip de
-cifragem (inclusive Unicode), senha errada rejeitada, detecção de adulteração
-(GCM), leitura/migração do formato legado, e bloqueio de path-traversal.
-Adicionar um projeto xUnit é uma melhoria recomendada.
+`source/Memo.Service.Tests` cobre o `auth` (parse otpauth, filtro AND, RFC 6238,
+parse do `ente account list`). Rode `dotnet test source/Memo.slnx`.
+
+Para o cofre, continue usando um **diretório temporário** (`MEMO_DIR` ou
+`new MemoService("<dir temp>")`) — jamais a pasta real do usuário. Um bom teste
+de cofre cobre: round-trip de cifragem (inclusive Unicode), senha errada
+rejeitada, detecção de adulteração (GCM), leitura/migração do formato legado, e
+bloqueio de path-traversal.

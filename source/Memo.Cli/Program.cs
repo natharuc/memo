@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using Memo.Service;
+using Memo.Service.Auth;
 using Memo.Service.Classes;
 using Memo.Service.Lembretes;
 using Memo.Service.Notificacoes;
 using Memo.Service.Seguranca;
 using Memo.Services;
+using TextCopy;
 
 namespace Memo.Cli
 {
@@ -51,6 +53,7 @@ namespace Memo.Cli
                     case "del": case "rm": case "delete": return Del(args);
                     case "remember": case "lembrar": case "lembrete": return Remember(args);
                     case "notify": case "notificar": return Notify(args);
+                    case "auth": return Auth(args);
                     case "rail": case "missao": return RailCmd(args);
                     case "pass": return Pass(args);
                     case "guid": return Guid(args);
@@ -395,20 +398,128 @@ namespace Memo.Cli
             return Codigo.Ok;
         }
 
+        private static int Auth(Args a)
+        {
+            var pos = a.Positionals();
+            var forcar = a.Tem("--sync");
+            if (pos.Count > 0 && pos[0].Equals("sync", StringComparison.OrdinalIgnoreCase))
+            {
+                forcar = true;
+                pos = pos.Skip(1).ToList();
+            }
+
+            var svc = new EnteAuthService();
+
+            if (pos.Count == 0 && forcar)
+            {
+                var r = svc.Sincronizar();
+                return EscreverAuth(a, r, copiar: false, listar: true);
+            }
+
+            if (pos.Count > 0 && (pos[0].Equals("list", StringComparison.OrdinalIgnoreCase) ||
+                                  pos[0].Equals("ls", StringComparison.OrdinalIgnoreCase)))
+            {
+                var r = svc.Listar(forcar);
+                return EscreverAuth(a, r, copiar: false, listar: true);
+            }
+
+            if (pos.Count == 0)
+            {
+                Erro("Uso: memo-cli auth <issuer> [conta] [--copy|--json|--sync]  |  auth list  |  auth sync");
+                return Codigo.Uso;
+            }
+
+            var busca = svc.Buscar(pos, forcar);
+            return EscreverAuth(a, busca, copiar: a.Tem("--copy"), listar: false);
+        }
+
+        private static int EscreverAuth(Args a, ResultadoAuth r, bool copiar, bool listar)
+        {
+            if (!r.Sucesso)
+            {
+                Erro(r.Mensagem);
+                if (r.UsoIncorreto) return Codigo.Uso;
+                if (r.EhNaoEncontrado) return Codigo.NaoEncontrado;
+                return Codigo.Erro;
+            }
+
+            if (listar)
+            {
+                if (a.Formato() == Formato.Json)
+                {
+                    EscreverJson((r.Entradas ?? new List<EntradaAuth>()).Select(e => new
+                    {
+                        issuer = e.Issuer,
+                        account = e.Account
+                    }));
+                }
+                else
+                {
+                    foreach (var e in r.Entradas ?? new List<EntradaAuth>())
+                        Console.Out.WriteLine(e.Rotulo);
+                    if (!string.IsNullOrEmpty(r.Mensagem) && (r.Entradas == null || r.Entradas.Count == 0))
+                        Console.Error.WriteLine(r.Mensagem);
+                }
+                return Codigo.Ok;
+            }
+
+            if (a.Formato() == Formato.Json)
+            {
+                EscreverJson(new
+                {
+                    issuer = r.Issuer,
+                    account = r.Account,
+                    code = r.Codigo,
+                    remainingSeconds = r.SegundosRestantes
+                });
+                return Codigo.Ok;
+            }
+
+            if (copiar)
+            {
+                new Clipboard().SetText(r.Codigo ?? string.Empty);
+                Console.Error.WriteLine(r.Mensagem);
+                return Codigo.Ok;
+            }
+
+            Console.Out.Write(r.Codigo ?? string.Empty);
+            Console.Out.Write(Environment.NewLine);
+            return Codigo.Ok;
+        }
+
         private static int Config(Args a)
         {
+            var cfg = Configuracoes.Atual;
+            var mudou = false;
+
             if (a.TemValor("--dir", out var dir) && !string.IsNullOrWhiteSpace(dir))
             {
-                var cfg = Configuracoes.Atual;
                 cfg.DiretorioDocumentos = dir.Trim();
-                cfg.Salvar();
+                mudou = true;
                 Console.Error.WriteLine($"Pasta de documentos definida: {dir.Trim()}");
+            }
+
+            if (a.TemValor("--ente", out var ente) && !string.IsNullOrWhiteSpace(ente))
+            {
+                cfg.EnteCliCaminho = ente.Trim();
+                mudou = true;
+                Console.Error.WriteLine($"Ente CLI: {ente.Trim()}");
+            }
+
+            if (mudou)
+            {
+                cfg.Salvar();
                 return Codigo.Ok;
             }
 
             var atual = MemoService.DiretorioConfigurado;
-            if (a.Formato() == Formato.Json) EscreverJson(new { dir = atual });
-            else Console.Out.WriteLine(atual ?? "(não configurada)");
+            var exe = string.IsNullOrWhiteSpace(cfg.EnteCliCaminho) ? EnteCliCliente.AcharExe() : cfg.EnteCliCaminho;
+            if (a.Formato() == Formato.Json) EscreverJson(new { dir = atual, ente = exe });
+            else
+            {
+                Console.Out.WriteLine(atual ?? "(pasta não configurada)");
+                Console.Out.WriteLine(exe ?? "(ente.exe não encontrado)");
+            }
             return Codigo.Ok;
         }
 
@@ -538,12 +649,14 @@ Comandos:
   del <chave>             Exclui um segredo
   remember <texto/quando> Cria um lembrete (ex.: ""ver tarefa 10:00 tomorrow"")
   notify [canal] <msg>    Notifica nos canais (telegram/email); -t <titulo> opcional
+  auth <issuer> [conta]   TOTP do Ente Auth (clipboard com --copy; não usa o cofre)
+  auth list | auth sync   Lista contas em cache / força refresh via Ente CLI
   rail [status|add <t> [--data <d>]|done <n>|edit <n>|move <n> up|down|clear]  Missão do dia (Rail)
   pass [chave]            Gera uma senha (e salva, se der uma chave)
   guid                    Gera um GUID
   unlock / lock           Destranca (pede senha) / tranca o cofre
   migrar                  Recifra documentos antigos
-  config [--dir <pasta>]  Mostra/define a pasta dos documentos
+  config [--dir <pasta>] [--ente <exe>]  Pasta dos documentos e caminho do ente.exe
   version                 Versão
 
 Saída:
@@ -578,7 +691,7 @@ Exit codes: 0 ok · 1 erro · 2 trancado · 3 não encontrado · 64 uso");
 
                     // flags que consomem o próximo token
                     if ((t == "--password" || t == "--value" || t == "--dir" || t == "--titulo" ||
-                         t == "--link" || t == "--data" || t == "--texto") && i + 1 < argv.Length)
+                         t == "--link" || t == "--data" || t == "--texto" || t == "--ente") && i + 1 < argv.Length)
                     {
                         _valores[t] = argv[++i];
                         continue;

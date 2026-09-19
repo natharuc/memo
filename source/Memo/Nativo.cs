@@ -13,6 +13,28 @@ namespace Memo
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr SendMessageTimeout(
+            IntPtr hWnd, uint msg, IntPtr wParam, string lParam, uint flags, uint timeout, out IntPtr result);
+
+        private const uint HWND_BROADCAST = 0xffff;
+        private const uint WM_SETTINGCHANGE = 0x001A;
+        private const uint SMTO_ABORTIFHUNG = 0x0002;
+
+        /// <summary>
+        /// Avisa o Explorer (e outros) que o PATH / variáveis de ambiente mudaram,
+        /// para Win+R e novos terminais enxergarem a Ente CLI sem relogar.
+        /// </summary>
+        public static void NotificarMudancaDeAmbiente()
+        {
+            try
+            {
+                SendMessageTimeout((IntPtr)HWND_BROADCAST, WM_SETTINGCHANGE, IntPtr.Zero,
+                    "Environment", SMTO_ABORTIFHUNG, 1000, out _);
+            }
+            catch { }
+        }
+
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);

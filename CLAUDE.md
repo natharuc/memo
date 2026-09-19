@@ -20,9 +20,10 @@ relevante.**
 ## O que é o Memo
 
 Cofre de segredos **file-based**: cada segredo é um arquivo cifrado (AES-256-GCM,
-chave PBKDF2) numa pasta escolhida pelo usuário. Três projetos: `source/Memo`
-(WPF + bandeja, também age como CLI), `source/Memo.Cli` (CLI console scriptável) e
-`source/Memo.Service` (núcleo, sem WPF). Plataforma: Windows, .NET 8.
+chave PBKDF2) numa pasta escolhida pelo usuário. Projetos: `source/Memo`
+(WPF + bandeja, também age como CLI), `source/Memo.Cli` (CLI console scriptável),
+`source/Memo.Service` (núcleo, sem WPF) e `source/Memo.Service.Tests`. Plataforma:
+Windows, .NET 8. TOTP do Ente Auth: comando `auth` (ver [cli.md](docs/cli.md)).
 
 ## Por onde começar
 

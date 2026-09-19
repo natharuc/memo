@@ -39,11 +39,13 @@ memo-cli remember <texto/quando>    # mesmas regras do "memo remember"
 memo-cli notify [canal] [-t <titulo>] <mensagem>   # telegram|email; sem canal = todos habilitados
 memo-cli rail [status|add <t> [--link <url>] [--data <d>]|done <n>|edit <n> [--texto|--link|--data]|clear]
                                     # missão (Memo Rail): atrasadas/hoje/próximas — ver rail.md
+memo-cli auth <issuer> [conta] [--copy|--json|--sync]
+memo-cli auth list | auth sync      # TOTP do Ente Auth (não usa o cofre)
 memo-cli pass [<chave>] [--json]
 memo-cli guid [--json]
 memo-cli unlock | lock
 memo-cli migrar
-memo-cli config [--dir <pasta>]     # mostra/define a pasta dos documentos
+memo-cli config [--dir <pasta>] [--ente <exe>]
 memo-cli version | help
 ```
 
@@ -67,6 +69,7 @@ salva); no CLI, defina com `memo-cli config --dir <pasta>` (ou `MEMO_DIR`).
 ### Variáveis de ambiente
 - **`MEMO_DIR`** — aponta o cofre para uma pasta (sobrepõe a configurada).
 - **`MEMO_PASSWORD`** — senha-mestra para destravar sem prompt.
+- **`ENTE_CLI`** — caminho do `ente.exe` (Ente CLI) para o `auth`.
 
 ### Exit codes
 `0` ok · `1` erro · `2` cofre trancado · `3` não encontrado · `64` uso incorreto.
@@ -213,6 +216,26 @@ memo rail status             # resumo: "2/5 · 1 atrasada(s) · atual: ..."
 Pendências de dias anteriores **acumulam como atrasadas** até serem concluídas.
 Datas: `hoje`, `amanha`, `dd/MM`, `dd/MM/yyyy`, `yyyy-MM-dd`.
 
+### `memo auth <issuer> [conta]`
+Copia o **código TOTP de 6 dígitos** do Ente Auth para a área de transferência.
+Não pede a senha-mestra do Memo (usa a sessão da Ente CLI + cache DPAPI).
+
+```
+memo auth vercel nathanarrudacamara@gmail.com
+memo auth sync           # força refresh do cache
+memo auth list           # issuer · conta (sem o código)
+```
+
+Os tokens depois de `auth` são filtro **AND** (substring, sem maiúscula/minúscula)
+em issuer, account e label. Um match copia o código; zero vira "não encontrado";
+vários lista os candidatos e **não** copia.
+
+> O app **Ente Auth (GUI)** não expõe os códigos por CLI. O caminho fácil:
+> **Memo → Configurações → Ente → Instalar Ente CLI**, depois **Conectar conta Auth**
+> (app = `auth`, mesmo e-mail). A CLI fica em `%LOCALAPPDATA%\Memo\ente` e no PATH
+> do usuário. Cadastre **só** auth — se também houver photos, `ente export` baixa
+> as fotos. Detalhes na skill [memo-auth](../skills/memo-auth/SKILL.md).
+
 ### `memo migrar`
 Recifra todos os documentos no formato atual e move para `falhas/` os que não
 abrirem. Mostra um resumo `X migrado(s), Y ok, Z em quarentena`.
@@ -226,6 +249,7 @@ Se a sessão não estiver válida, **mesmo um comando de CLI abre a janela de se
 destrancar uma vez, os próximos `get`/`set` dentro do prazo da sessão não pedem
 senha. O prazo é **absoluto** (conta a partir da senha digitada, não renova a
 cada uso) e configurável (`Configuracoes.DuracaoSessao`).
+`remember`, `notify`, `rail` e `auth` **não** exigem o cofre.
 
 ## Como o usuário chama `memo`
 

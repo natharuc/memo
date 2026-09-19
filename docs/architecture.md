@@ -33,7 +33,8 @@ A UI é "burra": orquestra janelas e delega tudo para `MemoService` (e
 │ DocumentoRepository  IO dos arquivos + migração + sanitização            │
 │ LembreteService      lembretes (lembretes.json) — não é segredo           │
 │ HistoricoExecutar    higiene: limpa "memo set" do histórico do Win+R      │
-│ Configuracoes        preferências (tema, duração da sessão, gerador)      │
+│ Configuracoes        preferências (tema, duração da sessão, gerador, ente)│
+│ EnteAuthService      TOTP do Ente Auth (CLI oficial + cache DPAPI)        │
 │ AtualizadorService   auto-update via GitHub Releases                      │
 └───────────────────────────────────────────────────────────────────────────┘
                          │ lê/escreve
@@ -101,6 +102,15 @@ Canais de notificação de **saída** (Telegram e e-mail/SMTP), com credenciais
 cifradas por DPAPI em `notificacoes.bin`. Usado por `memo notify`. Ver
 [security.md](security.md).
 
+### `EnteAuthService` — `source/Memo.Service/Auth/`
+TOTP do Ente Auth. Não usa o cofre. `ente.exe` exporta `otpauth://totp/...` num
+temp (apagado em seguida); o Memo guarda issuer/account/secret em
+`%LOCALAPPDATA%\Memo\ente-auth.bin` (DPAPI, ~6 h) e gera o código com Otp.NET.
+`EnteCliInstalador` baixa a release `cli-v*` do GitHub, instala em
+`%LOCALAPPDATA%\Memo\ente` e coloca no PATH (aba **Configurações → Ente**).
+A GUI do Ente Auth **não** é lida. Setup: **Configurações → Ente** (instala a CLI
+e conecta a conta) ou `ente account add` (app `auth`). Ver [cli.md](cli.md).
+
 ### `TelegramBotListener` — `source/Memo.Service/Notificacoes/TelegramBotListener.cs`
 Notificação de **entrada**: long-polling (`getUpdates`) numa thread de fundo,
 iniciado com a bandeja (`App.IniciarAgendador`) e parado no `Encerrar`. Controla o
@@ -152,10 +162,9 @@ Detalhes de comportamento em [ui.md](ui.md).
    usuário (`EscolherPastaDocumentos`) e salva. Depois cria `MemoService`.
 3. **`--apos-atualizacao <pid>`** → espera o processo antigo sair (libera o mutex
    de instância única) e segue como uma abertura normal.
-4. **Com argumentos** (que não `--tray`) → modo CLI: executa
-   `get`/`set`/`new`/`pass`/`guid`/`migrar`/`lock`/`unlock`/`remember`, mostra um
-   `Toast` e sai. O cofre é destrancado pela sessão ou pela `JanelaSenha`
-   (lembretes e `lock` não exigem cofre aberto).
+4. **Com argumentos** (que não `--tray`) → modo CLI: executa o comando, mostra um
+   `Toast` e sai. O cofre é destrancado pela sessão ou pela `JanelaSenha`.
+   `remember`, `notify`, `rail` e `auth` **não** exigem cofre aberto.
 5. **Sem argumentos** ou **`--tray`** → modo bandeja: adquire a **instância única**
    (se já houver outra, manda mostrar e sai), liga a bandeja e o **agendador de
    lembretes**, e limpa resíduos de update. Com `--tray` (início com o Windows)

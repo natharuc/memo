@@ -1,5 +1,6 @@
 using Memo.Service;
 using Memo.Service.Atualizacao;
+using Memo.Service.Auth;
 using Memo.Service.Lembretes;
 using Memo.Service.Notificacoes;
 using Memo.Service.Repositorio;
@@ -349,6 +350,13 @@ namespace Memo
                 return;
             }
 
+            // TOTP do Ente Auth: sessão da Ente CLI + cache DPAPI, não o cofre.
+            if (cmd == "auth")
+            {
+                ExecutarAuth(args);
+                return;
+            }
+
             // Demais comandos precisam do cofre aberto.
             if (!cofre.TentarDestrancarPelaSessao() && !JanelaSenha.Solicitar(cofre))
             {
@@ -381,6 +389,43 @@ namespace Memo
             if (cmd == "set") Memo.Service.Seguranca.HistoricoExecutar.LimparComandosSet();
 
             Toast.Mostrar(resultado.Mensagem, resultado.Sucesso);
+        }
+
+        private void ExecutarAuth(string[] args)
+        {
+            var tokens = args.Skip(1).ToList();
+            var forcar = false;
+            if (tokens.Count > 0 && tokens[0].Equals("sync", StringComparison.OrdinalIgnoreCase))
+            {
+                forcar = true;
+                tokens = tokens.Skip(1).ToList();
+            }
+
+            var svc = new EnteAuthService();
+            ResultadoAuth r;
+            try
+            {
+                if (tokens.Count == 0 && forcar)
+                    r = svc.Sincronizar();
+                else if (tokens.Count > 0 && (tokens[0].Equals("list", StringComparison.OrdinalIgnoreCase) ||
+                                              tokens[0].Equals("ls", StringComparison.OrdinalIgnoreCase)))
+                    r = svc.Listar(forcar);
+                else
+                    r = svc.Buscar(tokens, forcar);
+            }
+            catch (Exception ex)
+            {
+                r = ResultadoAuth.Falha(ex.Message);
+            }
+
+            if (r.Sucesso && !string.IsNullOrEmpty(r.Codigo))
+                _service.CopiarTexto(r.Codigo);
+
+            var msg = r.Mensagem;
+            if (r.Sucesso && r.Entradas != null && r.Entradas.Count > 8 && string.IsNullOrEmpty(r.Codigo))
+                msg = r.Entradas.Count + " contas no cache. Use memo-cli auth list para ver todas.";
+
+            Toast.Mostrar(msg, r.Sucesso);
         }
 
         private void ExecutarRail(string[] args)

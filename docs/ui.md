@@ -62,7 +62,7 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
   se cancelar) e **Tempo para guardar a senha** (presets 15 min … 1 dia →
   `Configuracoes.DuracaoSessaoMinutos`, usado pelo `Cofre` na expiração).
 - **Atalhos**: texto didático explicando cada comando de CLI (`get`, `set`, `new`,
-  `pass`, `guid`, `lock`, `unlock`, `migrar`). É só conteúdo estático — para mudar
+  `pass`, `guid`, `lock`, `unlock`, `auth`, `migrar`). É só conteúdo estático — para mudar
   a explicação, edite o XAML; a referência completa fica em [cli.md](cli.md).
 - **Notificações**: configura os canais **Telegram** (bot token + chat id) e
   **e-mail/SMTP** (servidor, porta, SSL, usuário, senha, de, para), cada um com um
@@ -71,6 +71,11 @@ em **abas** (`TabControl`, estilizado em `Tema.xaml`):
   comando `memo notify`. O Telegram tem ainda **"Ouvir comandos (bot do Rail)"**:
   liga o `TelegramBotListener` para controlar a Missão do dia pelo Telegram (só o
   chat configurado; não dá acesso a documentos) — ver [rail.md](rail.md).
+- **Ente**: instala a **Ente CLI** oficial (GitHub `cli-v*`, zip Windows), grava em
+  `%LOCALAPPDATA%\Memo\ente\ente.exe`, aponta `Configuracoes.EnteCliCaminho` e
+  coloca a pasta no **PATH do usuário**. **Conectar conta Auth** abre um `cmd` com
+  `ente account add` (app = `auth`). Status: instalada / falta conta / pronta.
+  Usado por `memo auth`.
 - **Memo Rail**: a aba usa o componente reutilizável **`PainelRail`**
   (`Rail/PainelRail.xaml[.cs]`) — habilitar, intervalo de check-in, **nível de
   distração** (Baixo…Muito alto e **TDAH**, com descrição do efeito), **horário**

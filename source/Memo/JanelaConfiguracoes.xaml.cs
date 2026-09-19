@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Memo.Service;
+using Memo.Service.Auth;
 using Memo.Service.Notificacoes;
 using Memo.Services;
 
@@ -34,6 +35,7 @@ namespace Memo
             Destacar(painelDuracao, _minutosSelecionado.ToString(CultureInfo.InvariantCulture));
 
             CarregarNotificacoes();
+            AtualizarStatusEnte();
             // A aba "Memo Rail" é o componente PainelRail — ele se carrega sozinho.
         }
 
@@ -143,6 +145,83 @@ namespace Memo
             notifStatus.SetResourceReference(ForegroundProperty,
                 ok == false ? "CorPerigo" : ok == true ? "CorDestaque" : "CorTextoFraco");
         }
+
+        // ----------------- Ente CLI -----------------
+
+        private void AtualizarStatusEnte()
+        {
+            var s = EnteCliInstalador.Consultar();
+            enteStatus.Text = s.Mensagem;
+            enteStatus.SetResourceReference(ForegroundProperty,
+                !s.Instalada ? "CorPerigo" : s.ContaAuth ? "CorDestaque" : "CorTexto");
+
+            var detalhe = "";
+            if (!string.IsNullOrEmpty(s.Caminho)) detalhe += s.Caminho;
+            if (!string.IsNullOrEmpty(s.Versao))
+                detalhe += (detalhe.Length > 0 ? "\n" : "") + s.Versao;
+            enteDetalhe.Text = detalhe;
+
+            enteBotaoInstalar.Content = s.Instalada ? "Reinstalar Ente CLI" : "Instalar Ente CLI";
+            enteBotaoInstalar.IsEnabled = true;
+            enteBotaoInstalar.Style = s.Instalada
+                ? (Style)FindResource(typeof(Button))
+                : (Style)FindResource("BotaoPrimario");
+            enteBotaoConta.IsEnabled = s.Instalada;
+            enteBotaoConta.Style = (s.Instalada && !s.ContaAuth)
+                ? (Style)FindResource("BotaoPrimario")
+                : (Style)FindResource(typeof(Button));
+            enteBotaoVerificar.IsEnabled = s.Instalada;
+        }
+
+        private async void EnteInstalar_Click(object sender, RoutedEventArgs e)
+        {
+            enteBotaoInstalar.IsEnabled = false;
+            enteBotaoConta.IsEnabled = false;
+            enteBotaoVerificar.IsEnabled = false;
+            enteBarra.Visibility = Visibility.Visible;
+            enteBarra.Value = 0;
+            enteStatus.Text = "Baixando Ente CLI…";
+            enteStatus.SetResourceReference(ForegroundProperty, "CorTexto");
+
+            var progresso = new Progress<double>(p => enteBarra.Value = p);
+            try
+            {
+                await new EnteCliInstalador().InstalarAsync(progresso);
+                Nativo.NotificarMudancaDeAmbiente();
+                AtualizarStatusEnte();
+            }
+            catch (Exception ex)
+            {
+                enteStatus.Text = "Falha ao instalar: " + ex.Message;
+                enteStatus.SetResourceReference(ForegroundProperty, "CorPerigo");
+            }
+            finally
+            {
+                enteBarra.Visibility = Visibility.Collapsed;
+                enteBotaoInstalar.IsEnabled = true;
+                var instalada = !string.IsNullOrEmpty(EnteCliCliente.AcharExe());
+                enteBotaoConta.IsEnabled = instalada;
+                enteBotaoVerificar.IsEnabled = instalada;
+            }
+        }
+
+        private void EnteConta_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var exe = EnteCliCliente.AcharExe();
+                EnteCliInstalador.AbrirCadastroDeConta(exe);
+                enteStatus.Text = "Terminal aberto. Depois de logar (app = auth), clique em Verificar.";
+                enteStatus.SetResourceReference(ForegroundProperty, "CorTexto");
+            }
+            catch (Exception ex)
+            {
+                enteStatus.Text = ex.Message;
+                enteStatus.SetResourceReference(ForegroundProperty, "CorPerigo");
+            }
+        }
+
+        private void EnteVerificar_Click(object sender, RoutedEventArgs e) => AtualizarStatusEnte();
 
         private void Cancelar_Click(object sender, RoutedEventArgs e) => Close();
 

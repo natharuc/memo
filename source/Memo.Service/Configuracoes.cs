@@ -60,6 +60,12 @@ namespace Memo.Service
         /// <summary>Preferências do Memo Rail (assistente de foco).</summary>
         public Rail.RailConfig Rail { get; set; } = new Rail.RailConfig();
 
+        /// <summary>
+        /// Caminho do <c>ente.exe</c> (Ente CLI). Vazio = procurar no PATH /
+        /// variável <c>ENTE_CLI</c> / pastas comuns. Não é segredo.
+        /// </summary>
+        public string EnteCliCaminho { get; set; }
+
         [JsonIgnore]
         public TimeSpan DuracaoSessao =>
             TimeSpan.FromMinutes(Math.Min(MinutosMaximo, Math.Max(MinutosMinimo, DuracaoSessaoMinutos)));

@@ -19,6 +19,7 @@ chamam `MemoService`. Plataforma: Windows, .NET 8.
 | Mudar senha-mestra / sessão / vault.json | `Memo.Service/Seguranca/Cofre.cs` |
 | Mudar leitura/escrita/migração de documentos | `Memo.Service/Repositorio/DocumentoRepository.cs` |
 | Adicionar uma operação de negócio | `Memo.Service/MemoService.cs` |
+| TOTP / Ente Auth | `Memo.Service/Auth/*` (`EnteAuthService`, `EnteCliInstalador`); aba Ente em `JanelaConfiguracoes` |
 | Adicionar/alterar um comando da CLI | `Memo.Cli/Program.cs` (console) **e** `Memo/App.xaml.cs` (GUI) |
 | Mexer nos lembretes (parser/persistência) | `Memo.Service/Lembretes/*` |
 | Mexer no Memo Rail (missão/foco) | `Memo.Service/Rail/*` (dados/config) e `Memo/Rail/*` (coordenador/UI); ver [rail.md](rail.md) |
@@ -91,7 +92,9 @@ Correções já aplicadas (invariantes 3 e 4 acima): sessão validada
    método correspondente, com o **exit code** certo (`Codigo.*`).
 3. **GUI** (`Memo.exe <args>`): adicione o ramo em `App.ExecutarComando`
    (mostra um `Toast`).
-4. Atualize [cli.md](cli.md) **e** este guia.
+4. Atualize [cli.md](cli.md) **e** este guia. Comandos que **não** tocam o cofre
+   (`remember`, `notify`, `rail`, `auth`) entram em `App.ExecutarComando`
+   **antes** do destravamento.
 
 ### Pasta dos documentos (sem caminho fixo)
 Resolvida por `MemoService.DiretorioConfigurado`: `MEMO_DIR` (env) → senão
@@ -117,6 +120,7 @@ nova, declare-a nas **duas** paletas. Reutilize estilos existentes. Ver
 
 ```powershell
 dotnet build source/Memo.slnx -c Release
+dotnet test source/Memo.slnx -c Release
 dotnet run --project source/Memo -- get alguma-chave   # CLI
 ```
 

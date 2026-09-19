@@ -122,6 +122,13 @@
 
                             <StackPanel Margin="0,0,0,12">
                                 <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
+                                           Text="memo auth &lt;issuer&gt; [conta]" />
+                                <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
+                                           Text="Copia o código TOTP de 6 dígitos do Ente Auth. Configure em Configurações → Ente." />
+                            </StackPanel>
+
+                            <StackPanel Margin="0,0,0,12">
+                                <TextBlock FontFamily="Consolas" FontSize="13" Foreground="{DynamicResource CorDestaque}"
                                            Text="memo migrar" />
                                 <TextBlock FontSize="12" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap" Margin="0,2,0,0"
                                            Text="Reorganiza/atualiza os documentos antigos para o formato de criptografia atual." />
@@ -216,6 +223,43 @@
 
                     </TabControl>
                 </DockPanel>
+            </TabItem>
+
+            <!-- ===== Ente Auth ===== -->
+            <TabItem Header="Ente">
+                <StackPanel>
+                    <TextBlock Text="ENTE AUTH / TOTP"
+                               Foreground="{DynamicResource CorTextoFraco}"
+                               FontSize="11" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                               Margin="0,0,0,14"
+                               Text="O Memo pega o código de 6 dígitos do Ente Auth via Ente CLI (não pela GUI). Instale aqui, conecte a mesma conta e depois use: memo auth vercel seu@email.com" />
+
+                    <TextBlock x:Name="enteStatus" FontSize="14" FontWeight="SemiBold"
+                               Foreground="{DynamicResource CorTexto}" TextWrapping="Wrap"
+                               Margin="0,0,0,4" Text="Verificando…" />
+                    <TextBlock x:Name="enteDetalhe" FontSize="12" Foreground="{DynamicResource CorTextoFraco}"
+                               TextWrapping="Wrap" Margin="0,0,0,14" />
+
+                    <ProgressBar x:Name="enteBarra" Height="6" Minimum="0" Maximum="1"
+                                 Margin="0,0,0,12" Visibility="Collapsed"
+                                 Background="{DynamicResource CorCampo}"
+                                 Foreground="{DynamicResource CorDestaque}"
+                                 BorderThickness="0" />
+
+                    <WrapPanel Margin="0,0,0,8">
+                        <Button x:Name="enteBotaoInstalar" Content="Instalar Ente CLI"
+                                Style="{StaticResource BotaoPrimario}"
+                                Click="EnteInstalar_Click" Margin="0,0,8,8" />
+                        <Button x:Name="enteBotaoConta" Content="Conectar conta Auth"
+                                Click="EnteConta_Click" Margin="0,0,8,8" />
+                        <Button x:Name="enteBotaoVerificar" Content="Verificar"
+                                Click="EnteVerificar_Click" Margin="0,0,8,8" />
+                    </WrapPanel>
+
+                    <TextBlock FontSize="11" Foreground="{DynamicResource CorTextoFraco}" TextWrapping="Wrap"
+                               Text="Na janela do terminal: app = auth, o mesmo e-mail do Ente Auth. Não cadastre photos nessa CLI. Depois volte e clique em Verificar." />
+                </StackPanel>
             </TabItem>
 
             <!-- ===== Memo Rail (componente reutilizável) ===== -->
