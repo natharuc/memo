@@ -10,6 +10,13 @@ namespace Memo.Service.Auth
         public static bool Tentar(EntradaAuth entrada, out string codigo, out int segundosRestantes) =>
             Tentar(entrada, DateTime.UtcNow, out codigo, out segundosRestantes);
 
+        /// <summary>Código do período seguinte (o "próximo" da tela).</summary>
+        public static bool Proximo(EntradaAuth entrada, out string codigo)
+        {
+            var step = entrada != null && entrada.Periodo > 0 ? entrada.Periodo : 30;
+            return Tentar(entrada, DateTime.UtcNow.AddSeconds(step), out codigo, out _);
+        }
+
         public static bool Tentar(EntradaAuth entrada, DateTime utc, out string codigo, out int segundosRestantes)
         {
             codigo = null;

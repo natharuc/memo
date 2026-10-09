@@ -20,7 +20,7 @@ de referência ([architecture.md](architecture.md), [security.md](security.md),
 | **Lembrete** | Aviso em linguagem natural, na bandeja | GUI (**⏰**) · `remember` |
 | **Missão do dia (Rail)** | Foco: checklist, check-ins, detector de distração | GUI (**🚂**) · `rail` |
 | **Notificar** | Envia para Telegram/e-mail | `notify` |
-| **TOTP (Ente Auth)** | Copia o código de 6 dígitos | `auth` |
+| **TOTP (Ente Auth)** | Tela com os códigos; copia o de 6 dígitos; cadastra via QR, print ou arquivo | GUI (bandeja **Auth…**) · `auth` |
 | **Bot do Telegram** | Controla o Rail pelo Telegram (opt-in) | Config. → Notificações |
 | **Trancar / destrancar** | Encerra/reabre a sessão | badge da tela · `lock`/`unlock` |
 | **Trocar tema** | Claro ou escuro, em runtime | GUI (**⚙**) |
@@ -161,7 +161,7 @@ Referência completa em [cli.md](cli.md). Resumo dos comandos do **`memo-cli`**:
 | `remember <texto/quando>` | Cria um lembrete |
 | `notify [canal] <msg>` | Telegram / e-mail |
 | `rail …` | Missão do dia |
-| `auth <issuer> [conta]` | TOTP do Ente Auth (clipboard com `--copy`) |
+| `auth <issuer> [conta]` | TOTP do Ente Auth (clipboard com `--copy`). Sem argumentos na GUI abre a tela |
 | `pass [chave]` | Gera uma senha (e salva, se der uma chave) |
 | `guid` | Gera um GUID |
 | `unlock` / `lock` | Destranca (pede senha) / tranca o cofre |
@@ -182,8 +182,14 @@ captura stdout — use o `memo-cli` para automação. `remember`, `notify`, `rai
 ## TOTP (Ente Auth)
 
 `auth` gera o código de 6 dígitos a partir da **mesma conta Ente** usada no
-app Ente Auth. A GUI do Auth **não** tem API local; o Memo usa a
-[Ente CLI](https://github.com/ente/ente/releases?q=tag%3Acli-v0). Setup:
+app Ente Auth. A bandeja (**Auth…**) ou `memo auth` sem argumentos abre a tela:
+busca, código atual e o próximo. Clique ou Enter copia; setas navegam;
+Ctrl+F foca a busca e Ctrl+N abre uma chave nova. **Adicionar** lê QR (câmera),
+cola um print ou abre um arquivo; a chave vai cifrada para o Ente.
+
+A GUI do Auth **não** tem API local; o Memo usa a
+[Ente CLI](https://github.com/ente/ente/releases?q=tag%3Acli-v0) para exportar
+e a API do Ente para cadastrar. Setup:
 **Configurações → Ente → Instalar Ente CLI** (baixa, instala, PATH) e
 **Conectar conta Auth**. Ver [cli.md](cli.md) e [skills/memo-auth](../skills/memo-auth/SKILL.md).
 

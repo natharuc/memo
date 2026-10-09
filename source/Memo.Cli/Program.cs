@@ -651,6 +651,7 @@ Comandos:
   notify [canal] <msg>    Notifica nos canais (telegram/email); -t <titulo> opcional
   auth <issuer> [conta]   TOTP do Ente Auth (clipboard com --copy; não usa o cofre)
   auth list | auth sync   Lista contas em cache / força refresh via Ente CLI
+                          A tela (QR, print, arquivo) abre com "memo auth" na GUI
   rail [status|add <t> [--data <d>]|done <n>|edit <n>|move <n> up|down|clear]  Missão do dia (Rail)
   pass [chave]            Gera uma senha (e salva, se der uma chave)
   guid                    Gera um GUID

@@ -163,6 +163,7 @@ namespace Memo
             menu.Items.Add("Abrir Memo", null, (_, __) => Dispatcher.Invoke(MostrarJanela));
             menu.Items.Add("Missão do dia…", IconeCerebro(), (_, __) => Dispatcher.Invoke(() => Rail.JanelaMissao.Mostrar()));
             menu.Items.Add("Lembretes…", null, (_, __) => Dispatcher.Invoke(AbrirLembretes));
+            menu.Items.Add("Auth…", null, (_, __) => Dispatcher.Invoke(() => JanelaAuth.Mostrar()));
             menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
             menu.Items.Add("Sair", null, (_, __) => Dispatcher.Invoke(Encerrar));
             _bandeja.ContextMenuStrip = menu;
@@ -351,8 +352,14 @@ namespace Memo
             }
 
             // TOTP do Ente Auth: sessão da Ente CLI + cache DPAPI, não o cofre.
+            // Sem argumentos abre a tela. memo-cli sem argumentos continua no uso.
             if (cmd == "auth")
             {
+                if (args.Length == 1)
+                {
+                    JanelaAuth.Mostrar();
+                    return;
+                }
                 ExecutarAuth(args);
                 return;
             }

@@ -20,6 +20,16 @@ No app: **Configurações → Ente → Instalar Ente CLI**, depois **Conectar co
 Se o comando falhar dizendo que a CLI/conta não existe, peça ao usuário para abrir
 essa aba — **não** rode `ente account add` você mesmo (é interativo, pede senha).
 
+## Tela
+
+No app (bandeja → **Auth…**, ou `memo auth` sem argumentos) lista os códigos
+com busca, código atual e o próximo. A busca já vem focada. Clique ou Enter
+copia; setas navegam; Ctrl+F foca a busca; Ctrl+N inclui chave. **Adicionar** lê QR pela
+câmera, cola um print ou abre arquivo (imagem ou texto `otpauth://`). A chave
+nova é cifrada e enviada para o Ente; só conta se o export devolver o segredo.
+
+`memo-cli auth` sem argumentos **não** abre a tela — mostra o uso.
+
 ## Comandos
 
 ```

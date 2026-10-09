@@ -19,6 +19,66 @@ namespace Memo.Service.Auth
             _cli = cli ?? new EnteCliCliente();
         }
 
+        public ResultadoAuth Cadastrar(IList<string> uris)
+        {
+            var lista = new List<EntradaAuth>();
+            foreach (var bruta in uris ?? Array.Empty<string>())
+            {
+                if (!ParserOtpAuth.Tentar(bruta, out var entrada))
+                    return ResultadoAuth.Falha("Não é um otpauth://totp válido.");
+                lista.Add(entrada);
+            }
+            if (lista.Count == 0)
+                return ResultadoAuth.Falha("Nenhuma chave para cadastrar.");
+
+            var sessao = (SessaoEnteCli)null;
+            try
+            {
+                sessao = SessaoEnteCli.Carregar();
+                var api = new EnteAuthApi();
+                foreach (var bruta in uris)
+                    api.Enviar(sessao, bruta.Trim());
+            }
+            catch (Exception ex)
+            {
+                return ResultadoAuth.Falha(ex.Message);
+            }
+            finally
+            {
+                sessao?.Limpar();
+            }
+
+            try
+            {
+                var cache = SyncInterno();
+                foreach (var entrada in lista)
+                {
+                    var achou = false;
+                    foreach (var item in cache.Entradas)
+                    {
+                        if (string.Equals(item.Secret, entrada.Secret, StringComparison.OrdinalIgnoreCase))
+                        {
+                            achou = true;
+                            break;
+                        }
+                    }
+                    if (!achou)
+                        return ResultadoAuth.Falha(
+                            "Enviei a chave, mas o export da Ente não a devolveu. Confira no app Ente Auth.");
+                }
+
+                var msg = lista.Count == 1
+                    ? "Chave enviada para o Ente"
+                    : lista.Count + " chaves enviadas para o Ente";
+                return ResultadoAuth.Ok(msg, cache.Entradas);
+            }
+            catch (Exception ex)
+            {
+                return ResultadoAuth.Falha(
+                    "A chave pode ter sido enviada, mas não confirmei no export: " + ex.Message);
+            }
+        }
+
         public ResultadoAuth Sincronizar()
         {
             try

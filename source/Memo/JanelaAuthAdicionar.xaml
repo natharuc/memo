@@ -1,0 +1,60 @@
+<Window x:Class="Memo.JanelaAuthAdicionar"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Adicionar chave" Width="560" Height="640"
+        MinWidth="480" MinHeight="420"
+        Icon="memo.ico"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        FontFamily="Segoe UI" Background="{DynamicResource CorFundo}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Nova chave" Foreground="{DynamicResource CorTexto}"
+                   FontSize="20" FontWeight="SemiBold" />
+        <TextBlock Grid.Row="0" Margin="0,32,0,0" TextWrapping="Wrap"
+                   Foreground="{DynamicResource CorTextoFraco}" FontSize="12"
+                   Text="Leia um QR, cole um print ou abra um arquivo. A chave vai cifrada para o Ente Auth." />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,16,0,12">
+            <Button x:Name="botaoCamera" Content="Ler QR" Style="{StaticResource BotaoPrimario}"
+                    Click="Camera_Click" Margin="0,0,8,0" />
+            <Button x:Name="botaoColar" Content="Colar print" Click="Colar_Click" Margin="0,0,8,0" />
+            <Button x:Name="botaoArquivo" Content="Arquivo" Click="Arquivo_Click" />
+        </StackPanel>
+
+        <Border Grid.Row="2" Background="{DynamicResource CorPainel}" CornerRadius="10" ClipToBounds="True">
+            <Grid>
+                <Image x:Name="preview" Stretch="Uniform" />
+                <TextBlock x:Name="textoPreview" Text="Nenhuma imagem ainda."
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{DynamicResource CorTextoFraco}" />
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8">
+                    <ItemsControl x:Name="listaChaves" VerticalAlignment="Bottom">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Margin="8,4" FontSize="13"
+                                           Foreground="{DynamicResource CorTexto}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+
+        <TextBlock x:Name="textoErro" Grid.Row="3" Margin="0,10,0,0" TextWrapping="Wrap"
+                   Foreground="{DynamicResource CorPerigo}" FontSize="12" />
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button Content="Cancelar" Click="Cancelar_Click" Margin="0,0,8,0" />
+            <Button x:Name="botaoEnviar" Content="Enviar para o Ente" Style="{StaticResource BotaoPrimario}"
+                    IsEnabled="False" Click="Enviar_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

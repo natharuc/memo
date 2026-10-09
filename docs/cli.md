@@ -216,15 +216,23 @@ memo rail status             # resumo: "2/5 · 1 atrasada(s) · atual: ..."
 Pendências de dias anteriores **acumulam como atrasadas** até serem concluídas.
 Datas: `hoje`, `amanha`, `dd/MM`, `dd/MM/yyyy`, `yyyy-MM-dd`.
 
-### `memo auth <issuer> [conta]`
-Copia o **código TOTP de 6 dígitos** do Ente Auth para a área de transferência.
-Não pede a senha-mestra do Memo (usa a sessão da Ente CLI + cache DPAPI).
+### `memo auth [issuer] [conta]`
+Sem argumentos, abre a **tela Auth**: busca, cartões com o código atual e o próximo.
+Clique ou Enter copia; setas navegam; Ctrl+F foca a busca; Ctrl+N inclui chave.
+Dá para incluir por QR (câmera), print colado ou arquivo
+(imagem ou texto `otpauth://`). A chave nova é cifrada e enviada para o Ente Auth.
+
+Com issuer (e conta, se precisar), copia o **código TOTP de 6 dígitos** para a área
+de transferência. Não pede a senha-mestra do Memo (usa a sessão da Ente CLI + cache DPAPI).
 
 ```
+memo auth                                    # abre a tela
 memo auth vercel nathanarrudacamara@gmail.com
 memo auth sync           # força refresh do cache
 memo auth list           # issuer · conta (sem o código)
 ```
+
+`memo-cli auth` sem argumentos continua mostrando o uso no terminal (não abre janela).
 
 Os tokens depois de `auth` são filtro **AND** (substring, sem maiúscula/minúscula)
 em issuer, account e label. Um match copia o código; zero vira "não encontrado";

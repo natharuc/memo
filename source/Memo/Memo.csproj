@@ -24,6 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ZXing.Net" Version="0.16.9" />
+    <PackageReference Include="OpenCvSharp4" Version="4.10.0.20240616" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.10.0.20240616" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Recursos\logo.png" />
     <Resource Include="memo.ico" />
   </ItemGroup>
