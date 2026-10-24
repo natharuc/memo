@@ -78,6 +78,13 @@ namespace Memo
 
         private void Janela_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (e.Key == Key.Escape)
+            {
+                e.Handled = true;
+                Close();
+                return;
+            }
+
             var mods = Keyboard.Modifiers;
             if (e.Key == Key.F && mods == ModifierKeys.Control)
             {

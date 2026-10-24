@@ -48,6 +48,12 @@ Tela principal.
 - A barra de status (rodapé) mostra o último resultado; à direita, um rótulo
   discreto mostra a **versão** do app (`v<Major.Minor.Build>`, lida do assembly).
 
+### `JanelaAuth` (`JanelaAuth.xaml[.cs]`)
+Tela de códigos TOTP do Ente Auth, aberta pela bandeja (**Auth…**) ou por `memo auth`.
+- Busca, cartões com código atual e próximo, e cadastro de novas chaves.
+- Clique ou Enter copia; setas navegam; Ctrl+F foca a busca; Ctrl+N inclui chave.
+- **Esc fecha a janela**, inclusive com o foco na busca ou nos cartões.
+
 ### `JanelaEditar` (`JanelaEditar.xaml[.cs]`)
 Criar/editar um documento.
 - `static Documento JanelaEditar.Criar(owner)` e `Editar(owner, doc)` → devolvem
