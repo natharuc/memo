@@ -53,6 +53,19 @@ Tela de códigos TOTP do Ente Auth, aberta pela bandeja (**Auth…**) ou por `me
 - Busca, cartões com código atual e próximo, e cadastro de novas chaves.
 - Clique ou Enter copia; setas navegam; Ctrl+F foca a busca; Ctrl+N inclui chave.
 - **Esc fecha a janela**, inclusive com o foco na busca ou nos cartões.
+- Cada cartão tem um menu **⋯**: **Editar chave…**, **Renomear…** e **Remover…**,
+  que abrem a `JanelaAuthEditar`, centralizada sobre o Auth. Abrir o menu não copia o código.
+- **Renomear** muda serviço/nome e conta/e-mail, preservando o segredo e os parâmetros.
+  **Editar** também permite substituir o segredo Base32 (campo mascarado, vazio mantém
+  o atual), algoritmo, dígitos e período. Os dados são salvos cifrados no Ente.
+- **Remover** mostra a chave e o aviso de que a exclusão afeta o Ente e os dispositivos
+  sincronizados; exige digitar a **senha-mestra do cofre Memo em cada remoção**.
+  Sessão já aberta não substitui essa validação; cancelar/senha errada não remove.
+  Sem cofre configurado/inicializado, a exclusão fica bloqueada.
+- A segunda tela consulta a identidade remota antes de habilitar a confirmação.
+  Se a chave mudou em outro dispositivo, bloqueia a gravação e orienta atualizar.
+  Durante o envio, os botões e o fechamento ficam bloqueados para não perder o resultado.
+  Após sucesso, a lista é atualizada imediatamente, inclusive ao remover a última chave.
 
 ### `JanelaEditar` (`JanelaEditar.xaml[.cs]`)
 Criar/editar um documento.

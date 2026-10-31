@@ -162,7 +162,20 @@ namespace Memo.Service.Auth
 
         private CacheAuth SyncInterno()
         {
-            var entradas = _cli.Exportar();
+            List<EntradaAuth> entradas;
+            SessaoEnteCli sessao = null;
+            try
+            {
+                sessao = SessaoEnteCli.Carregar();
+                entradas = GerenciadorAuthService.EntradasVisiveis(new EnteAuthApi().Listar(sessao));
+            }
+            catch
+            {
+                // Compatibilidade com instalações antigas da CLI/sessão. O export
+                // não contém IDs; gerenciamento exige resolução remota inequívoca.
+                entradas = _cli.Exportar();
+            }
+            finally { sessao?.Limpar(); }
             var cache = new CacheAuth { Entradas = entradas };
             cache.Salvar();
             return cache;

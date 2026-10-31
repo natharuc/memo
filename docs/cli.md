@@ -219,6 +219,9 @@ Datas: `hoje`, `amanha`, `dd/MM`, `dd/MM/yyyy`, `yyyy-MM-dd`.
 ### `memo auth [issuer] [conta]`
 Sem argumentos, abre a **tela Auth**: busca, cartões com o código atual e o próximo.
 Clique ou Enter copia; setas navegam; Ctrl+F foca a busca; Ctrl+N inclui chave.
+O menu **⋯** de cada cartão abre a edição, renomeação ou remoção. A remoção
+exige a senha-mestra do cofre Memo, mesmo com sessão aberta. O gerenciamento é
+feito na GUI; os comandos `memo-cli auth` continuam focados em leitura/sincronização.
 Dá para incluir por QR (câmera), print colado ou arquivo
 (imagem ou texto `otpauth://`). A chave nova é cifrada e enviada para o Ente Auth.
 

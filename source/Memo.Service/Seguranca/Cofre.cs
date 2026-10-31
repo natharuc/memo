@@ -116,6 +116,40 @@ namespace Memo.Service.Seguranca
             return true;
         }
 
+        /// <summary>
+        /// Valida uma senha recém-digitada sem destrancar o cofre, criar ou renovar
+        /// sessão. Usada para autorizar ações sensíveis mesmo com uma sessão ativa.
+        /// </summary>
+        public bool ValidarSenha(string senha)
+        {
+            if (string.IsNullOrEmpty(senha) || !Inicializado) return false;
+
+            byte[] chave = null;
+            try
+            {
+                var cfg = JsonConvert.DeserializeObject<Config>(File.ReadAllText(_arquivoConfig));
+                if (cfg == null || cfg.Versao != 1 || cfg.Iteracoes <= 0 ||
+                    string.IsNullOrEmpty(cfg.Salt) || string.IsNullOrEmpty(cfg.Verificador))
+                    return false;
+
+                var salt = Convert.FromBase64String(cfg.Salt);
+                if (salt.Length != CryptoCofre.TamanhoSalt) return false;
+
+                chave = CryptoCofre.DerivarChave(senha, salt, cfg.Iteracoes);
+                return CryptoCofre.TentarDecifrar(cfg.Verificador, chave, out var marca)
+                       && marca == MarcadorVerificacao;
+            }
+            catch
+            {
+                // Ausente, ilegível ou corrompido: nunca autoriza a ação.
+                return false;
+            }
+            finally
+            {
+                if (chave != null) CryptographicOperations.ZeroMemory(chave);
+            }
+        }
+
         /// <summary>Reaproveita a sessão recente (sem pedir senha) se ainda válida.</summary>
         public bool TentarDestrancarPelaSessao()
         {

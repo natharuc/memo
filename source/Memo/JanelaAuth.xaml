@@ -18,7 +18,7 @@
             <Setter Property="Padding" Value="20,18" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Width" Value="336" />
-            <Setter Property="Margin" Value="8" />
+            <Setter Property="Margin" Value="0" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -80,12 +80,13 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
+                        <Grid Width="336" Margin="8">
                         <Button Style="{StaticResource CartaoAuth}" Click="Cartao_Click" Tag="{Binding}"
                                 ToolTip="{Binding Rotulo}">
                             <StackPanel>
                                 <TextBlock Text="{Binding Issuer}" FontWeight="SemiBold" FontSize="15"
                                            Foreground="{DynamicResource CorTexto}"
-                                           TextAlignment="Center" TextTrimming="CharacterEllipsis"
+                                           TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="22,0"
                                            TextWrapping="NoWrap" />
                                 <TextBlock Text="{Binding Conta}" FontSize="12" Margin="0,4,0,0"
                                            Foreground="{DynamicResource CorTextoFraco}"
@@ -127,6 +128,11 @@
                                 </Grid>
                             </StackPanel>
                         </Button>
+                        <Button Content="⋯" Tag="{Binding}" Click="MenuChave_Click"
+                                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                                Padding="8,2" FontSize="20" ToolTip="Opções da chave"
+                                AutomationProperties.Name="{Binding Rotulo, StringFormat=Opções de {0}}" />
+                        </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -14,11 +14,13 @@ namespace Memo
         private static JanelaAuth _aberta;
 
         private readonly EnteAuthService _svc = new EnteAuthService();
+        private readonly GerenciadorAuthService _gerenciador = new GerenciadorAuthService();
         private readonly List<CartaoAuthVm> _todos = new List<CartaoAuthVm>();
         private CartaoAuthVm[] _visiveis = Array.Empty<CartaoAuthVm>();
         private readonly DispatcherTimer _timer;
         private int _indice = -1;
         private bool _ocupado;
+        private bool _fechada;
 
         public JanelaAuth()
         {
@@ -36,6 +38,7 @@ namespace Memo
             };
             Closed += (_, __) =>
             {
+                _fechada = true;
                 _timer.Stop();
                 if (_aberta == this) _aberta = null;
             };
@@ -76,8 +79,39 @@ namespace Memo
             Copiar(vm);
         }
 
+        private void MenuChave_Click(object sender, RoutedEventArgs e)
+        {
+            if (_ocupado || !(sender is Button botao) || !(botao.Tag is CartaoAuthVm vm)) return;
+            var menu = new ContextMenu();
+            menu.SetResourceReference(BackgroundProperty, "CorPainel");
+            menu.SetResourceReference(ForegroundProperty, "CorTexto");
+            void Adicionar(string titulo, AcaoChaveAuth acao)
+            {
+                var item = new MenuItem { Header = titulo };
+                if (acao == AcaoChaveAuth.Remover) item.SetResourceReference(ForegroundProperty, "CorPerigo");
+                item.Click += (_, __) => AbrirEdicao(vm, acao);
+                menu.Items.Add(item);
+            }
+            Adicionar("Editar chave…", AcaoChaveAuth.Editar);
+            Adicionar("Renomear…", AcaoChaveAuth.Renomear);
+            menu.Items.Add(new Separator());
+            Adicionar("Remover…", AcaoChaveAuth.Remover);
+            menu.PlacementTarget = botao;
+            menu.IsOpen = true;
+            e.Handled = true;
+        }
+
+        private void AbrirEdicao(CartaoAuthVm vm, AcaoChaveAuth acao)
+        {
+            var janela = new JanelaAuthEditar(vm.Entrada, acao, _gerenciador) { Owner = this };
+            if (janela.ShowDialog() != true) return;
+            AplicarEntradas(janela.Resultado.Entradas);
+            textoStatus.Text = janela.Resultado.Mensagem;
+        }
+
         private void Janela_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (Keyboard.FocusedElement is MenuItem) return;
             if (e.Key == Key.Escape)
             {
                 e.Handled = true;
@@ -100,7 +134,7 @@ namespace Memo
             }
             if (e.Key == Key.Enter)
             {
-                if (Keyboard.FocusedElement is Button botao && !(botao.Tag is CartaoAuthVm))
+                if (Keyboard.FocusedElement is Button botao && botao.Style != (Style)FindResource("CartaoAuth"))
                     return;
                 CopiarSelecionado();
                 e.Handled = true;
@@ -227,6 +261,7 @@ namespace Memo
                 {
                     Dispatcher.Invoke(() =>
                     {
+                        if (_fechada) return;
                         _ocupado = false;
                         if (t.IsFaulted)
                         {
@@ -243,16 +278,21 @@ namespace Memo
                             textoStatus.Text = r.Mensagem;
                             return;
                         }
-                        _todos.Clear();
-                        foreach (var entrada in r.Entradas ?? new List<EntradaAuth>())
-                            _todos.Add(new CartaoAuthVm(entrada));
-                        AplicarFiltro();
-                        _timer.Start();
+                        AplicarEntradas(r.Entradas);
                         textoStatus.Text = _todos.Count == 1
                             ? "1 chave"
                             : _todos.Count + " chaves";
                     });
                 });
+        }
+
+        private void AplicarEntradas(List<EntradaAuth> entradas)
+        {
+            _todos.Clear();
+            foreach (var entrada in entradas ?? new List<EntradaAuth>())
+                _todos.Add(new CartaoAuthVm(entrada));
+            AplicarFiltro();
+            _timer.Start();
         }
 
         private void AplicarFiltro()
@@ -309,6 +349,7 @@ namespace Memo
         public string Issuer => string.IsNullOrWhiteSpace(_entrada.Issuer) ? _entrada.Rotulo : _entrada.Issuer;
         public string Conta => _entrada.Account ?? string.Empty;
         public string Rotulo => _entrada.Rotulo;
+        public EntradaAuth Entrada => EdicaoAuth.Copiar(_entrada);
         public string Codigo => _codigo;
         public string CodigoCru { get; private set; }
         public string Proximo => _proximo;

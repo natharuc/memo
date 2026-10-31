@@ -114,6 +114,28 @@ a cada `memo auth`.
 - Independente do cofre: `auth` não pede a senha-mestra.
 - Nunca logar `EntradaAuth.Secret` nem o conteúdo do cache.
 
+### Edição e remoção de chaves Auth
+
+- Leitura/sincronização e edição continuam independentes do desbloqueio do cofre.
+  **Remoção exige senha-mestra recém-digitada**, validada no `vault.json` atual
+  por `Cofre.ValidarSenha`; o serviço verifica antes de enviar qualquer exclusão.
+  Senha vazia/errada, cofre ausente ou configuração corrompida bloqueiam a ação.
+- A validação não destranca/tranca, cria ou renova a sessão; a chave derivada
+  temporária é zerada. A senha-mestra nunca é enviada ao Ente nem gravada.
+- O gerenciamento usa o **ID remoto da entidade**, não o nome nem apenas o segredo.
+  Caches antigos sem ID só permitem resolução por correspondência completa e única;
+  em caso de duplicidade, atualize para obter os IDs antes de gerenciar.
+- Antes de alterar/remover, o serviço relê o registro e compara URI e timestamp
+  com o snapshot da segunda tela. Mudanças detectadas abortam a operação. O Ente
+  não oferece escrita condicional: uma edição simultânea após essa checagem ainda
+  pode prevalecer pela última gravação.
+- A edição mantém os metadados desconhecidos da URI, incluindo `codeDisplay`.
+  O PUT é cifrado; o DELETE contém somente o ID da entidade. A remoção atinge
+  a conta do Ente e seus dispositivos sincronizados, não só o cache deste PC.
+- O cache DPAPI só muda após confirmação HTTP de sucesso. Em falha de rede com
+  resultado incerto, atualize a lista antes de repetir; se a gravação do cache
+  falhar após sucesso remoto, a UI avisa e usa o resultado confirmado em memória.
+
 ### Bot do Telegram (entrada)
 
 Com **"Ouvir comandos"** ligado, o `TelegramBotListener` faz *long-polling* e

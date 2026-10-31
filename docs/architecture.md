@@ -61,6 +61,8 @@ destrancado. Detalhes de formato em [security.md](security.md).
 - `Inicializado`, `Destrancado`.
 - `Inicializar(senha)` — cria um cofre novo (gera salt, grava `vault.json`).
 - `Destrancar(senha)` — valida a senha contra o verificador.
+- `ValidarSenha(senha)` — verifica senha recém-digitada sem modificar a sessão;
+  autoriza a remoção de chaves Auth.
 - `TentarDestrancarPelaSessao()` — usa o cache de sessão **se** ele abrir o
   cofre atual (`ChaveAbreCofre`).
 - `Cifrar(texto)` / `Decifrar(base64)` / `TentarDecifrar(...)`.
@@ -103,9 +105,15 @@ cifradas por DPAPI em `notificacoes.bin`. Usado por `memo notify`. Ver
 [security.md](security.md).
 
 ### `EnteAuthService` — `source/Memo.Service/Auth/`
-TOTP do Ente Auth. Não usa o cofre. `ente.exe` exporta `otpauth://totp/...` num
-temp (apagado em seguida); o Memo guarda issuer/account/secret em
+TOTP do Ente Auth. Leitura e edição não exigem o cofre; a remoção exige sua
+senha-mestra. A sincronização prefere a API do Ente, preservando os IDs remotos;
+se indisponível, `ente.exe` exporta `otpauth://totp/...` num temp (apagado em seguida).
+O Memo guarda ID (quando conhecido), issuer/account/secret em
 `%LOCALAPPDATA%\Memo\ente-auth.bin` (DPAPI, ~6 h) e gera o código com Otp.NET.
+`GerenciadorAuthService` resolve a chave selecionada, detecta snapshots desatualizados,
+valida a senha antes da exclusão e atualiza o cache após sucesso remoto.
+`EnteAuthApi` lista entidades por diff paginado, atualiza por PUT cifrado e remove
+por DELETE com ID; `EdicaoAuth` valida os campos e preserva metadados da URI.
 `EnteCliInstalador` baixa a release `cli-v*` do GitHub, instala em
 `%LOCALAPPDATA%\Memo\ente` e coloca no PATH (aba **Configurações → Ente**).
 A GUI do Ente Auth **não** é lida. Setup: **Configurações → Ente** (instala a CLI

@@ -187,6 +187,12 @@ busca, código atual e o próximo. Clique ou Enter copia; setas navegam;
 Ctrl+F foca a busca e Ctrl+N abre uma chave nova. **Adicionar** lê QR (câmera),
 cola um print ou abre um arquivo; a chave vai cifrada para o Ente.
 
+O menu **⋯** em cada cartão abre uma segunda tela para **editar**, **renomear**
+ou **remover** a chave. Renomear altera serviço/conta; editar também permite
+substituir o segredo e os parâmetros TOTP. Remover exige a **senha-mestra do
+cofre Memo**, mesmo com sessão aberta, e afeta também os dispositivos Ente
+sincronizados. Cancelar ou informar senha errada mantém a chave.
+
 A GUI do Auth **não** tem API local; o Memo usa a
 [Ente CLI](https://github.com/ente/ente/releases?q=tag%3Acli-v0) para exportar
 e a API do Ente para cadastrar. Setup:

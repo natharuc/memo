@@ -43,16 +43,27 @@ namespace Memo.Service.Auth
             string issuer = null;
             string account = label;
 
-            if (query.TryGetValue("issuer", out var issuerQ) && !string.IsNullOrWhiteSpace(issuerQ))
+            var issuerExplicito = query.TryGetValue("issuer", out var issuerQ);
+            if (issuerExplicito && !string.IsNullOrWhiteSpace(issuerQ))
                 issuer = issuerQ.Trim();
 
             var doisPontos = label.IndexOf(':');
-            if (doisPontos > 0)
+            if (!string.IsNullOrEmpty(issuer) && label.StartsWith(issuer + ":", StringComparison.Ordinal))
+            {
+                // O serviço pode conter ':'; retire o prefixo completo, não só
+                // o trecho anterior ao primeiro separador.
+                account = label.Substring(issuer.Length + 1).Trim();
+            }
+            else if (!string.IsNullOrEmpty(issuer) && label == issuer)
+            {
+                account = string.Empty;
+            }
+            else if (doisPontos > 0 && (!issuerExplicito || !string.IsNullOrWhiteSpace(issuerQ)))
             {
                 var esquerda = label.Substring(0, doisPontos).Trim();
                 var direita = label.Substring(doisPontos + 1).Trim();
                 if (string.IsNullOrEmpty(issuer)) issuer = esquerda;
-                if (!string.IsNullOrEmpty(direita)) account = direita;
+                account = direita;
             }
 
             if (query.TryGetValue("steam", out _)) return false;

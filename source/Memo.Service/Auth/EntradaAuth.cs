@@ -6,6 +6,9 @@ namespace Memo.Service.Auth
     [DebuggerDisplay("{Rotulo}")]
     public class EntradaAuth
     {
+        /// <summary>Identidade no Ente, quando conhecida. Caches antigos podem não tê-la.</summary>
+        public string IdEntidade { get; set; }
+
         public string Issuer { get; set; }
         public string Account { get; set; }
         public string Label { get; set; }

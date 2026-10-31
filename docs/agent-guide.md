@@ -20,6 +20,7 @@ chamam `MemoService`. Plataforma: Windows, .NET 8.
 | Mudar leitura/escrita/migração de documentos | `Memo.Service/Repositorio/DocumentoRepository.cs` |
 | Adicionar uma operação de negócio | `Memo.Service/MemoService.cs` |
 | TOTP / Ente Auth | `Memo.Service/Auth/*` (`EnteAuthService`, `EnteCliInstalador`); tela `JanelaAuth`; aba Ente em `JanelaConfiguracoes` |
+| Editar/renomear/remover chave Auth | `GerenciadorAuthService`, `EdicaoAuth`, `EnteAuthApi` e `JanelaAuthEditar`; remoção sempre valida a senha por `Cofre.ValidarSenha` |
 | Adicionar/alterar um comando da CLI | `Memo.Cli/Program.cs` (console) **e** `Memo/App.xaml.cs` (GUI) |
 | Mexer nos lembretes (parser/persistência) | `Memo.Service/Lembretes/*` |
 | Mexer no Memo Rail (missão/foco) | `Memo.Service/Rail/*` (dados/config) e `Memo/Rail/*` (coordenador/UI); ver [rail.md](rail.md) |
@@ -143,7 +144,8 @@ adulteração / legado. Ver [development.md](development.md) → Testes.
 ## Estado conhecido / pendências
 
 - Pasta dos documentos: sem caminho fixo (MEMO_DIR / config / pergunta na 1ª vez).
-- Sem projeto de testes versionado (recomendado adicionar xUnit).
+- `Memo.Service.Tests` cobre Auth (parser/TOTP, protocolo HTTP simulado e gerenciamento)
+  e validação da senha-mestra. Use somente sessões simuladas e cofres temporários.
 - `StringUtil` em `Memo.Service/Extensoes/StringExtensao.cs` é legado e não usado
   (alguns métodos têm bugs); pode ser removido.
 - Sem limpeza automática do clipboard após `get` (possível melhoria de

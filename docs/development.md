@@ -153,7 +153,12 @@ caso um cofre (ou um `MEMO_DIR` de teste) acabe dentro do repo.
 ## Testes
 
 `source/Memo.Service.Tests` cobre o `auth` (parse otpauth, filtro AND, RFC 6238,
-parse do `ente account list`). Rode `dotnet test source/Memo.slnx`.
+parse do `ente account list`), CRUD do Ente com HTTP simulado, preservação de
+metadados, resolução por ID/conflitos e exigência da senha-mestra na exclusão.
+`CofreValidacaoTests` valida senha com cofres temporários e sessão preservada.
+Rode `dotnet test source/Memo.slnx`. O teste legado de leitura de sessão Ente
+presente no PC deve ser isolado usando `ENTE_CLI_CONFIG_DIR` em uma pasta
+temporária vazia, para não acessar a sessão real.
 
 Para o cofre, continue usando um **diretório temporário** (`MEMO_DIR` ou
 `new MemoService("<dir temp>")`) — jamais a pasta real do usuário. Um bom teste
