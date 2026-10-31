@@ -55,6 +55,9 @@ Tela de códigos TOTP do Ente Auth, aberta pela bandeja (**Auth…**) ou por `me
 - **Esc fecha a janela**, inclusive com o foco na busca ou nos cartões.
 - Cada cartão tem um menu **⋯**: **Editar chave…**, **Renomear…** e **Remover…**,
   que abrem a `JanelaAuthEditar`, centralizada sobre o Auth. Abrir o menu não copia o código.
+  O menu usa os estilos `MenuAcoes`, `ItemMenuAcao` e `SeparadorMenuAcoes`: painel e
+  itens arredondados, sem faixa lateral de ícones, cores do tema claro/escuro e
+  destaque suave por mouse ou teclado. **Remover** permanece em cor de perigo.
 - **Renomear** muda serviço/nome e conta/e-mail, preservando o segredo e os parâmetros.
   **Editar** também permite substituir o segredo Base32 (campo mascarado, vazio mantém
   o atual), algoritmo, dígitos e período. Os dados são salvos cifrados no Ente.

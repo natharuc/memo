@@ -82,19 +82,22 @@ namespace Memo
         private void MenuChave_Click(object sender, RoutedEventArgs e)
         {
             if (_ocupado || !(sender is Button botao) || !(botao.Tag is CartaoAuthVm vm)) return;
-            var menu = new ContextMenu();
-            menu.SetResourceReference(BackgroundProperty, "CorPainel");
-            menu.SetResourceReference(ForegroundProperty, "CorTexto");
+            var menu = new ContextMenu
+            {
+                Style = (Style)FindResource("MenuAcoes"),
+                Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
+                VerticalOffset = 4
+            };
             void Adicionar(string titulo, AcaoChaveAuth acao)
             {
-                var item = new MenuItem { Header = titulo };
+                var item = new MenuItem { Header = titulo, Style = (Style)FindResource("ItemMenuAcao") };
                 if (acao == AcaoChaveAuth.Remover) item.SetResourceReference(ForegroundProperty, "CorPerigo");
                 item.Click += (_, __) => AbrirEdicao(vm, acao);
                 menu.Items.Add(item);
             }
             Adicionar("Editar chave…", AcaoChaveAuth.Editar);
             Adicionar("Renomear…", AcaoChaveAuth.Renomear);
-            menu.Items.Add(new Separator());
+            menu.Items.Add(new Separator { Style = (Style)FindResource("SeparadorMenuAcoes") });
             Adicionar("Remover…", AcaoChaveAuth.Remover);
             menu.PlacementTarget = botao;
             menu.IsOpen = true;
